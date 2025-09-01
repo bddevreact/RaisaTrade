@@ -1,0 +1,15 @@
+[
+  {
+    "symbol": "BTC_USDT",
+    "side": "buy",
+    "amount": 100,
+    "timestamp": "2025-09-01T16:40:00.225654"
+  },
+  {
+    "symbol": "TEST_USDT",
+    "side": "buy",
+    "amount": 100,
+    "price": 50000,
+    "timestamp": "2024-01-01T00:00:00"
+  }
+]

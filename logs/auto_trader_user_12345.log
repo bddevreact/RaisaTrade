@@ -1,0 +1,114 @@
+2025-08-05 19:25:29,834 - AutoTrader_user_12345 - INFO - AutoTrader instance initialized for user_12345
+2025-08-05 19:25:29,878 - AutoTrader_user_12345 - INFO - Trading pair changed from DOT_USDT to BTCUSDT
+2025-08-05 19:25:29,879 - AutoTrader_user_12345 - INFO - AutoTrader instance initialized for user_12345
+2025-08-05 19:25:29,879 - AutoTrader_user_12345 - INFO - AutoTrader instance initialized for user_12345
+2025-08-05 19:25:29,893 - AutoTrader_user_12345 - INFO - Auto trading enabled for user 12345
+2025-08-05 19:25:29,893 - AutoTrader_user_12345 - INFO - Auto trading enabled for user 12345
+2025-08-05 19:25:29,894 - AutoTrader_user_12345 - INFO - Auto trading started for BTCUSDT
+2025-08-05 19:25:29,894 - AutoTrader_user_12345 - INFO - Auto trading started for BTCUSDT
+2025-08-05 19:25:32,982 - AutoTrader_user_12345 - INFO - Auto trading disabled for user 12345
+2025-08-05 19:25:32,982 - AutoTrader_user_12345 - INFO - Auto trading disabled for user 12345
+2025-08-05 19:25:37,988 - AutoTrader_user_12345 - INFO - Auto trading stopped
+2025-08-05 19:25:37,988 - AutoTrader_user_12345 - INFO - Auto trading stopped
+2025-08-05 19:25:37,989 - AutoTrader_user_12345 - INFO - Restarting auto trading...
+2025-08-05 19:25:37,989 - AutoTrader_user_12345 - INFO - Restarting auto trading...
+2025-08-05 19:25:37,989 - AutoTrader_user_12345 - WARNING - Auto trading is not running
+2025-08-05 19:25:37,989 - AutoTrader_user_12345 - WARNING - Auto trading is not running
+2025-08-05 19:25:39,990 - AutoTrader_user_12345 - INFO - Auto trading not restarted (disabled)
+2025-08-05 19:25:39,990 - AutoTrader_user_12345 - INFO - Auto trading not restarted (disabled)
+2025-08-05 19:25:45,757 - AutoTrader_user_12345 - ERROR - Error getting portfolio snapshot: Database.add_portfolio_snapshot() missing 3 required positional arguments: 'total_pnl', 'positions_count', and 'snapshot_data'
+2025-08-05 19:25:45,757 - AutoTrader_user_12345 - ERROR - Error getting portfolio snapshot: Database.add_portfolio_snapshot() missing 3 required positional arguments: 'total_pnl', 'positions_count', and 'snapshot_data'
+2025-08-05 19:26:48,545 - AutoTrader_user_12345 - INFO - AutoTrader instance initialized for user_12345
+2025-08-05 19:26:48,595 - AutoTrader_user_12345 - INFO - Trading pair changed from BTCUSDT to BTCUSDT
+2025-08-05 19:26:48,597 - AutoTrader_user_12345 - INFO - AutoTrader instance initialized for user_12345
+2025-08-05 19:26:48,597 - AutoTrader_user_12345 - INFO - AutoTrader instance initialized for user_12345
+2025-08-05 19:26:48,609 - AutoTrader_user_12345 - INFO - Auto trading enabled for user 12345
+2025-08-05 19:26:48,609 - AutoTrader_user_12345 - INFO - Auto trading enabled for user 12345
+2025-08-05 19:26:48,610 - AutoTrader_user_12345 - INFO - Auto trading started for BTCUSDT
+2025-08-05 19:26:48,610 - AutoTrader_user_12345 - INFO - Auto trading started for BTCUSDT
+2025-08-05 19:26:48,702 - AutoTrader_user_12345 - INFO - Auto trading disabled for user 12345
+2025-08-05 19:26:48,702 - AutoTrader_user_12345 - INFO - Auto trading disabled for user 12345
+2025-08-05 19:26:53,717 - AutoTrader_user_12345 - INFO - Auto trading stopped
+2025-08-05 19:26:53,717 - AutoTrader_user_12345 - INFO - Auto trading stopped
+2025-08-05 19:26:53,718 - AutoTrader_user_12345 - INFO - Restarting auto trading...
+2025-08-05 19:26:53,718 - AutoTrader_user_12345 - INFO - Restarting auto trading...
+2025-08-05 19:26:53,718 - AutoTrader_user_12345 - WARNING - Auto trading is not running
+2025-08-05 19:26:53,718 - AutoTrader_user_12345 - WARNING - Auto trading is not running
+2025-08-05 19:26:55,719 - AutoTrader_user_12345 - INFO - Auto trading not restarted (disabled)
+2025-08-05 19:26:55,719 - AutoTrader_user_12345 - INFO - Auto trading not restarted (disabled)
+2025-08-05 19:27:00,822 - AutoTrader_user_12345 - ERROR - Error getting portfolio snapshot: Database.add_portfolio_snapshot() missing 3 required positional arguments: 'total_pnl', 'positions_count', and 'snapshot_data'
+2025-08-05 19:27:00,822 - AutoTrader_user_12345 - ERROR - Error getting portfolio snapshot: Database.add_portfolio_snapshot() missing 3 required positional arguments: 'total_pnl', 'positions_count', and 'snapshot_data'
+2025-08-05 19:29:42,847 - AutoTrader_user_12345 - INFO - AutoTrader instance initialized for user_12345
+2025-08-05 19:29:42,879 - AutoTrader_user_12345 - INFO - Trading pair changed from BTCUSDT to BTCUSDT
+2025-08-05 19:29:42,880 - AutoTrader_user_12345 - INFO - AutoTrader instance initialized for user_12345
+2025-08-05 19:29:42,880 - AutoTrader_user_12345 - INFO - AutoTrader instance initialized for user_12345
+2025-08-05 19:29:42,892 - AutoTrader_user_12345 - INFO - Auto trading enabled for user 12345
+2025-08-05 19:29:42,892 - AutoTrader_user_12345 - INFO - Auto trading enabled for user 12345
+2025-08-05 19:29:42,894 - AutoTrader_user_12345 - INFO - Auto trading started for BTCUSDT
+2025-08-05 19:29:42,894 - AutoTrader_user_12345 - INFO - Auto trading started for BTCUSDT
+2025-08-05 19:29:42,985 - AutoTrader_user_12345 - INFO - Auto trading disabled for user 12345
+2025-08-05 19:29:42,985 - AutoTrader_user_12345 - INFO - Auto trading disabled for user 12345
+2025-08-05 19:29:47,997 - AutoTrader_user_12345 - INFO - Auto trading stopped
+2025-08-05 19:29:47,997 - AutoTrader_user_12345 - INFO - Auto trading stopped
+2025-08-05 19:29:47,997 - AutoTrader_user_12345 - INFO - Restarting auto trading...
+2025-08-05 19:29:47,997 - AutoTrader_user_12345 - INFO - Restarting auto trading...
+2025-08-05 19:29:47,997 - AutoTrader_user_12345 - WARNING - Auto trading is not running
+2025-08-05 19:29:47,997 - AutoTrader_user_12345 - WARNING - Auto trading is not running
+2025-08-05 19:29:49,999 - AutoTrader_user_12345 - INFO - Auto trading not restarted (disabled)
+2025-08-05 19:29:49,999 - AutoTrader_user_12345 - INFO - Auto trading not restarted (disabled)
+2025-08-05 19:29:57,022 - AutoTrader_user_12345 - ERROR - Error getting portfolio snapshot: 'str' object has no attribute 'get'
+2025-08-05 19:29:57,022 - AutoTrader_user_12345 - ERROR - Error getting portfolio snapshot: 'str' object has no attribute 'get'
+2025-08-05 19:34:20,395 - AutoTrader_user_12345 - INFO - AutoTrader instance initialized for user_12345
+2025-08-05 19:34:20,424 - AutoTrader_user_12345 - INFO - Trading pair changed from BTCUSDT to BTCUSDT
+2025-08-05 19:34:20,425 - AutoTrader_user_12345 - INFO - AutoTrader instance initialized for user_12345
+2025-08-05 19:34:20,425 - AutoTrader_user_12345 - INFO - AutoTrader instance initialized for user_12345
+2025-08-05 19:34:20,437 - AutoTrader_user_12345 - INFO - Auto trading enabled for user 12345
+2025-08-05 19:34:20,437 - AutoTrader_user_12345 - INFO - Auto trading enabled for user 12345
+2025-08-05 19:34:20,440 - AutoTrader_user_12345 - INFO - Auto trading started for BTCUSDT
+2025-08-05 19:34:20,440 - AutoTrader_user_12345 - INFO - Auto trading started for BTCUSDT
+2025-08-05 19:34:20,527 - AutoTrader_user_12345 - INFO - Auto trading disabled for user 12345
+2025-08-05 19:34:20,527 - AutoTrader_user_12345 - INFO - Auto trading disabled for user 12345
+2025-08-05 19:34:25,537 - AutoTrader_user_12345 - INFO - Auto trading stopped
+2025-08-05 19:34:25,537 - AutoTrader_user_12345 - INFO - Auto trading stopped
+2025-08-05 19:34:25,538 - AutoTrader_user_12345 - INFO - Restarting auto trading...
+2025-08-05 19:34:25,538 - AutoTrader_user_12345 - INFO - Restarting auto trading...
+2025-08-05 19:34:25,539 - AutoTrader_user_12345 - WARNING - Auto trading is not running
+2025-08-05 19:34:25,539 - AutoTrader_user_12345 - WARNING - Auto trading is not running
+2025-08-05 19:34:27,541 - AutoTrader_user_12345 - INFO - Auto trading not restarted (disabled)
+2025-08-05 19:34:27,541 - AutoTrader_user_12345 - INFO - Auto trading not restarted (disabled)
+2025-08-05 21:07:40,141 - AutoTrader_user_12345 - INFO - AutoTrader instance initialized for user_12345
+2025-08-05 21:07:40,229 - AutoTrader_user_12345 - INFO - Trading pair changed from BTCUSDT to BTCUSDT
+2025-08-05 21:07:40,230 - AutoTrader_user_12345 - INFO - AutoTrader instance initialized for user_12345
+2025-08-05 21:07:40,230 - AutoTrader_user_12345 - INFO - AutoTrader instance initialized for user_12345
+2025-08-05 21:07:40,236 - AutoTrader_user_12345 - INFO - Auto trading enabled for user 12345
+2025-08-05 21:07:40,236 - AutoTrader_user_12345 - INFO - Auto trading enabled for user 12345
+2025-08-05 21:07:40,238 - AutoTrader_user_12345 - INFO - Auto trading started for BTCUSDT
+2025-08-05 21:07:40,238 - AutoTrader_user_12345 - INFO - Auto trading started for BTCUSDT
+2025-08-05 21:07:40,505 - AutoTrader_user_12345 - INFO - Auto trading disabled for user 12345
+2025-08-05 21:07:40,505 - AutoTrader_user_12345 - INFO - Auto trading disabled for user 12345
+2025-08-05 21:07:45,520 - AutoTrader_user_12345 - INFO - Auto trading stopped
+2025-08-05 21:07:45,520 - AutoTrader_user_12345 - INFO - Auto trading stopped
+2025-08-05 21:07:45,521 - AutoTrader_user_12345 - INFO - Restarting auto trading...
+2025-08-05 21:07:45,521 - AutoTrader_user_12345 - INFO - Restarting auto trading...
+2025-08-05 21:07:45,521 - AutoTrader_user_12345 - WARNING - Auto trading is not running
+2025-08-05 21:07:45,521 - AutoTrader_user_12345 - WARNING - Auto trading is not running
+2025-08-05 21:07:47,523 - AutoTrader_user_12345 - INFO - Auto trading not restarted (disabled)
+2025-08-05 21:07:47,523 - AutoTrader_user_12345 - INFO - Auto trading not restarted (disabled)
+2025-08-05 21:09:47,784 - AutoTrader_user_12345 - INFO - AutoTrader instance initialized for user_12345
+2025-08-05 21:09:47,824 - AutoTrader_user_12345 - INFO - Trading pair changed from BTCUSDT to BTCUSDT
+2025-08-05 21:09:47,825 - AutoTrader_user_12345 - INFO - AutoTrader instance initialized for user_12345
+2025-08-05 21:09:47,825 - AutoTrader_user_12345 - INFO - AutoTrader instance initialized for user_12345
+2025-08-05 21:09:47,831 - AutoTrader_user_12345 - INFO - Auto trading enabled for user 12345
+2025-08-05 21:09:47,831 - AutoTrader_user_12345 - INFO - Auto trading enabled for user 12345
+2025-08-05 21:09:47,832 - AutoTrader_user_12345 - INFO - Auto trading started for BTCUSDT
+2025-08-05 21:09:47,832 - AutoTrader_user_12345 - INFO - Auto trading started for BTCUSDT
+2025-08-05 21:09:47,945 - AutoTrader_user_12345 - INFO - Auto trading disabled for user 12345
+2025-08-05 21:09:47,945 - AutoTrader_user_12345 - INFO - Auto trading disabled for user 12345
+2025-08-05 21:09:52,955 - AutoTrader_user_12345 - INFO - Auto trading stopped
+2025-08-05 21:09:52,955 - AutoTrader_user_12345 - INFO - Auto trading stopped
+2025-08-05 21:09:52,956 - AutoTrader_user_12345 - INFO - Restarting auto trading...
+2025-08-05 21:09:52,956 - AutoTrader_user_12345 - INFO - Restarting auto trading...
+2025-08-05 21:09:52,956 - AutoTrader_user_12345 - WARNING - Auto trading is not running
+2025-08-05 21:09:52,956 - AutoTrader_user_12345 - WARNING - Auto trading is not running
+2025-08-05 21:09:54,959 - AutoTrader_user_12345 - INFO - Auto trading not restarted (disabled)
+2025-08-05 21:09:54,959 - AutoTrader_user_12345 - INFO - Auto trading not restarted (disabled)

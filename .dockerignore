@@ -3,51 +3,19 @@
 .gitignore
 
 # Python
-__pycache__
+__pycache__/
 *.pyc
 *.pyo
 *.pyd
 .Python
-env
-pip-log.txt
-pip-delete-this-directory.txt
-.tox
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.log
-.git
-.mypy_cache
-.pytest_cache
-.hypothesis
-
-# Virtual environments
-.env
-.venv
 env/
 venv/
-ENV/
-env.bak/
-venv.bak/
+.venv/
 
-# IDEs
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# OS
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
+# Environment variables
+.env
+.env.local
+.env.production
 
 # Logs
 logs/
@@ -55,10 +23,25 @@ logs/
 
 # Data
 data/
-*.csv
-*.json
 *.db
+*.sqlite
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
 
 # Documentation
-*.md
-docs/ 
+README.md
+RAILWAY_DEPLOYMENT.md
+LICENSE
+
+# Railway specific
+railway.json
+nixpacks.toml
+Procfile 

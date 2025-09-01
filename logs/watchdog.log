@@ -1,0 +1,11 @@
+2025-08-05 10:27:10,708 - Watchdog - INFO - Watchdog started
+2025-08-05 10:27:11,710 - Watchdog - WARNING - High CPU usage: 95.3% > 80%
+2025-08-05 10:27:11,710 - Watchdog - WARNING - System warning: High CPU usage - CPU: 95.3%
+2025-08-05 11:58:59,867 - Watchdog - INFO - Watchdog started
+2025-08-05 11:59:00,867 - Watchdog - WARNING - High CPU usage: 89.1% > 80%
+2025-08-05 11:59:00,867 - Watchdog - WARNING - System warning: High CPU usage - CPU: 89.1%
+2025-08-05 12:00:59,102 - Watchdog - INFO - Watchdog started
+2025-08-05 12:11:42,611 - Watchdog - INFO - Watchdog started
+2025-08-05 12:30:38,522 - Watchdog - INFO - Watchdog started
+2025-08-05 12:47:17,656 - Watchdog - ERROR - API connectivity issue: All retry attempts failed. Last error: Connection error: HTTPSConnectionPool(host='api.pionex.com', port=443): Max retries exceeded with url: /api/v1/account/balances?timestamp=1754376368877 (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017A88488050>: Failed to resolve 'api.pionex.com' ([Errno 11001] getaddrinfo failed)")) (attempt 3/3)
+2025-08-05 12:47:17,669 - Watchdog - ERROR - API failure: All retry attempts failed. Last error: Connection error: HTTPSConnectionPool(host='api.pionex.com', port=443): Max retries exceeded with url: /api/v1/account/balances?timestamp=1754376368877 (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017A88488050>: Failed to resolve 'api.pionex.com' ([Errno 11001] getaddrinfo failed)")) (attempt 3/3)
