@@ -3537,3 +3537,10 @@ Request → GET https://api.bybit.com/v5/position/list: category=linear&settleCo
 2025-09-01 17:01:38,369 - engineio.server - INFO - dLrusBINWGC_K9aPAAAA: Received packet PONG data 
 2025-09-01 17:02:03,369 - engineio.server - INFO - dLrusBINWGC_K9aPAAAA: Sending packet PING data None
 2025-09-01 17:02:03,370 - engineio.server - INFO - dLrusBINWGC_K9aPAAAA: Received packet PONG data 
+2025-09-01 17:02:28,585 - engineio.server - INFO - dLrusBINWGC_K9aPAAAA: Sending packet PING data None
+2025-09-01 17:02:30,723 - __main__ - INFO - Positions API response: {'result': True, 'data': {'balances': [{'coin': 'ETH', 'free': '0.000010085', 'frozen': '0'}, {'coin': 'USDC', 'free': '0.417064', 'frozen': '0'}, {'coin': 'USDT', 'free': '0.0000900656948024', 'frozen': '0'}]}, 'timestamp': 1756724550608}
+2025-09-01 17:02:30,724 - __main__ - INFO - No positions found, returning empty list
+2025-09-01 17:02:31,526 - engineio.server - INFO - dLrusBINWGC_K9aPAAAA: Received packet PONG data 
+2025-09-01 17:02:31,527 - pionex_api - INFO - Fetching trades for BTC_USDT with limit 20
+2025-09-01 17:02:57,543 - engineio.server - INFO - dLrusBINWGC_K9aPAAAA: Sending packet PING data None
+2025-09-01 17:02:57,544 - engineio.server - INFO - dLrusBINWGC_K9aPAAAA: Received packet PONG data 
