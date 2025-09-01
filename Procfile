@@ -1,1 +1,1 @@
-web: python railway_deploy.py
+web: python railway_fix.py

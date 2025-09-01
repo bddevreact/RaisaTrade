@@ -29,7 +29,7 @@ RUN mkdir -p logs data
 # Set environment variables
 ENV PYTHONPATH=/app
 ENV FLASK_ENV=production
-ENV FLASK_APP=railway_deploy.py
+ENV FLASK_APP=railway_fix.py
 
 # Expose port (will be set by Railway at runtime)
 EXPOSE 5000
@@ -39,4 +39,4 @@ HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:5000/ || exit 1
 
 # Start command
-CMD ["python", "railway_deploy.py"]
+CMD ["python", "railway_fix.py"]

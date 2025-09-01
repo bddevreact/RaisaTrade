@@ -16,4 +16,4 @@ cmds = [
 ]
 
 [start]
-cmd = "python railway_deploy.py"
+cmd = "python railway_fix.py"

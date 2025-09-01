@@ -33,12 +33,37 @@ def setup_signal_handlers():
 
 def get_valid_port():
     """Get and validate port from environment or use default"""
-    port_str = os.environ.get('PORT')
+    # Try multiple ways to get PORT
+    port_str = None
     
+    # Method 1: Direct environment variable
+    port_str = os.environ.get('PORT')
+    logger.info(f"Method 1 - Direct PORT env var: {port_str}")
+    
+    # Method 2: Check if PORT is set in environment
+    if not port_str:
+        # Try to get from Railway's automatic port assignment
+        try:
+            # Railway sometimes sets this in a different way
+            port_str = os.environ.get('RAILWAY_PORT') or os.environ.get('PORT')
+            logger.info(f"Method 2 - Railway PORT: {port_str}")
+        except:
+            pass
+    
+    # Method 3: Check for any port-related environment variables
+    if not port_str:
+        for key, value in os.environ.items():
+            if 'PORT' in key.upper() and value:
+                port_str = value
+                logger.info(f"Method 3 - Found PORT in {key}: {port_str}")
+                break
+    
+    # If still no port, use default
     if not port_str:
         logger.info("No PORT environment variable found, using default 5000")
         return 5000
     
+    # Validate the port string
     try:
         port = int(port_str)
         if 1 <= port <= 65535:
@@ -71,6 +96,16 @@ def setup_environment():
         # Validate and set PORT
         port = get_valid_port()
         os.environ['PORT'] = str(port)
+        
+        # Log all environment variables for debugging
+        logger.info("Current environment variables:")
+        for key, value in os.environ.items():
+            if 'PORT' in key or 'SECRET' in key or 'API' in key:
+                # Mask sensitive values
+                masked_value = value[:4] + '*' * (len(value) - 8) + value[-4:] if len(value) > 8 else '***'
+                logger.info(f"  {key}: {masked_value}")
+            else:
+                logger.info(f"  {key}: {value}")
         
         logger.info("Environment setup completed successfully")
         return True
