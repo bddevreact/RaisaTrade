@@ -72,7 +72,15 @@ from futures_trading import (
 from backtesting import (
     run_backtest, enable_paper_trading, disable_paper_trading, get_paper_trading_ledger
 )
-from pionex_ws import PionexWebSocket
+# Try to import PionexWebSocket, fallback to None if not available
+try:
+    from pionex_ws import PionexWebSocket
+    WEBSOCKET_AVAILABLE = True
+    logger.info("PionexWebSocket imported successfully")
+except ImportError as e:
+    logger.warning(f"PionexWebSocket import failed: {e}")
+    PionexWebSocket = None
+    WEBSOCKET_AVAILABLE = False
 
 # Load environment variables
 load_dotenv()
@@ -639,6 +647,11 @@ class TradingBotGUI:
     def _start_websocket(self):
         """Start WebSocket connection for real-time data"""
         try:
+            if not WEBSOCKET_AVAILABLE or PionexWebSocket is None:
+                logger.warning("WebSocket not available, skipping WebSocket connection")
+                self.ws_connected = False
+                return
+                
             self.ws = PionexWebSocket()
             self.ws_connected = True
             logger.info("WebSocket connection started")

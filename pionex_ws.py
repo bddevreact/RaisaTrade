@@ -1,8 +1,16 @@
 import asyncio
 import json
 import logging
-import websockets
 from typing import Callable, Dict, Any, Optional
+
+# Try to import websockets, fallback to basic implementation if not available
+try:
+    import websockets
+    WEBSOCKETS_AVAILABLE = True
+    logging.info("Websockets library imported successfully")
+except ImportError:
+    WEBSOCKETS_AVAILABLE = False
+    logging.warning("Websockets library not available, using fallback implementation")
 
 class PionexWebSocket:
     def __init__(self, api_key=None, secret_key=None):
@@ -11,6 +19,10 @@ class PionexWebSocket:
         self.ws = None
         self.connected = False
         self.logger = logging.getLogger(__name__)
+        
+        # Check if websockets is available
+        if not WEBSOCKETS_AVAILABLE:
+            self.logger.warning("Websockets not available, WebSocket functionality will be limited")
         
         # Updated WebSocket URLs based on Pionex documentation
         self.BASE_URLS = [
@@ -29,6 +41,10 @@ class PionexWebSocket:
 
     async def connect(self):
         """Connect to WebSocket with fallback to REST API"""
+        if not WEBSOCKETS_AVAILABLE:
+            self.logger.warning("Websockets not available, cannot establish WebSocket connection")
+            return False
+            
         try:
             url = self.BASE_URLS[self.current_url_index]
             self.logger.info(f"Connecting to {url}")
@@ -73,11 +89,15 @@ class PionexWebSocket:
 
     async def disconnect(self):
         self._stop = True
-        if self.ws:
+        if self.ws and WEBSOCKETS_AVAILABLE:
             await self.ws.close()
         self.connected = False
 
     async def subscribe(self, channel: str, params: Dict[str, Any] = None):
+        if not WEBSOCKETS_AVAILABLE:
+            self.logger.warning("Websockets not available, subscription not possible")
+            return
+            
         if not self.connected:
             self.logger.warning("WebSocket not connected. Subscription will be sent after reconnect.")
         sub_msg = {"event": "subscribe", "channel": channel}
@@ -89,6 +109,10 @@ class PionexWebSocket:
             self.logger.info(f"Subscribed to {channel} {params if params else ''}")
 
     async def unsubscribe(self, channel: str, params: Dict[str, Any] = None):
+        if not WEBSOCKETS_AVAILABLE:
+            self.logger.warning("Websockets not available, unsubscription not possible")
+            return
+            
         unsub_msg = {"event": "unsubscribe", "channel": channel}
         if params:
             unsub_msg.update(params)

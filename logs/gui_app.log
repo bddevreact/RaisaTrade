@@ -3831,3 +3831,65 @@ Request → GET https://api.bybit.com/v5/position/list: category=linear&settleCo
 2025-09-01 17:39:32,407 - pionex_api - INFO - Fetching trades for BTC_USDT with limit 20
 2025-09-01 17:39:53,011 - engineio.server - INFO - dLrusBINWGC_K9aPAAAA: Sending packet PING data None
 2025-09-01 17:39:53,012 - engineio.server - INFO - dLrusBINWGC_K9aPAAAA: Received packet PONG data 
+2025-09-01 17:40:18,014 - engineio.server - INFO - dLrusBINWGC_K9aPAAAA: Sending packet PING data None
+2025-09-01 17:40:18,015 - engineio.server - INFO - dLrusBINWGC_K9aPAAAA: Received packet PONG data 
+2025-09-01 17:40:31,264 - __main__ - INFO - Positions API response: {'result': True, 'data': {'balances': [{'coin': 'ETH', 'free': '0.000010085', 'frozen': '0'}, {'coin': 'USDC', 'free': '0.417064', 'frozen': '0'}, {'coin': 'USDT', 'free': '0.0000900656948024', 'frozen': '0'}]}, 'timestamp': 1756726831148}
+2025-09-01 17:40:31,265 - __main__ - INFO - No positions found, returning empty list
+2025-09-01 17:40:32,602 - pionex_api - INFO - Fetching trades for BTC_USDT with limit 20
+2025-09-01 17:40:43,027 - engineio.server - INFO - dLrusBINWGC_K9aPAAAA: Sending packet PING data None
+2025-09-01 17:40:43,028 - engineio.server - INFO - dLrusBINWGC_K9aPAAAA: Received packet PONG data 
+2025-09-01 17:41:08,033 - engineio.server - INFO - dLrusBINWGC_K9aPAAAA: Sending packet PING data None
+2025-09-01 17:41:08,034 - engineio.server - INFO - dLrusBINWGC_K9aPAAAA: Received packet PONG data 
+2025-09-01 17:41:30,900 - __main__ - INFO - Positions API response: {'result': True, 'data': {'balances': [{'coin': 'ETH', 'free': '0.000010085', 'frozen': '0'}, {'coin': 'USDC', 'free': '0.417064', 'frozen': '0'}, {'coin': 'USDT', 'free': '0.0000900656948024', 'frozen': '0'}]}, 'timestamp': 1756726890787}
+2025-09-01 17:41:30,901 - __main__ - INFO - No positions found, returning empty list
+2025-09-01 17:41:31,696 - pionex_api - INFO - Fetching trades for BTC_USDT with limit 20
+2025-09-01 17:41:33,024 - engineio.server - INFO - dLrusBINWGC_K9aPAAAA: Sending packet PING data None
+2025-09-01 17:41:33,026 - engineio.server - INFO - dLrusBINWGC_K9aPAAAA: Received packet PONG data 
+2025-09-01 17:41:58,037 - engineio.server - INFO - dLrusBINWGC_K9aPAAAA: Sending packet PING data None
+2025-09-01 17:41:58,038 - engineio.server - INFO - dLrusBINWGC_K9aPAAAA: Received packet PONG data 
+2025-09-01 17:42:23,063 - engineio.server - INFO - dLrusBINWGC_K9aPAAAA: Sending packet PING data None
+2025-09-01 17:42:23,097 - engineio.server - INFO - dLrusBINWGC_K9aPAAAA: Received packet PONG data 
+2025-09-01 17:42:31,150 - __main__ - INFO - Positions API response: {'result': True, 'data': {'balances': [{'coin': 'ETH', 'free': '0.000010085', 'frozen': '0'}, {'coin': 'USDC', 'free': '0.417064', 'frozen': '0'}, {'coin': 'USDT', 'free': '0.0000900656948024', 'frozen': '0'}]}, 'timestamp': 1756726951038}
+2025-09-01 17:42:31,151 - __main__ - INFO - No positions found, returning empty list
+2025-09-01 17:42:31,944 - pionex_api - INFO - Fetching trades for BTC_USDT with limit 20
+2025-09-01 17:42:48,121 - engineio.server - INFO - dLrusBINWGC_K9aPAAAA: Sending packet PING data None
+2025-09-01 17:42:48,122 - engineio.server - INFO - dLrusBINWGC_K9aPAAAA: Received packet PONG data 
+2025-09-01 17:43:13,125 - engineio.server - INFO - dLrusBINWGC_K9aPAAAA: Sending packet PING data None
+2025-09-01 17:43:13,128 - engineio.server - INFO - dLrusBINWGC_K9aPAAAA: Received packet PONG data 
+2025-09-01 17:43:31,138 - __main__ - INFO - Positions API response: {'result': True, 'data': {'balances': [{'coin': 'ETH', 'free': '0.000010085', 'frozen': '0'}, {'coin': 'USDC', 'free': '0.417064', 'frozen': '0'}, {'coin': 'USDT', 'free': '0.0000900656948024', 'frozen': '0'}]}, 'timestamp': 1756727011028}
+2025-09-01 17:43:31,139 - __main__ - INFO - No positions found, returning empty list
+2025-09-01 17:43:32,007 - pionex_api - INFO - Fetching trades for BTC_USDT with limit 20
+2025-09-01 17:43:38,139 - engineio.server - INFO - dLrusBINWGC_K9aPAAAA: Sending packet PING data None
+2025-09-01 17:43:38,140 - engineio.server - INFO - dLrusBINWGC_K9aPAAAA: Received packet PONG data 
+2025-09-01 17:44:03,135 - engineio.server - INFO - dLrusBINWGC_K9aPAAAA: Sending packet PING data None
+2025-09-01 17:44:03,136 - engineio.server - INFO - dLrusBINWGC_K9aPAAAA: Received packet PONG data 
+2025-09-01 17:44:28,141 - engineio.server - INFO - dLrusBINWGC_K9aPAAAA: Sending packet PING data None
+2025-09-01 17:44:28,142 - engineio.server - INFO - dLrusBINWGC_K9aPAAAA: Received packet PONG data 
+2025-09-01 17:44:31,127 - __main__ - INFO - Positions API response: {'result': True, 'data': {'balances': [{'coin': 'ETH', 'free': '0.000010085', 'frozen': '0'}, {'coin': 'USDC', 'free': '0.417064', 'frozen': '0'}, {'coin': 'USDT', 'free': '0.0000900656948024', 'frozen': '0'}]}, 'timestamp': 1756727071016}
+2025-09-01 17:44:31,169 - __main__ - INFO - No positions found, returning empty list
+2025-09-01 17:44:32,260 - pionex_api - INFO - Fetching trades for BTC_USDT with limit 20
+2025-09-01 17:44:53,142 - engineio.server - INFO - dLrusBINWGC_K9aPAAAA: Sending packet PING data None
+2025-09-01 17:44:53,145 - engineio.server - INFO - dLrusBINWGC_K9aPAAAA: Received packet PONG data 
+2025-09-01 17:45:18,151 - engineio.server - INFO - dLrusBINWGC_K9aPAAAA: Sending packet PING data None
+2025-09-01 17:45:18,152 - engineio.server - INFO - dLrusBINWGC_K9aPAAAA: Received packet PONG data 
+2025-09-01 17:45:31,013 - __main__ - INFO - Positions API response: {'result': True, 'data': {'balances': [{'coin': 'ETH', 'free': '0.000010085', 'frozen': '0'}, {'coin': 'USDC', 'free': '0.417064', 'frozen': '0'}, {'coin': 'USDT', 'free': '0.0000900656948024', 'frozen': '0'}]}, 'timestamp': 1756727130901}
+2025-09-01 17:45:31,014 - __main__ - INFO - No positions found, returning empty list
+2025-09-01 17:45:31,782 - pionex_api - INFO - Fetching trades for BTC_USDT with limit 20
+2025-09-01 17:45:43,152 - engineio.server - INFO - dLrusBINWGC_K9aPAAAA: Sending packet PING data None
+2025-09-01 17:45:43,153 - engineio.server - INFO - dLrusBINWGC_K9aPAAAA: Received packet PONG data 
+2025-09-01 17:46:08,155 - engineio.server - INFO - dLrusBINWGC_K9aPAAAA: Sending packet PING data None
+2025-09-01 17:46:08,167 - engineio.server - INFO - dLrusBINWGC_K9aPAAAA: Received packet PONG data 
+2025-09-01 17:46:31,174 - __main__ - INFO - Positions API response: {'result': True, 'data': {'balances': [{'coin': 'ETH', 'free': '0.000010085', 'frozen': '0'}, {'coin': 'USDC', 'free': '0.417064', 'frozen': '0'}, {'coin': 'USDT', 'free': '0.0000900656948024', 'frozen': '0'}]}, 'timestamp': 1756727191065}
+2025-09-01 17:46:31,174 - __main__ - INFO - No positions found, returning empty list
+2025-09-01 17:46:31,941 - pionex_api - INFO - Fetching trades for BTC_USDT with limit 20
+2025-09-01 17:46:33,169 - engineio.server - INFO - dLrusBINWGC_K9aPAAAA: Sending packet PING data None
+2025-09-01 17:46:33,170 - engineio.server - INFO - dLrusBINWGC_K9aPAAAA: Received packet PONG data 
+2025-09-01 17:46:58,180 - engineio.server - INFO - dLrusBINWGC_K9aPAAAA: Sending packet PING data None
+2025-09-01 17:46:58,183 - engineio.server - INFO - dLrusBINWGC_K9aPAAAA: Received packet PONG data 
+2025-09-01 17:47:23,201 - engineio.server - INFO - dLrusBINWGC_K9aPAAAA: Sending packet PING data None
+2025-09-01 17:47:23,219 - engineio.server - INFO - dLrusBINWGC_K9aPAAAA: Received packet PONG data 
+2025-09-01 17:47:31,057 - __main__ - INFO - Positions API response: {'result': True, 'data': {'balances': [{'coin': 'ETH', 'free': '0.000010085', 'frozen': '0'}, {'coin': 'USDC', 'free': '0.417064', 'frozen': '0'}, {'coin': 'USDT', 'free': '0.0000900656948024', 'frozen': '0'}]}, 'timestamp': 1756727250946}
+2025-09-01 17:47:31,058 - __main__ - INFO - No positions found, returning empty list
+2025-09-01 17:47:31,845 - pionex_api - INFO - Fetching trades for BTC_USDT with limit 20
+2025-09-01 17:47:48,233 - engineio.server - INFO - dLrusBINWGC_K9aPAAAA: Sending packet PING data None
+2025-09-01 17:47:48,234 - engineio.server - INFO - dLrusBINWGC_K9aPAAAA: Received packet PONG data 
