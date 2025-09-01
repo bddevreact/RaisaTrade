@@ -94,7 +94,16 @@ def main():
         logger.info("Environment variables check passed")
         
         # Get port from environment (for Railway and other cloud platforms)
-        port = int(os.environ.get('PORT', 5000))
+        port_str = os.environ.get('PORT', '5000')
+        try:
+            port = int(port_str)
+            if not (1 <= port <= 65535):
+                logger.warning(f"Invalid port number {port}, using default 5000")
+                port = 5000
+        except ValueError:
+            logger.warning(f"Invalid port format '{port_str}', using default 5000")
+            port = 5000
+        
         host = '0.0.0.0'  # Bind to all interfaces for production
         
         logger.info(f"Starting server on {host}:{port}")

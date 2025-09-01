@@ -16,12 +16,42 @@ def _replace_env_vars(value):
     """Replace environment variable placeholders in config values"""
     if isinstance(value, str) and value.startswith('${') and value.endswith('}'):
         env_var = value[2:-1]  # Remove ${ and }
+        
+        # Special handling for PORT variable
+        if env_var == 'PORT':
+            port = os.getenv('PORT', '5000')
+            try:
+                # Validate port number
+                port_int = int(port)
+                if 1 <= port_int <= 65535:
+                    return str(port_int)
+                else:
+                    print(f"Warning: Invalid port number {port}, using default 5000")
+                    return '5000'
+            except ValueError:
+                print(f"Warning: Invalid port format {port}, using default 5000")
+                return '5000'
+        
+        # Special handling for SECRET_KEY variable
+        if env_var == 'SECRET_KEY':
+            secret_key = os.getenv('SECRET_KEY')
+            if secret_key:
+                return secret_key
+            else:
+                # Generate a fallback secret key if not provided
+                import secrets
+                fallback_key = secrets.token_hex(32)
+                print(f"Warning: SECRET_KEY not found, using generated fallback key")
+                return fallback_key
+        
+        # Handle other environment variables
         env_value = os.getenv(env_var)
         if env_value:
             return env_value
         else:
             print(f"Warning: Environment variable {env_var} not found, using placeholder")
             return value
+    
     return value
 
 def _process_config_dict(config_dict):

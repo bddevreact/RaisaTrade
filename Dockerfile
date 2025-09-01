@@ -28,7 +28,7 @@ RUN mkdir -p logs data
 # Set environment variables
 ENV PYTHONPATH=/app
 ENV FLASK_ENV=production
-ENV FLASK_APP=main.py
+ENV FLASK_APP=railway_start.py
 
 # Expose port
 EXPOSE $PORT
@@ -38,4 +38,4 @@ HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:$PORT/ || exit 1
 
 # Start command
-CMD ["gunicorn", "--worker-class", "eventlet", "-w", "1", "--bind", "0.0.0.0:$PORT", "main:app"]
+CMD ["python", "railway_start.py"]

@@ -3358,7 +3358,15 @@ def main():
     """Main function to run the Flask application"""
     try:
         # Get port from Railway environment or use default
-        port = int(os.environ.get('PORT', 5000))
+        port_str = os.environ.get('PORT', '5000')
+        try:
+            port = int(port_str)
+            if not (1 <= port <= 65535):
+                print(f"Warning: Invalid port number {port}, using default 5000")
+                port = 5000
+        except ValueError:
+            print(f"Warning: Invalid port format '{port_str}', using default 5000")
+            port = 5000
         
         # Run the Flask application
         socketio.run(

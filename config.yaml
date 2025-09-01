@@ -212,9 +212,9 @@ grid_trading:
   spacing: 0.02
 gui:
   debug: false
-  host: 127.0.0.1
-  port: 5000
-  secret_key: 8f4e2a1b9c6d3e7f8a2b5c9d1e4f7a8b3c6d9e2f5a8b1c4d7e0f3a6b9c2d5e8f1
+  host: 0.0.0.0
+  port: ${PORT:-5000}
+  secret_key: ${SECRET_KEY}
 leverage: 10
 logging:
   file: logs/trading_bot.log
