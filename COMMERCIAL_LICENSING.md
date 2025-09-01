@@ -62,13 +62,13 @@
 
 ### **Step 1: Contact Developer**
 Choose your preferred platform:
-- **📧 Email**: moonbd01717@gmail.com
-- **📱 WhatsApp**: +880 1305343170
-- **📱 Telegram**: @mushfiqmoon
-- **💼 LinkedIn**: Md Moshfiqur Rahman
-- **📘 Facebook**: Mushfiqr Moon
-- **🛠️ Fiverr**: digi707
-- **💻 Upwork**: moshfiqurrahman
+- **📧 Email**: moshfiqur.rahaman@email.com
+- **📱 WhatsApp**: +880 17XX-XXXXXX
+- **📱 Telegram**: @MoshfiqurRahaman
+- **💼 LinkedIn**: Md Moshfiqur Rahaman
+- **📘 Facebook**: Md Moshfiqur Rahaman
+- **🛠️ Fiverr**: MoshfiqurRahaman
+- **💻 Upwork**: Md Moshfiqur Rahaman
 
 ### **Step 2: Discuss Requirements**
 - **Use Case**: How will you use the bot?
@@ -140,15 +140,15 @@ Choose your preferred platform:
 ## 📞 **Contact for Licensing**
 
 ### **Primary Contact**
-- **📧 Email**: moonbd01717@gmail.com
-- **📱 WhatsApp**: +880 1305343170
-- **📱 Telegram**: @mushfiqmoon
+- **📧 Email**: moshfiqur.rahaman@email.com
+- **📱 WhatsApp**: +880 17XX-XXXXXX
+- **📱 Telegram**: @MoshfiqurRahaman
 
 ### **Professional Networks**
-- **💼 LinkedIn**: [Md Moshfiqur Rahman](https://www.linkedin.com/in/md-moshfiqur-rahman-951039232/)
-- **📘 Facebook**: [Mushfiqr Moon](https://www.facebook.com/mushfiqr.moon)
-- **🛠️ Fiverr**: [digi707](https://www.fiverr.com/sellers/digi707)
-- **💻 Upwork**: [moshfiqurrahman](https://upwork.com/freelancers/moshfiqurrahman)
+- **💼 LinkedIn**: [Md Moshfiqur Rahaman](https://www.linkedin.com/in/md-moshfiqur-rahaman)
+- **📘 Facebook**: [Md Moshfiqur Rahaman](https://www.facebook.com/mdmoshfiqur.rahaman)
+- **🛠️ Fiverr**: [MoshfiqurRahaman](https://www.fiverr.com/MoshfiqurRahaman)
+- **💻 Upwork**: [Md Moshfiqur Rahaman](https://www.upwork.com/freelancers/mdmoshfiqurrahaman)
 
 ### **Response Time**
 - **Email**: Within 24 hours
@@ -189,9 +189,9 @@ Choose your preferred platform:
 
 **Contact me now for pricing and customization:**
 
-- **📧 Email**: moonbd01717@gmail.com
-- **📱 WhatsApp**: +880 1305343170
-- **📱 Telegram**: @mushfiqmoon
+- **📧 Email**: moshfiqur.rahaman@email.com
+- **📱 WhatsApp**: +880 17XX-XXXXXX
+- **📱 Telegram**: @MoshfiqurRahaman
 
 **⚠️ REMEMBER: Commercial use requires purchase and licensing!**
 
