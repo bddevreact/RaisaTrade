@@ -12,6 +12,22 @@ _CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'config.
 _config_cache = None
 _config_lock = threading.Lock()
 
+def _validate_port(port_str):
+    """Validate port number and return valid port or default"""
+    if not port_str:
+        return '5000'
+    
+    try:
+        port = int(port_str)
+        if 1 <= port <= 65535:
+            return str(port)
+        else:
+            print(f"Warning: Invalid port number {port} (out of range 1-65535), using default 5000")
+            return '5000'
+    except ValueError:
+        print(f"Warning: Invalid port format '{port_str}', using default 5000")
+        return '5000'
+
 def _replace_env_vars(value):
     """Replace environment variable placeholders in config values"""
     if isinstance(value, str) and value.startswith('${') and value.endswith('}'):
@@ -20,17 +36,7 @@ def _replace_env_vars(value):
         # Special handling for PORT variable
         if env_var == 'PORT':
             port = os.getenv('PORT', '5000')
-            try:
-                # Validate port number
-                port_int = int(port)
-                if 1 <= port_int <= 65535:
-                    return str(port_int)
-                else:
-                    print(f"Warning: Invalid port number {port}, using default 5000")
-                    return '5000'
-            except ValueError:
-                print(f"Warning: Invalid port format {port}, using default 5000")
-                return '5000'
+            return _validate_port(port)
         
         # Special handling for SECRET_KEY variable
         if env_var == 'SECRET_KEY':

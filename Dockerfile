@@ -8,6 +8,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     gcc \
     g++ \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first for better caching
@@ -28,14 +29,14 @@ RUN mkdir -p logs data
 # Set environment variables
 ENV PYTHONPATH=/app
 ENV FLASK_ENV=production
-ENV FLASK_APP=railway_start.py
+ENV FLASK_APP=railway_deploy.py
 
-# Expose port
-EXPOSE $PORT
+# Expose port (will be set by Railway at runtime)
+EXPOSE 5000
 
-# Health check
+# Health check (using default port 5000)
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:$PORT/ || exit 1
+    CMD curl -f http://localhost:5000/ || exit 1
 
 # Start command
-CMD ["python", "railway_start.py"]
+CMD ["python", "railway_deploy.py"]
