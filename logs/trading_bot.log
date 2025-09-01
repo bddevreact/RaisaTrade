@@ -1,0 +1,89 @@
+2025-08-05 10:27:10,708 - Watchdog - INFO - Watchdog started
+2025-08-05 10:27:11,710 - Watchdog - WARNING - High CPU usage: 95.3% > 80%
+2025-08-05 10:27:11,710 - Watchdog - WARNING - System warning: High CPU usage - CPU: 95.3%
+2025-08-05 10:27:12,102 - gui_app - INFO - WebSocket connection started
+2025-08-05 10:27:24,718 - pionex_api - ERROR - API error: Unknown API error (code: MARKET_PARAMETER_ERROR)
+2025-08-05 10:27:24,719 - trading_strategies - ERROR - Error fetching klines for BTC_USDT: Unknown API error
+2025-08-05 11:58:59,867 - Watchdog - INFO - Watchdog started
+2025-08-05 11:59:00,867 - Watchdog - WARNING - High CPU usage: 89.1% > 80%
+2025-08-05 11:59:00,867 - Watchdog - WARNING - System warning: High CPU usage - CPU: 89.1%
+2025-08-05 11:59:01,643 - gui_app - INFO - WebSocket connection started
+2025-08-05 11:59:04,737 - gui_app - INFO - Fetching chart data for symbol: BTCUSDT -> BTC_USDT
+2025-08-05 11:59:04,782 - pionex_api - INFO - Fetching klines for BTC_USDT with interval 5M
+2025-08-05 11:59:05,043 - pionex_api - INFO - Successfully retrieved klines for BTC_USDT
+2025-08-05 11:59:05,043 - gui_app - ERROR - Error getting chart data for BTCUSDT: 0
+2025-08-05 11:59:13,945 - pionex_api - INFO - Fetching klines for BTC_USDT with interval 5M
+2025-08-05 11:59:14,659 - pionex_api - INFO - Successfully retrieved klines for BTC_USDT
+2025-08-05 11:59:14,664 - trading_strategies - INFO - Retrieved 100 data points for BTCUSDT (5M)
+2025-08-05 11:59:14,665 - gui_app - ERROR - Error testing strategy ADVANCED_STRATEGY: TradingStrategies.advanced_strategy() missing 1 required positional argument: 'balance'
+2025-08-05 12:00:59,102 - Watchdog - INFO - Watchdog started
+2025-08-05 12:01:00,995 - gui_app - INFO - WebSocket connection started
+2025-08-05 12:01:03,974 - gui_app - INFO - Fetching chart data for symbol: BTCUSDT -> BTC_USDT
+2025-08-05 12:01:03,978 - pionex_api - INFO - Fetching klines for BTC_USDT with interval 5M
+2025-08-05 12:01:04,237 - pionex_api - INFO - Successfully retrieved klines for BTC_USDT
+2025-08-05 12:01:04,240 - gui_app - ERROR - Error getting chart data for BTCUSDT: 0
+2025-08-05 12:01:10,856 - pionex_api - INFO - Fetching klines for BTC_USDT with interval 5M
+2025-08-05 12:01:11,577 - pionex_api - INFO - Successfully retrieved klines for BTC_USDT
+2025-08-05 12:01:11,583 - trading_strategies - INFO - Retrieved 100 data points for BTCUSDT (5M)
+2025-08-05 12:01:11,594 - pionex_api - INFO - Fetching klines for BTC_USDT with interval 1H
+2025-08-05 12:01:11,826 - pionex_api - ERROR - API error: Unknown API error (code: MARKET_PARAMETER_ERROR)
+2025-08-05 12:01:11,827 - pionex_api - ERROR - API error for BTC_USDT: Unknown API error
+2025-08-05 12:01:11,827 - trading_strategies - ERROR - Error getting market data: Unknown API error
+2025-08-05 12:01:25,392 - gui_app - INFO - Strategy updated to: VOLUME_FILTER_STRATEGY
+2025-08-05 12:01:33,657 - pionex_api - INFO - Fetching klines for BTC_USDT with interval 5M
+2025-08-05 12:01:33,917 - pionex_api - INFO - Successfully retrieved klines for BTC_USDT
+2025-08-05 12:01:33,921 - trading_strategies - INFO - Retrieved 100 data points for BTCUSDT (5M)
+2025-08-05 12:01:33,933 - pionex_api - INFO - Fetching klines for BTC_USDT with interval 1H
+2025-08-05 12:01:34,170 - pionex_api - ERROR - API error: Unknown API error (code: MARKET_PARAMETER_ERROR)
+2025-08-05 12:01:34,171 - pionex_api - ERROR - API error for BTC_USDT: Unknown API error
+2025-08-05 12:01:34,171 - trading_strategies - ERROR - Error getting market data: Unknown API error
+2025-08-05 12:01:34,822 - gui_app - INFO - Fetching chart data for symbol: BTCUSDT -> BTC_USDT
+2025-08-05 12:01:34,822 - pionex_api - INFO - Fetching klines for BTC_USDT with interval 5M
+2025-08-05 12:01:35,091 - pionex_api - INFO - Successfully retrieved klines for BTC_USDT
+2025-08-05 12:01:35,092 - gui_app - ERROR - Error getting chart data for BTCUSDT: 0
+2025-08-05 12:02:51,842 - gui_app - INFO - Strategy updated to: DCA_STRATEGY
+2025-08-05 12:02:56,555 - gui_app - INFO - Strategy updated to: ADVANCED_STRATEGY
+2025-08-05 12:11:42,611 - Watchdog - INFO - Watchdog started
+2025-08-05 12:11:44,410 - gui_app - INFO - WebSocket connection started
+2025-08-05 12:11:48,560 - gui_app - INFO - Fetching chart data for symbol: BTCUSDT -> BTC_USDT
+2025-08-05 12:11:48,560 - pionex_api - INFO - Fetching klines for BTC_USDT with interval 5M
+2025-08-05 12:11:48,844 - pionex_api - INFO - Successfully retrieved klines for BTC_USDT
+2025-08-05 12:11:48,844 - gui_app - ERROR - Error getting chart data for BTCUSDT: 0
+2025-08-05 12:20:53,692 - gui_app - INFO - Strategy updated to: DCA_STRATEGY
+2025-08-05 12:30:38,522 - Watchdog - INFO - Watchdog started
+2025-08-05 12:30:40,051 - gui_app - INFO - WebSocket connection started
+2025-08-05 12:30:42,542 - gui_app - INFO - Fetching chart data for symbol: BTCUSDT -> BTC_USDT with timeframe: 5M
+2025-08-05 12:30:42,543 - gui_app - INFO - Trying interval 5M for BTC_USDT
+2025-08-05 12:30:42,544 - pionex_api - INFO - Fetching klines for BTC_USDT with interval 5M
+2025-08-05 12:30:42,801 - pionex_api - INFO - Successfully retrieved klines for BTC_USDT
+2025-08-05 12:30:42,802 - gui_app - INFO - Successfully got 100 data points with interval 5M
+2025-08-05 12:30:42,802 - gui_app - ERROR - Error getting chart data for BTCUSDT: 0
+2025-08-05 12:46:21,560 - pionex_api - WARNING - Connection error: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response')) (attempt 1/3)
+2025-08-05 12:46:50,978 - pionex_api - WARNING - Request timeout (attempt 1/3)
+2025-08-05 12:47:04,661 - pionex_api - WARNING - Request timeout (attempt 2/3)
+2025-08-05 12:47:13,068 - pionex_api - WARNING - Connection error: HTTPSConnectionPool(host='api.pionex.com', port=443): Max retries exceeded with url: /api/v1/account/balances?timestamp=1754376368877 (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x0000017A88493050>: Failed to establish a new connection: [WinError 10065] A socket operation was attempted to an unreachable host')) (attempt 2/3)
+2025-08-05 12:47:17,655 - pionex_api - WARNING - Connection error: HTTPSConnectionPool(host='api.pionex.com', port=443): Max retries exceeded with url: /api/v1/account/balances?timestamp=1754376368877 (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017A88488050>: Failed to resolve 'api.pionex.com' ([Errno 11001] getaddrinfo failed)")) (attempt 3/3)
+2025-08-05 12:47:17,656 - Watchdog - ERROR - API connectivity issue: All retry attempts failed. Last error: Connection error: HTTPSConnectionPool(host='api.pionex.com', port=443): Max retries exceeded with url: /api/v1/account/balances?timestamp=1754376368877 (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017A88488050>: Failed to resolve 'api.pionex.com' ([Errno 11001] getaddrinfo failed)")) (attempt 3/3)
+2025-08-05 12:47:17,669 - Watchdog - ERROR - API failure: All retry attempts failed. Last error: Connection error: HTTPSConnectionPool(host='api.pionex.com', port=443): Max retries exceeded with url: /api/v1/account/balances?timestamp=1754376368877 (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017A88488050>: Failed to resolve 'api.pionex.com' ([Errno 11001] getaddrinfo failed)")) (attempt 3/3)
+2025-08-05 12:47:19,442 - pionex_api - WARNING - Connection error: HTTPSConnectionPool(host='api.pionex.com', port=443): Max retries exceeded with url: /api/v1/account/balances?timestamp=1754376360185 (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x0000017A88488BD0>: Failed to establish a new connection: [WinError 10051] A socket operation was attempted to an unreachable network')) (attempt 3/3)
+2025-08-05 12:47:19,531 - pionex_api - WARNING - Connection error: HTTPSConnectionPool(host='api.pionex.com', port=443): Max retries exceeded with url: /api/v1/account/balances?timestamp=1754376439527 (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017A8846D650>: Failed to resolve 'api.pionex.com' ([Errno 11001] getaddrinfo failed)")) (attempt 1/3)
+2025-08-05 12:47:20,536 - pionex_api - WARNING - Connection error: HTTPSConnectionPool(host='api.pionex.com', port=443): Max retries exceeded with url: /api/v1/account/balances?timestamp=1754376439527 (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017A88487850>: Failed to resolve 'api.pionex.com' ([Errno 11001] getaddrinfo failed)")) (attempt 2/3)
+2025-08-05 12:47:22,039 - pionex_api - WARNING - Connection error: HTTPSConnectionPool(host='api.pionex.com', port=443): Max retries exceeded with url: /api/v1/account/balances?timestamp=1754376439527 (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017A884B0D10>: Failed to resolve 'api.pionex.com' ([Errno 11001] getaddrinfo failed)")) (attempt 3/3)
+2025-08-05 12:47:22,099 - pionex_api - WARNING - Connection error: HTTPSConnectionPool(host='api.pionex.com', port=443): Max retries exceeded with url: /api/v1/account/balances?timestamp=1754376442096 (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017A88485E10>: Failed to resolve 'api.pionex.com' ([Errno 11001] getaddrinfo failed)")) (attempt 1/3)
+2025-08-05 12:47:23,103 - pionex_api - WARNING - Connection error: HTTPSConnectionPool(host='api.pionex.com', port=443): Max retries exceeded with url: /api/v1/account/balances?timestamp=1754376442096 (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017A884841D0>: Failed to resolve 'api.pionex.com' ([Errno 11001] getaddrinfo failed)")) (attempt 2/3)
+2025-08-05 12:47:24,605 - pionex_api - WARNING - Connection error: HTTPSConnectionPool(host='api.pionex.com', port=443): Max retries exceeded with url: /api/v1/account/balances?timestamp=1754376442096 (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017A87134290>: Failed to resolve 'api.pionex.com' ([Errno 11001] getaddrinfo failed)")) (attempt 3/3)
+2025-08-05 12:47:24,613 - pionex_api - WARNING - Connection error: HTTPSConnectionPool(host='api.pionex.com', port=443): Max retries exceeded with url: /api/v1/account/balances?timestamp=1754376444610 (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017A8848B850>: Failed to resolve 'api.pionex.com' ([Errno 11001] getaddrinfo failed)")) (attempt 1/3)
+2025-08-05 12:47:25,616 - pionex_api - WARNING - Connection error: HTTPSConnectionPool(host='api.pionex.com', port=443): Max retries exceeded with url: /api/v1/account/balances?timestamp=1754376444610 (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017A87B88BD0>: Failed to resolve 'api.pionex.com' ([Errno 11001] getaddrinfo failed)")) (attempt 2/3)
+2025-08-05 12:47:27,119 - pionex_api - WARNING - Connection error: HTTPSConnectionPool(host='api.pionex.com', port=443): Max retries exceeded with url: /api/v1/account/balances?timestamp=1754376444610 (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017A88490C10>: Failed to resolve 'api.pionex.com' ([Errno 11001] getaddrinfo failed)")) (attempt 3/3)
+2025-08-05 12:47:27,167 - pionex_api - WARNING - Connection error: HTTPSConnectionPool(host='api.pionex.com', port=443): Max retries exceeded with url: /api/v1/account/balances?timestamp=1754376447164 (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017A8847A550>: Failed to resolve 'api.pionex.com' ([Errno 11001] getaddrinfo failed)")) (attempt 1/3)
+2025-08-05 12:47:28,171 - pionex_api - WARNING - Connection error: HTTPSConnectionPool(host='api.pionex.com', port=443): Max retries exceeded with url: /api/v1/account/balances?timestamp=1754376447164 (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017A8848BBD0>: Failed to resolve 'api.pionex.com' ([Errno 11001] getaddrinfo failed)")) (attempt 2/3)
+2025-08-05 12:47:29,673 - pionex_api - WARNING - Connection error: HTTPSConnectionPool(host='api.pionex.com', port=443): Max retries exceeded with url: /api/v1/account/balances?timestamp=1754376447164 (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017A8848A710>: Failed to resolve 'api.pionex.com' ([Errno 11001] getaddrinfo failed)")) (attempt 3/3)
+2025-08-05 12:47:29,679 - pionex_api - WARNING - Connection error: HTTPSConnectionPool(host='api.pionex.com', port=443): Max retries exceeded with url: /api/v1/account/balances?timestamp=1754376449676 (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017A884246D0>: Failed to resolve 'api.pionex.com' ([Errno 11001] getaddrinfo failed)")) (attempt 1/3)
+2025-08-05 12:47:30,681 - pionex_api - WARNING - Connection error: HTTPSConnectionPool(host='api.pionex.com', port=443): Max retries exceeded with url: /api/v1/account/balances?timestamp=1754376449676 (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017A8846FED0>: Failed to resolve 'api.pionex.com' ([Errno 11001] getaddrinfo failed)")) (attempt 2/3)
+2025-08-05 12:47:32,184 - pionex_api - WARNING - Connection error: HTTPSConnectionPool(host='api.pionex.com', port=443): Max retries exceeded with url: /api/v1/account/balances?timestamp=1754376449676 (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017A8841F410>: Failed to resolve 'api.pionex.com' ([Errno 11001] getaddrinfo failed)")) (attempt 3/3)
+2025-08-05 12:47:32,190 - pionex_api - WARNING - Connection error: HTTPSConnectionPool(host='api.pionex.com', port=443): Max retries exceeded with url: /api/v1/account/balances?timestamp=1754376452186 (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017A88486550>: Failed to resolve 'api.pionex.com' ([Errno 11001] getaddrinfo failed)")) (attempt 1/3)
+2025-08-05 12:47:33,198 - pionex_api - WARNING - Connection error: HTTPSConnectionPool(host='api.pionex.com', port=443): Max retries exceeded with url: /api/v1/account/balances?timestamp=1754376452186 (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017A884B1BD0>: Failed to resolve 'api.pionex.com' ([Errno 11001] getaddrinfo failed)")) (attempt 2/3)
+2025-08-05 12:47:34,703 - pionex_api - WARNING - Connection error: HTTPSConnectionPool(host='api.pionex.com', port=443): Max retries exceeded with url: /api/v1/account/balances?timestamp=1754376452186 (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017A884B00D0>: Failed to resolve 'api.pionex.com' ([Errno 11001] getaddrinfo failed)")) (attempt 3/3)
+2025-08-05 12:47:34,707 - pionex_api - WARNING - Connection error: HTTPSConnectionPool(host='api.pionex.com', port=443): Max retries exceeded with url: /api/v1/account/balances?timestamp=1754376454704 (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017A8841F990>: Failed to resolve 'api.pionex.com' ([Errno 11001] getaddrinfo failed)")) (attempt 1/3)
+2025-08-05 12:47:35,710 - pionex_api - WARNING - Connection error: HTTPSConnectionPool(host='api.pionex.com', port=443): Max retries exceeded with url: /api/v1/account/balances?timestamp=1754376454704 (Caused by NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x0000017A88424C50>: Failed to resolve 'api.pionex.com' ([Errno 11001] getaddrinfo failed)")) (attempt 2/3)
+2025-08-05 12:48:14,321 - pionex_api - ERROR - API error: Unknown API error (code: INVALID_TIMESTAMP)

@@ -1,0 +1,339 @@
+api:
+  key: ''
+  retry_attempts: 3
+  retry_backoff: 1.5
+  secret: ''
+  timeout: 30
+backtesting:
+  enabled: false
+  paper_trading: true
+bollinger_bands:
+  n_std: 2.0
+  squeeze_detection: true
+  window: 20
+bot_2025:
+  anti_fake:
+    max_slippage: 0.05
+    min_distance_from_box: 0.02
+    retest_enabled: true
+  breakout:
+    buffer_percentage: 0.05
+    confirmation_candles: 1
+    cooldown_minutes: 30
+    enabled: true
+    max_trades_per_session: 1
+  control_panel:
+    editable_box_lookback: true
+    editable_buffer: true
+    editable_session_times: true
+    editable_sl_tp: true
+    editable_trailing: true
+    enable_pair_duplication: true
+    manual_price_entry: true
+    pair_selection: true
+    show_active_pairs: true
+    show_box_trading_toggle: true
+    show_filters_toggle: true
+    show_session_toggles: true
+  enabled: true
+  exchanges:
+    binance:
+      enabled: false
+      post_only: false
+      reduce_only: true
+      symbols: []
+    bybit:
+      enabled: true
+      post_only: false
+      reduce_only: true
+      symbols:
+      - BTCUSDT
+      - ETHUSDT
+      - SOLUSDT
+      - ADAUSDT
+      - DOTUSDT
+      - BNBUSDT
+  logging:
+    level: INFO
+    log_box_levels: true
+    log_filters: true
+    log_no_trade_reasons: true
+    telegram_alerts: false
+    telegram_bot_token: ''
+    telegram_chat_id: ''
+  mtf_rsi:
+    enabled: true
+    reduced_version: false
+    thresholds:
+      long_conditions:
+        long_tf: 50
+        short_tf: 30
+      short_conditions:
+        long_tf: 50
+        short_tf: 70
+    timeframes:
+      long: 1h
+      short: 5m
+  risk_management:
+    auto_breakeven:
+      enabled: true
+      percentage: 1.0
+    stop_loss:
+      percentage: 1.5
+      use_box_opposite: true
+    take_profit:
+      percentage: 2.5
+      risk_reward_ratio: 2.0
+    trailing_stop:
+      after_tp1: true
+      distance_percentage: 0.8
+      enabled: true
+      step_percentage: 0.3
+  sessions:
+    asian_session:
+      enabled: true
+      end_time: 01:30
+      name: Asian Session
+      range_box_lookback: 90
+      start_time: '19:30'
+      timezone: UTC-5
+    us_session:
+      daylight_saving:
+        end_time: '15:00'
+        months:
+        - 3
+        - 4
+        - 5
+        - 6
+        - 7
+        - 8
+        - 9
+        - 10
+        - 11
+        start_time: 08:30
+      enabled: true
+      name: US Session (New York)
+      range_box_lookback: 90
+      standard_time:
+        end_time: '16:00'
+        months:
+        - 12
+        - 1
+        - 2
+        start_time: 09:30
+      timezone: UTC-5
+  volume_filter:
+    ema_period: 20
+    enabled: true
+    multiplier: 1.5
+bybit:
+  api_key: qqpuYWmzZkyCqrypZ4
+  api_secret: csfTAQDzRkyGESGZsCbWhxL0KolI19NQZMCm
+  enabled: true
+  futures:
+    default_leverage: 10
+    default_stop_loss: 2.0
+    default_take_profit: 4.0
+    margin_type: ISOLATED
+    market_data:
+      include_funding_rate: true
+      include_long_short_ratio: true
+      include_open_interest: true
+      symbols:
+      - BTCUSDT
+      - ETHUSDT
+      - SOLUSDT
+      - ADAUSDT
+      - DOTUSDT
+      update_interval: 30
+    max_daily_loss: 5.0
+    max_leverage: 125
+    max_position_size: 10.0
+    rate_limits:
+      requests_per_hour: 36000
+      requests_per_minute: 600
+      requests_per_second: 10
+    trading_rules:
+      max_orders: 100
+      min_order_size: 1.0
+      price_precision: 2
+      quantity_precision: 4
+  testnet: false
+  v5_api:
+    account_type: UNIFIED
+    base_url_mainnet: https://api.bybit.com
+    base_url_testnet: https://api-testnet.bybit.com
+    category: linear
+candlestick_analysis:
+  enabled: true
+  patterns:
+  - engulfing
+  - pin_bar
+  - doji
+  - marubozu
+  - three_soldiers
+  - three_crows
+  - morning_star
+  - evening_star
+  strength_threshold: 1.0
+dca_strategy:
+  amount: 100.0
+  enabled: true
+  interval_days: 7
+  max_investment: 10000.0
+default_strategy: RSI_STRATEGY
+dynamic_sl_tp:
+  atr_period: 14
+  enabled: true
+  min_sl_percentage: 1.5
+  min_tp_percentage: 2.5
+  sl_multiplier: 2.0
+  tp_multiplier: 3.0
+exchange_priority:
+  backup: BINANCE
+  futures: BYBIT
+  spot: PIONEX
+futures:
+  enabled: true
+  grid:
+    max_grids: 100
+    max_investment: 10000.0
+    min_investment: 10.0
+  hedging:
+    enabled: true
+    max_positions: 5
+futures_exchange: BYBIT
+grid_trading:
+  enabled: true
+  levels: 10
+  max_investment: 5000.0
+  min_investment: 100.0
+  position_size: 0.1
+  spacing: 0.02
+gui:
+  debug: false
+  host: 127.0.0.1
+  port: 5000
+  secret_key: 8f4e2a1b9c6d3e7f8a2b5c9d1e4f7a8b3c6d9e2f5a8b1c4d7e0f3a6b9c2d5e8f1
+leverage: 10
+logging:
+  file: logs/trading_bot.log
+  level: INFO
+  per_instance: true
+macd:
+  crossover_detection: true
+  fast: 12
+  signal: 9
+  slow: 26
+margin_type: ISOLATED
+max_daily_loss: 10
+notifications:
+  email:
+    enabled: false
+    recipient_email: ''
+    sender_email: ''
+    sender_password: ''
+    smtp_port: 587
+    smtp_server: smtp.gmail.com
+  telegram:
+    bot_token: ''
+    enabled: false
+    user_id: ''
+  types:
+    balance_notifications: true
+    error_notifications: true
+    status_notifications: true
+    trade_notifications: true
+obv_analysis:
+  divergence_detection: true
+  enabled: true
+  trend_strength_threshold: 0.3
+position_size: 0.5
+rsi:
+  multi_tf:
+    enabled: true
+    thresholds:
+      long_1h: 50
+      long_5m: 30
+      short_1h: 50
+      short_5m: 70
+    timeframes:
+    - 5m
+    - 1h
+  overbought: 50
+  oversold: 20
+  period: 7
+rsi_filter:
+  enabled: false
+  mode: normal
+  thresholds:
+    long:
+      rsi_1h: 50
+      rsi_5m: 30
+    short:
+      rsi_1h: 50
+      rsi_5m: 70
+  timeframes:
+    long: 1h
+    short: 5m
+spot_exchange: PIONEX
+stop_loss_percentage: 1.5
+strategy_descriptions:
+  ADVANCED_STRATEGY: Combined strategy using multiple indicators with dynamic SL/TP
+  DCA: Dollar Cost Averaging strategy
+  GRID_TRADING: Grid trading strategy for range-bound markets
+  MANUAL: Manual trading with full user control
+  RSI_MULTI_TF: Multi-timeframe RSI strategy for better signal accuracy
+  RSI_STRATEGY: Basic RSI-based trading strategy
+  VOLUME_FILTER: Volume-based strategy with EMA filter
+strategy_types:
+  ADVANCED_STRATEGY: Advanced Strategy
+  DCA: Dollar Cost Averaging
+  GRID_TRADING: Grid Trading
+  MANUAL: Manual Trading
+  RSI_MULTI_TF: RSI Multi-Timeframe
+  RSI_STRATEGY: RSI Strategy
+  VOLUME_FILTER: Volume Filter Strategy
+support_resistance:
+  price_action_analysis: true
+  trend_analysis: true
+  window: 20
+take_profit_percentage: 2.5
+telegram:
+  bot_token: ''
+  chat_id: ''
+  enabled: false
+  notifications:
+    breakouts: true
+    risk: true
+    sessions: true
+    system: true
+    trades: true
+trading_amount: 10
+trading_hours:
+  enabled: true
+  end: 01:30
+  exclude_holidays: false
+  exclude_weekends: false
+  start: '19:30'
+  timezone: UTC-5
+trading_mode: HYBRID
+trading_pair: BTC_USDT
+trailing_stop:
+  dynamic_mobile_sl: true
+  enable_after_tp: true
+  enabled: true
+  percentage: 1.0
+  profit_lock_percentage: 0.5
+trailing_stop_percentage: 1
+volume_filter:
+  ema_period: 20
+  enhanced_analysis: true
+  multiplier: 1.5
+watchdog:
+  auto_restart: true
+  cpu_threshold: 80
+  enabled: true
+  heartbeat_interval: 60
+  max_failures: 3
+  memory_threshold: 200

@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot 2025 - Enhanced Trading Control Panel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bot-primary: #2c3e50;
+            --bot-secondary: #34495e;
+            --bot-success: #27ae60;
+            --bot-danger: #e74c3c;
+            --bot-warning: #f39c12;
+            --bot-info: #3498db;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .navbar {
+            background: linear-gradient(90deg, var(--bot-primary) 0%, var(--bot-secondary) 100%);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+        }
+        
+        .card-header {
+            background: linear-gradient(45deg, var(--bot-primary), var(--bot-secondary));
+            border-radius: 15px 15px 0 0 !important;
+            border: none;
+        }
+        
+        .btn-bot {
+            background: linear-gradient(45deg, var(--bot-primary), var(--bot-secondary));
+            border: none;
+            border-radius: 25px;
+            padding: 10px 25px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-bot:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(44, 62, 80, 0.4);
+        }
+        
+        .session-status {
+            padding: 10px;
+            border-radius: 10px;
+            margin: 10px 0;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .session-active {
+            background: var(--bot-success);
+            color: white;
+        }
+        
+        .session-inactive {
+            background: var(--bot-danger);
+            color: white;
+        }
+        
+        .session-disabled {
+            background: var(--bot-secondary);
+            color: #bdc3c7;
+        }
+        
+        .range-box-display {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        
+        .form-control, .form-select {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--bot-info);
+            color: white;
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+        
+        .form-control::placeholder {
+            color: #bdc3c7;
+        }
+        
+        .active-pairs-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .pair-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .loading-spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid var(--bot-info);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-robot me-2"></i>
+                <strong>Bot 2025 - Enhanced Trading Control Panel</strong>
+            </a>
+            
+            <div class="navbar-nav ms-auto">
+                <button class="btn btn-outline-light btn-sm me-3" onclick="goBackToMain()">
+                    <i class="fas fa-arrow-left me-1"></i>Back to Main
+                </button>
+                <span class="navbar-text me-3">
+                    <span class="status-indicator status-online me-2"></span>
+                    <span>Bot 2025 Active</span>
+                </span>
+                <button class="btn btn-outline-light btn-sm" onclick="refreshBotStatus()">
+                    <i class="fas fa-sync-alt me-1"></i>Refresh
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <!-- Header Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="row align-items-center">
+                            <div class="col">
+                                <h4 class="mb-0">
+                                    <i class="fas fa-chart-line me-2"></i>
+                                    Bot 2025 - Session-Based Breakout Trading
+                                </h4>
+                                <p class="mb-0 mt-2">Advanced trading bot with market session management and breakout detection</p>
+                            </div>
+                            <div class="col-auto">
+                                <span class="badge bg-success fs-6">ACTIVE</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Control Panel -->
+        <div class="row">
+            <!-- Session Management -->
+            <div class="col-lg-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-clock me-2"></i>Market Sessions
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <!-- US Session -->
+                        <div class="mb-4">
+                            <h6>US Session (New York)</h6>
+                            <div class="form-check form-switch mb-2">
+                                <input class="form-check-input" type="checkbox" id="us-session-toggle" checked>
+                                <label class="form-check-label" for="us-session-toggle">Enable US Session</label>
+                            </div>
+                            <div class="session-status" id="us-session-status">
+                                <i class="fas fa-clock me-2"></i>Checking status...
+                            </div>
+                            <div class="row">
+                                <div class="col-6">
+                                    <label class="form-label">Daylight Saving (Mar-Nov)</label>
+                                    <div class="input-group">
+                                        <input type="time" class="form-control" id="us-dst-start" value="08:30">
+                                        <span class="input-group-text">to</span>
+                                        <input type="time" class="form-control" id="us-dst-end" value="15:00">
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label">Standard Time (Nov-Mar)</label>
+                                    <div class="input-group">
+                                        <input type="time" class="form-control" id="us-std-start" value="09:30">
+                                        <span class="input-group-text">to</span>
+                                        <input type="time" class="form-control" id="us-std-end" value="16:00">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Asian Session -->
+                        <div class="mb-4">
+                            <h6>Asian Session</h6>
+                            <div class="form-check form-switch mb-2">
+                                <input class="form-check-input" type="checkbox" id="asian-session-toggle" checked>
+                                <label class="form-check-label" for="asian-session-toggle">Enable Asian Session</label>
+                            </div>
+                            <div class="session-status" id="asian-session-status">
+                                <i class="fas fa-clock me-2"></i>Checking status...
+                            </div>
+                            <div class="row">
+                                <div class="col-6">
+                                    <label class="form-label">Session Time</label>
+                                    <div class="input-group">
+                                        <input type="time" class="form-control" id="asian-start" value="19:30">
+                                        <span class="input-group-text">to</span>
+                                        <input type="time" class="form-control" id="asian-end" value="01:30">
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label">Range Box Lookback</label>
+                                    <input type="number" class="form-control" id="asian-lookback" value="90" min="30" max="180">
+                                    <small class="text-muted">minutes</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-bot w-100" onclick="updateSessionSettings()">
+                            <i class="fas fa-save me-2"></i>Update Session Settings
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Breakout Configuration -->
+            <div class="col-lg-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-chart-bar me-2"></i>Breakout Trading
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="breakout-toggle" checked>
+                            <label class="form-check-label" for="breakout-toggle">Enable Breakout Trading</label>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-6">
+                                <label class="form-label">Buffer Percentage</label>
+                                <input type="number" class="form-control" id="buffer-percentage" value="0.05" step="0.01" min="0.01" max="1.0">
+                                <small class="text-muted">%</small>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Confirmation Candles</label>
+                                <input type="number" class="form-control" id="confirmation-candles" value="1" min="1" max="5">
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-6">
+                                <label class="form-label">Max Trades per Session</label>
+                                <input type="number" class="form-control" id="max-trades-session" value="1" min="1" max="5">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Cooldown (minutes)</label>
+                                <input type="number" class="form-control" id="cooldown-minutes" value="30" min="5" max="120">
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-bot w-100 mt-3" onclick="updateBreakoutSettings()">
+                            <i class="fas fa-save me-2"></i>Update Breakout Settings
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Risk Management & Filters -->
+        <div class="row">
+            <!-- Risk Management -->
+            <div class="col-lg-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-shield-alt me-2"></i>Risk Management
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6">
+                                <label class="form-label">Stop Loss (%)</label>
+                                <input type="number" class="form-control" id="stop-loss-percentage" value="1.5" step="0.1" min="0.5" max="10.0">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Take Profit (%)</label>
+                                <input type="number" class="form-control" id="take-profit-percentage" value="2.5" step="0.1" min="1.0" max="20.0">
+                            </div>
+                        </div>
+                        
+                        <div class="form-check form-switch mt-3">
+                            <input class="form-check-input" type="checkbox" id="use-box-opposite" checked>
+                            <label class="form-check-label" for="use-box-opposite">Use Box Opposite Side for SL</label>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-6">
+                                <label class="form-label">Trailing Step (%)</label>
+                                <input type="number" class="form-control" id="trailing-step" value="0.3" step="0.1" min="0.1" max="2.0">
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">Trailing Distance (%)</label>
+                                <input type="number" class="form-control" id="trailing-distance" value="0.8" step="0.1" min="0.2" max="5.0">
+                            </div>
+                        </div>
+                        
+                        <div class="form-check form-switch mt-3">
+                            <input class="form-check-input" type="checkbox" id="auto-breakeven" checked>
+                            <label class="form-check-label" for="auto-breakeven">Auto Breakeven at +1.0%</label>
+                        </div>
+                        
+                        <button class="btn btn-bot w-100 mt-3" onclick="updateRiskSettings()">
+                            <i class="fas fa-save me-2"></i>Update Risk Settings
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trading Filters -->
+            <div class="col-lg-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-filter me-2"></i>Trading Filters
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <!-- MTF RSI Filter -->
+                        <div class="mb-3">
+                            <h6>Multi-Timeframe RSI</h6>
+                            <div class="form-check form-switch mb-2">
+                                <input class="form-check-input" type="checkbox" id="mtf-rsi-toggle" checked>
+                                <label class="form-check-label" for="mtf-rsi-toggle">Enable MTF RSI Filter</label>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-6">
+                                    <label class="form-label">5m Threshold</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">LONG <</span>
+                                        <input type="number" class="form-control" id="rsi-5m-long" value="30" min="10" max="50">
+                                    </div>
+                                    <div class="input-group mt-1">
+                                        <span class="input-group-text">SHORT ></span>
+                                        <input type="number" class="form-control" id="rsi-5m-short" value="70" min="50" max="90">
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label">1h Threshold</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">LONG <</span>
+                                        <input type="number" class="form-control" id="rsi-1h-long" value="50" min="30" max="70">
+                                    </div>
+                                    <div class="input-group mt-1">
+                                        <span class="input-group-text">SHORT ></span>
+                                        <input type="number" class="form-control" id="rsi-1h-short" value="50" min="30" max="70">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-check form-switch mt-2">
+                                <input class="form-check-input" type="checkbox" id="reduced-version">
+                                <label class="form-check-label" for="reduced-version">Reduced Version</label>
+                            </div>
+                        </div>
+                        
+                        <!-- Volume Filter -->
+                        <div class="mb-3">
+                            <h6>Volume Filter</h6>
+                            <div class="form-check form-switch mb-2">
+                                <input class="form-check-input" type="checkbox" id="volume-filter-toggle" checked>
+                                <label class="form-check-label" for="volume-filter-toggle">Enable Volume Filter</label>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-6">
+                                    <label class="form-label">Volume Multiplier</label>
+                                    <input type="number" class="form-control" id="volume-multiplier" value="1.5" step="0.1" min="1.0" max="5.0">
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label">EMA Period</label>
+                                    <input type="number" class="form-control" id="volume-ema-period" value="20" min="10" max="50">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-bot w-100" onclick="updateFilterSettings()">
+                            <i class="fas fa-save me-2"></i>Update Filter Settings
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Pairs & Trading -->
+        <div class="row">
+            <!-- Active Pairs -->
+            <div class="col-lg-8 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-list me-2"></i>Active Trading Pairs
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Select Symbol</label>
+                                <select class="form-select" id="pair-selector">
+                                    <option value="BTCUSDT">BTCUSDT</option>
+                                    <option value="ETHUSDT">ETHUSDT</option>
+                                    <option value="SOLUSDT">SOLUSDT</option>
+                                    <option value="ADAUSDT">ADAUSDT</option>
+                                    <option value="DOTUSDT">DOTUSDT</option>
+                                    <option value="BNBUSDT">BNBUSDT</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Position Size (USDT)</label>
+                                <input type="number" class="form-control" id="position-size" value="100" min="10" step="10">
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Manual Entry Price</label>
+                                <input type="number" class="form-control" id="manual-price" step="0.0001" placeholder="Enter current price">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Actions</label>
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-success btn-sm" onclick="addTradingPair()">
+                                        <i class="fas fa-plus me-1"></i>Add Pair
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="active-pairs-list" id="active-pairs-list">
+                            <!-- Active pairs will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Range Boxes & Status -->
+            <div class="col-lg-4 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-cube me-2"></i>Range Boxes & Status
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div id="range-boxes-display">
+                            <!-- Range boxes will be populated here -->
+                        </div>
+                        
+                        <button class="btn btn-bot w-100 mt-3" onclick="calculateAllRangeBoxes()">
+                            <i class="fas fa-calculator me-2"></i>Calculate All Range Boxes
+                        </button>
+                        
+                        <button class="btn btn-outline-warning w-100 mt-2" onclick="resetSessionTrades()">
+                            <i class="fas fa-redo me-2"></i>Reset Session Trades
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Bot 2025 JavaScript -->
+    <script>
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Bot 2025 Interface loaded');
+            initializeBot2025();
+            loadBotStatus();
+            loadActivePairs();
+        });
+        
+        function initializeBot2025() {
+            console.log('Initializing Bot 2025');
+            // Set up auto-refresh
+            setInterval(loadBotStatus, 30000); // Refresh every 30 seconds
+        }
+        
+        function loadBotStatus() {
+            console.log('Loading Bot 2025 status...');
+            
+            // Load session status
+            fetch('/api/bot2025/status')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updateSessionStatus(data.data);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading bot status:', error);
+                });
+            
+            // Load range boxes
+            fetch('/api/bot2025/range-boxes')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updateRangeBoxes(data.data);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading range boxes:', error);
+                });
+        }
+        
+        function updateSessionStatus(sessionData) {
+            // Update US session status
+            const usStatus = document.getElementById('us-session-status');
+            if (sessionData.us_session) {
+                const usSession = sessionData.us_session;
+                if (usSession.enabled) {
+                    usStatus.className = `session-status ${usSession.active ? 'session-active' : 'session-inactive'}`;
+                    usStatus.innerHTML = `<i class="fas fa-clock me-2"></i>${usSession.name}: ${usSession.active ? 'ACTIVE' : 'INACTIVE'}`;
+                } else {
+                    usStatus.className = 'session-status session-disabled';
+                    usStatus.innerHTML = `<i class="fas fa-clock me-2"></i>${usSession.name}: DISABLED`;
+                }
+            }
+            
+            // Update Asian session status
+            const asianStatus = document.getElementById('asian-session-status');
+            if (sessionData.asian_session) {
+                const asianSession = sessionData.asian_session;
+                if (asianSession.enabled) {
+                    asianStatus.className = `session-status ${asianSession.active ? 'session-active' : 'session-inactive'}`;
+                    asianStatus.innerHTML = `<i class="fas fa-clock me-2"></i>${asianSession.name}: ${asianSession.active ? 'ACTIVE' : 'INACTIVE'}`;
+                } else {
+                    asianStatus.className = 'session-status session-disabled';
+                    asianStatus.innerHTML = `<i class="fas fa-clock me-2"></i>${asianSession.name}: DISABLED`;
+                }
+            }
+        }
+        
+        function updateRangeBoxes(rangeBoxes) {
+            const container = document.getElementById('range-boxes-display');
+            container.innerHTML = '';
+            
+            if (!rangeBoxes || Object.keys(rangeBoxes).length === 0) {
+                container.innerHTML = '<p class="text-muted">No range boxes calculated yet</p>';
+                return;
+            }
+            
+            Object.keys(rangeBoxes).forEach(key => {
+                const box = rangeBoxes[key];
+                const boxElement = document.createElement('div');
+                boxElement.className = 'range-box-display';
+                boxElement.innerHTML = `
+                    <h6>${box.symbol} - ${box.session}</h6>
+                    <div class="row">
+                        <div class="col-6">
+                            <strong>High:</strong> $${box.high.toFixed(4)}<br>
+                            <strong>Low:</strong> $${box.low.toFixed(4)}
+                        </div>
+                        <div class="col-6">
+                            <strong>Range:</strong> $${box.range.toFixed(4)}<br>
+                            <strong>Lookback:</strong> ${box.lookback_minutes}m
+                        </div>
+                    </div>
+                    <small class="text-muted">Calculated: ${new Date(box.calculated_at).toLocaleTimeString()}</small>
+                `;
+                container.appendChild(boxElement);
+            });
+        }
+        
+        function loadActivePairs() {
+            console.log('Loading active trading pairs...');
+            
+            fetch('/api/bot2025/active-pairs')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updateActivePairsList(data.data);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading active pairs:', error);
+                });
+        }
+        
+        function updateActivePairsList(pairs) {
+            const container = document.getElementById('active-pairs-list');
+            container.innerHTML = '';
+            
+            if (!pairs || pairs.length === 0) {
+                container.innerHTML = '<p class="text-muted">No active trading pairs configured</p>';
+                return;
+            }
+            
+            pairs.forEach(pair => {
+                const pairElement = document.createElement('div');
+                pairElement.className = 'pair-item';
+                pairElement.innerHTML = `
+                    <div class="row align-items-center">
+                        <div class="col-md-3">
+                            <strong>${pair.symbol}</strong>
+                        </div>
+                        <div class="col-md-3">
+                            <span class="badge bg-primary">${pair.size} USDT</span>
+                        </div>
+                        <div class="col-md-3">
+                            <span class="badge bg-${pair.enabled ? 'success' : 'secondary'}">${pair.enabled ? 'ENABLED' : 'DISABLED'}</span>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-warning btn-sm" onclick="togglePair('${pair.symbol}')">
+                                    <i class="fas fa-${pair.enabled ? 'pause' : 'play'}"></i>
+                                </button>
+                                <button class="btn btn-outline-danger btn-sm" onclick="removePair('${pair.symbol}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(pairElement);
+            });
+        }
+        
+        function addTradingPair() {
+            const symbol = document.getElementById('pair-selector').value;
+            const size = parseFloat(document.getElementById('position-size').value);
+            const manualPrice = document.getElementById('manual-price').value;
+            
+            if (!symbol || !size) {
+                alert('Please select a symbol and enter position size');
+                return;
+            }
+            
+            const pairData = {
+                symbol: symbol,
+                size: size,
+                manual_price: manualPrice || null
+            };
+            
+            fetch('/api/bot2025/add-pair', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(pairData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(`Trading pair ${symbol} added successfully!`);
+                    loadActivePairs();
+                    document.getElementById('manual-price').value = '';
+                } else {
+                    alert(`Failed to add pair: ${data.error}`);
+                }
+            })
+            .catch(error => {
+                console.error('Error adding pair:', error);
+                alert('Error adding trading pair. Please try again.');
+            });
+        }
+        
+        function togglePair(symbol) {
+            fetch('/api/bot2025/toggle-pair', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ symbol: symbol })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    loadActivePairs();
+                } else {
+                    alert(`Failed to toggle pair: ${data.error}`);
+                }
+            })
+            .catch(error => {
+                console.error('Error toggling pair:', error);
+                alert('Error toggling pair. Please try again.');
+            });
+        }
+        
+        function removePair(symbol) {
+            if (confirm(`Are you sure you want to remove ${symbol} from trading?`)) {
+                fetch('/api/bot2025/remove-pair', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ symbol: symbol })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(`${symbol} removed successfully!`);
+                        loadActivePairs();
+                    } else {
+                        alert(`Failed to remove pair: ${data.error}`);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error removing pair:', error);
+                    alert('Error removing pair. Please try again.');
+                });
+            }
+        }
+        
+        function calculateAllRangeBoxes() {
+            console.log('Calculating all range boxes...');
+            
+            fetch('/api/bot2025/calculate-range-boxes', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Range boxes calculated successfully!');
+                    loadBotStatus();
+                } else {
+                    alert(`Failed to calculate range boxes: ${data.error}`);
+                }
+            })
+            .catch(error => {
+                console.error('Error calculating range boxes:', error);
+                alert('Error calculating range boxes. Please try again.');
+            });
+        }
+        
+        function resetSessionTrades() {
+            if (confirm('Are you sure you want to reset all session trade counters? This will allow new trades in all sessions.')) {
+                fetch('/api/bot2025/reset-session-trades', {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Session trade counters reset successfully!');
+                    } else {
+                        alert(`Failed to reset session trades: ${data.error}`);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error resetting session trades:', error);
+                    alert('Error resetting session trades. Please try again.');
+                });
+            }
+        }
+        
+        function updateSessionSettings() {
+            const sessionData = {
+                us_session: {
+                    enabled: document.getElementById('us-session-toggle').checked,
+                    daylight_saving: {
+                        start_time: document.getElementById('us-dst-start').value,
+                        end_time: document.getElementById('us-dst-end').value
+                    },
+                    standard_time: {
+                        start_time: document.getElementById('us-std-start').value,
+                        end_time: document.getElementById('us-std-end').value
+                    }
+                },
+                asian_session: {
+                    enabled: document.getElementById('asian-session-toggle').checked,
+                    start_time: document.getElementById('asian-start').value,
+                    end_time: document.getElementById('asian-end').value,
+                    range_box_lookback: parseInt(document.getElementById('asian-lookback').value)
+                }
+            };
+            
+            fetch('/api/bot2025/update-sessions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(sessionData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Session settings updated successfully!');
+                } else {
+                    alert(`Failed to update session settings: ${data.error}`);
+                }
+            })
+            .catch(error => {
+                console.error('Error updating session settings:', error);
+                alert('Error updating session settings. Please try again.');
+            });
+        }
+        
+        function updateBreakoutSettings() {
+            const breakoutData = {
+                enabled: document.getElementById('breakout-toggle').checked,
+                buffer_percentage: parseFloat(document.getElementById('buffer-percentage').value),
+                confirmation_candles: parseInt(document.getElementById('confirmation-candles').value),
+                max_trades_per_session: parseInt(document.getElementById('max-trades-session').value),
+                cooldown_minutes: parseInt(document.getElementById('cooldown-minutes').value)
+            };
+            
+            fetch('/api/bot2025/update-breakout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(breakoutData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Breakout settings updated successfully!');
+                } else {
+                    alert(`Failed to update breakout settings: ${data.error}`);
+                }
+            })
+            .catch(error => {
+                console.error('Error updating breakout settings:', error);
+                alert('Error updating breakout settings. Please try again.');
+            });
+        }
+        
+        function updateRiskSettings() {
+            const riskData = {
+                stop_loss: {
+                    percentage: parseFloat(document.getElementById('stop-loss-percentage').value),
+                    use_box_opposite: document.getElementById('use-box-opposite').checked
+                },
+                take_profit: {
+                    percentage: parseFloat(document.getElementById('take-profit-percentage').value)
+                },
+                trailing_stop: {
+                    step_percentage: parseFloat(document.getElementById('trailing-step').value),
+                    distance_percentage: parseFloat(document.getElementById('trailing-distance').value)
+                },
+                auto_breakeven: {
+                    enabled: document.getElementById('auto-breakeven').checked,
+                    percentage: 1.0
+                }
+            };
+            
+            fetch('/api/bot2025/update-risk', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(riskData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Risk settings updated successfully!');
+                } else {
+                    alert(`Failed to update risk settings: ${data.error}`);
+                }
+            })
+            .catch(error => {
+                console.error('Error updating risk settings:', error);
+                alert('Error updating risk settings. Please try again.');
+            });
+        }
+        
+        function updateFilterSettings() {
+            const filterData = {
+                mtf_rsi: {
+                    enabled: document.getElementById('mtf-rsi-toggle').checked,
+                    thresholds: {
+                        long_conditions: {
+                            short_tf: parseInt(document.getElementById('rsi-5m-long').value),
+                            long_tf: parseInt(document.getElementById('rsi-1h-long').value)
+                        },
+                        short_conditions: {
+                            short_tf: parseInt(document.getElementById('rsi-5m-short').value),
+                            long_tf: parseInt(document.getElementById('rsi-1h-short').value)
+                        }
+                    },
+                    reduced_version: document.getElementById('reduced-version').checked
+                },
+                volume_filter: {
+                    enabled: document.getElementById('volume-filter-toggle').checked,
+                    multiplier: parseFloat(document.getElementById('volume-multiplier').value),
+                    ema_period: parseInt(document.getElementById('volume-ema-period').value)
+                }
+            };
+            
+            fetch('/api/bot2025/update-filters', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(filterData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Filter settings updated successfully!');
+                } else {
+                    alert(`Failed to update filter settings: ${data.error}`);
+                }
+            })
+            .catch(error => {
+                console.error('Error updating filter settings:', error);
+                alert('Error updating filter settings. Please try again.');
+            });
+        }
+        
+        function refreshBotStatus() {
+            loadBotStatus();
+            loadActivePairs();
+        }
+        
+        function goBackToMain() {
+            window.location.href = '/';
+        }
+    </script>
+</body>
+</html> 
