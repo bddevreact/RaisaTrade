@@ -1101,11 +1101,21 @@
         <div class="row mb-4">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-header">
-                        <h6 class="mb-0">
-                            <i class="fas fa-chart-bar me-2"></i>Futures Market Data
-                        </h6>
+                                <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>Futures Market Data
+                    </h6>
+                    <div class="d-flex align-items-center">
+                        <small class="text-muted me-2" id="last-update-time">
+                            <i class="fas fa-clock me-1"></i>Last update: --
+                        </small>
+                        <span class="badge bg-success" id="refresh-status">
+                            <i class="fas fa-sync-alt me-1"></i>Auto-refresh
+                        </span>
                     </div>
+                </div>
+            </div>
                     <div class="card-body">
                         <div class="futures-grid" id="futures-market-data">
                             <!-- Market data cards will be populated here -->
@@ -1131,35 +1141,23 @@
                                     <div id="hedge-summary" class="text-muted me-3" style="font-size: 0.8rem;">
                                 <!-- Hedge summary will be populated by JavaScript -->
                                     </div>
-                                    <button class="btn btn-outline-secondary btn-sm me-2" onclick="testBybitAPI()">
-                                        <i class="fas fa-vial me-1"></i>Test API
-                                    </button>
                                     <button class="btn btn-outline-success btn-sm me-2" onclick="checkBalance()">
                                         <i class="fas fa-wallet me-1"></i>Check Balance
-                                    </button>
-                                    <button class="btn btn-outline-warning btn-sm" onclick="testRealModeOrder()">
-                                        <i class="fas fa-rocket me-1"></i>Test Real Order
                                     </button>
                                     <button class="btn btn-outline-info btn-sm" onclick="toggleDemoMode()" id="demo-toggle">
                                         <i class="fas fa-eye me-1"></i>Demo Mode
                                     </button>
-                                    <button class="btn btn-outline-secondary btn-sm" onclick="testBalanceUpdate()" title="Test Balance Update">
-                                        <i class="fas fa-vial me-1"></i>Test Balance
-                                    </button>
-                                    <button class="btn btn-outline-info btn-sm" onclick="testDemoPositions()" title="Test Demo Positions">
-                                        <i class="fas fa-list me-1"></i>Test Positions
-                                    </button>
-                                    <button class="btn btn-outline-primary btn-sm" onclick="checkCurrentMode()" title="Check Current Mode">
-                                        <i class="fas fa-info-circle me-1"></i>Check Mode
-                                    </button>
                                     <button class="btn btn-outline-success btn-sm" onclick="forceRefreshRealData()" title="Force Refresh Real Data">
                                         <i class="fas fa-sync-alt me-1"></i>Refresh Data
                                     </button>
-                                    <button class="btn btn-outline-warning btn-sm" onclick="debugPositionsLoading()" title="Debug Positions Loading">
-                                        <i class="fas fa-bug me-1"></i>Debug
+                                    <button class="btn btn-outline-info btn-sm me-2" onclick="openAdvancedFeatures()" title="Advanced Features">
+                                        <i class="fas fa-rocket me-1"></i>🚀 Features
                                     </button>
-                                    <button class="btn btn-outline-info btn-sm" onclick="testPositionsAPI()" title="Test Positions API Directly">
-                                        <i class="fas fa-vial me-1"></i>Test API
+                                    <button class="btn btn-outline-warning btn-sm me-2" onclick="showAdvancedTradingPanel()" title="Advanced Trading">
+                                        <i class="fas fa-chart-line me-1"></i>Advanced
+                                    </button>
+                                    <button class="btn btn-outline-primary btn-sm me-2" onclick="checkLiquidationRisk()" title="Check Liquidation Risk">
+                                        <i class="fas fa-shield-alt me-1"></i>Risk Check
                                     </button>
                             </div>
                         </div>
@@ -1182,7 +1180,9 @@
                                 </thead>
                                 <tbody id="positions-table">
                                     <tr>
-                                        <td colspan="9" class="text-center">No active positions</td>
+                                        <td colspan="9" class="text-center text-muted">
+                                            <i class="fas fa-inbox me-2"></i>No active positions
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -1875,10 +1875,7 @@
                                 <i class="fas fa-save me-2"></i>Update Settings
                             </button>
                             
-                            <!-- Advanced Features Button -->
-                            <button class="btn btn-info w-100 mt-3" onclick="openAdvancedFeatures()" style="color: #ffffff !important; font-weight: bold; background: linear-gradient(135deg, #17a2b8, #138496) !important; border: none !important; box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3) !important;">
-                                <i class="fas fa-rocket me-2"></i>🚀 Advanced Features
-                            </button>
+
                         </div>
                     </div>
                     
@@ -2390,48 +2387,9 @@
 
 
         // Function to test demo positions
-        function testDemoPositions() {
-            console.log('Testing demo positions...');
-            
-            alert(`📊 Demo Positions Status:\n\n` +
-                  `Demo Mode: ${demoMode ? '✅ Active' : '❌ Inactive'}\n` +
-                  `Real API Available: ${window.bybitApiAvailable ? '✅ Yes' : '❌ No'}\n` +
-                  `Total Demo Positions: ${demoPositions.length}\n` +
-                  `Current Mode: ${demoMode ? 'Demo Mode (Simulated Data)' : 'Real Mode (Live Data)'}\n\n` +
-                  `Ready for Position Updates: ${demoMode ? '✅ Demo Mode' : '✅ Real Mode'}`);
-        }
+
         
-        // Function to check current mode and data source
-        function checkCurrentMode() {
-            console.log('Checking current mode...');
-            
-            const modeInfo = `
-🔍 **Current System Status**
 
-📊 **Mode Information:**
-• Demo Mode: ${demoMode ? '✅ ACTIVE' : '❌ INACTIVE'}
-• Real API: ${window.bybitApiAvailable ? '✅ AVAILABLE' : '❌ NOT AVAILABLE'}
-• Current Mode: ${demoMode ? 'Demo Mode' : 'Real Mode'}
-
-📈 **Data Source:**
-• Positions: ${demoMode ? 'Mock/Simulated Data' : 'Real Bybit API'}
-• Balance: ${demoMode ? 'Simulated Updates' : 'Real Account Balance'}
-• Market Data: ${demoMode ? 'Sample Data' : 'Live Market Data'}
-
-💡 **What This Means:**
-${demoMode ? 
-    '• You are in DEMO MODE - all data is simulated\n• Positions are not real trades\n• Balance updates are simulated\n• Perfect for testing and learning' : 
-    '• You are in REAL MODE - all data is live\n• Positions are real trades\n• Balance is real account balance\n• Real money involved - be careful!'
-}
-
-⚠️ **Important Notes:**
-• Demo Mode: Safe for testing, no real money
-• Real Mode: Real trading, real money at risk
-• Switch modes using the Demo Mode button
-            `;
-            
-            alert(modeInfo);
-        }
         
         // Function to force refresh real mode data
         function forceRefreshRealData() {
@@ -2459,34 +2417,7 @@ ${demoMode ?
             }, 1000);
         }
         
-        // Function to debug positions loading
-        function debugPositionsLoading() {
-            console.log('=== POSITIONS DEBUG INFO ===');
-            console.log('Current mode:', demoMode ? 'Demo' : 'Real');
-            console.log('API available:', window.bybitApiAvailable);
-            console.log('Demo positions count:', demoPositions.length);
-            console.log('Demo positions:', demoPositions);
-            
-            // Check if positions table exists
-            const positionsTable = document.getElementById('positions-table');
-            console.log('Positions table element:', positionsTable);
-            
-            if (positionsTable) {
-                console.log('Positions table HTML:', positionsTable.innerHTML);
-            }
-            
-            // Check current positions display
-            const currentPositions = demoMode ? demoPositions : [];
-            console.log('Current positions to display:', currentPositions);
-            
-            // Show debug info to user
-            alert(`🔍 **Positions Debug Info**\n\n` +
-                  `Mode: ${demoMode ? 'Demo' : 'Real'}\n` +
-                  `API Available: ${window.bybitApiAvailable ? 'Yes' : 'No'}\n` +
-                  `Demo Positions: ${demoPositions.length}\n` +
-                  `Table Element: ${positionsTable ? 'Found' : 'Missing'}\n\n` +
-                  `Check console for detailed logs.`);
-        }
+
         
         // Function to test positions API directly
         function testPositionsAPI() {
@@ -2528,31 +2459,7 @@ ${demoMode ?
                 });
         }
         
-        // Function to test balance update
-        function testBalanceUpdate() {
-            console.log('Testing balance update...');
-            
-            // Get current balance
-            const totalBalanceElement = document.getElementById('total-balance');
-            const availableBalanceElement = document.getElementById('available-balance');
-            const usedBalanceElement = document.getElementById('used-balance');
-            
-            if (!totalBalanceElement || !availableBalanceElement || !usedBalanceElement) {
-                alert('❌ Balance elements not found. Please check the page.');
-                return;
-            }
-            
-            const currentTotal = parseFloat(totalBalanceElement.textContent.replace('$', '').replace(',', '')) || 0;
-            const currentAvailable = parseFloat(availableBalanceElement.textContent.replace('$', '').replace(',', '')) || 0;
-            const currentUsed = parseFloat(availableBalanceElement.textContent.replace('$', '').replace(',', '')) || 0;
-            
-            alert(`💰 Current Balance Status:\n\n` +
-                  `Total Balance: $${currentTotal.toFixed(2)}\n` +
-                  `Available Balance: $${currentAvailable.toFixed(2)}\n` +
-                  `Used Balance: $${currentUsed.toFixed(2)}\n\n` +
-                  `Balance Elements Found: ✅\n` +
-                  `Ready for Position Updates: ✅`);
-        }
+
         
         // Initialize when DOM is loaded
         document.addEventListener('DOMContentLoaded', function() {
@@ -2583,14 +2490,7 @@ ${demoMode ?
                 });
             }, 1000);
             
-            // Show initial demo mode notification
-            setTimeout(() => {
-                showNotification(
-                    'Welcome to Bybit Interface!', 
-                    'This is a demonstration interface. Use "Demo Mode" to see sample hedge positions. Real API integration requires valid Bybit credentials.', 
-                    'info'
-                );
-            }, 2000);
+
         });
         
                 function testBybitAPI() {
@@ -3135,100 +3035,7 @@ ${demoMode ?
             }
         }
         
-        function testRealModeOrder() {
-            // Test function to verify real mode order placement
-            if (demoMode) {
-                alert('Please switch to Real Mode first to test order placement.');
-                return;
-            }
-            
-            if (!window.bybitApiAvailable) {
-                alert('Bybit API is not available. Please check your API credentials.');
-                return;
-            }
-            
-            // First check balance
-            console.log('Checking account balance...');
-            fetch('/api/bybit/balance')
-                .then(response => response.json())
-                .then(balanceData => {
-                    if (balanceData.success) {
-                        const availableBalance = balanceData.data?.list?.[0]?.totalAvailableBalance || 0;
-                        console.log('Available balance:', availableBalance);
-                        
-                        if (parseFloat(availableBalance) < 5) {
-                            alert(`❌ Insufficient Balance\n\nAvailable: ${availableBalance} USDT\nRequired: At least 5 USDT (Bybit minimum)\n\nPlease add funds to your account.`);
-                            return;
-                        }
-                        
-                        // Continue with order test
-                        proceedWithOrderTest();
-                    } else {
-                        alert('Failed to check balance. Please try again.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Balance check error:', error);
-                    // Continue anyway
-                    proceedWithOrderTest();
-                });
-        }
-        
-        function proceedWithOrderTest() {
-            
-            const testSymbol = 'DOTUSDT';
-            const testSize = 5; // Minimum order value for Bybit
-            const testLeverage = 10;
-            
-            if (confirm(`Test real mode order placement?\n\nSymbol: ${testSymbol}\nSize: ${testSize} USDT\nLeverage: ${testLeverage}x\n\nNote: This will place a real order on Bybit!\n\nIf this fails, try with a smaller amount or check your balance.`)) {
-                console.log('Testing real mode order placement...');
-                
-                fetch('/api/bybit/place-order', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        symbol: testSymbol,
-                        side: 'Buy',
-                        orderType: 'Market',
-                        qty: testSize,
-                        leverage: testLeverage
-                    })
-                })
-                .then(response => {
-                    console.log('Test order response status:', response.status);
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                    }
-                    return response.text().then(text => {
-                        console.log('Test order raw response:', text);
-                        try {
-                            return JSON.parse(text);
-                        } catch (e) {
-                            throw new Error(`Invalid JSON response: ${text}`);
-                        }
-                    });
-                })
-                .then(data => {
-                    if (data.success) {
-                        alert(`✅ Real Mode Test Successful!\n\nOrder placed successfully on Bybit.\nOrder ID: ${data.data?.orderId || 'N/A'}\n\nReal mode is working correctly!`);
-                    } else {
-                        let errorMessage = data.error;
-                        if (errorMessage.includes('not enough for new order')) {
-                            errorMessage = 'Insufficient balance for this order size.\n\nPossible solutions:\n1. Check your account balance\n2. Reduce leverage\n3. Use a different symbol';
-                        } else if (errorMessage.includes('minimum order value 5USDT')) {
-                            errorMessage = 'Order value too small.\n\nBybit requires minimum 5 USDT order value.\n\nPossible solutions:\n1. Increase order size to at least 5 USDT\n2. Use a different symbol with lower price\n3. Check minimum order requirements';
-                        }
-                        alert(`❌ Real Mode Test Failed:\n\n${errorMessage}\n\nAPI is working, but order placement failed.`);
-                    }
-                })
-                .catch(error => {
-                    console.error('Test order error:', error);
-                    alert(`❌ Real Mode Test Error:\n\n${error.message}\n\nPlease check your API credentials and try again.`);
-                });
-            }
-        }
+
         
         function checkApiAvailability() {
             // First test the basic API endpoint
@@ -3275,12 +3082,26 @@ ${demoMode ?
             }, 60000); // Refresh positions every 1 minute in real mode
         }
         
+        // Background refresh variables
+        let marketDataRefreshInterval = null;
+        let lastMarketDataUpdate = null;
+        let isBackgroundRefreshing = false;
+        
         function loadMarketData() {
             console.log('Loading real Bybit market data...');
             
-            // Show loading state
+            // Don't show loading state - keep existing data
+            if (isBackgroundRefreshing) {
+                console.log('Background refresh in progress, skipping loading state');
+                return;
+            }
+            
+            // Only show loading state on first load
             const container = document.getElementById('futures-market-data');
-            container.innerHTML = '<div class="text-center"><div class="loading-spinner mx-auto"></div><p class="mt-2">Loading real market data...</p></div>';
+            if (!container.children.length || container.querySelector('.futures-card')) {
+                // First time loading - show loading state
+                container.innerHTML = '<div class="text-center"><div class="loading-spinner mx-auto"></div><p class="mt-2">Loading market data...</p></div>';
+            }
             
             // Fetch real data from Bybit API
             fetch('/api/bybit/market-data')
@@ -3290,6 +3111,12 @@ ${demoMode ?
                     
                     if (data.success && data.data) {
                         displayRealMarketData(data.data);
+                        lastMarketDataUpdate = new Date();
+                        
+                        // Start background refresh if not already started
+                        if (!marketDataRefreshInterval) {
+                            startBackgroundRefresh();
+                        }
                     } else {
                         console.error('Failed to load market data:', data.error);
                         // Fallback to mock data
@@ -3301,6 +3128,166 @@ ${demoMode ?
                     // Fallback to mock data
                     loadMockMarketData();
                 });
+        }
+        
+        // Background refresh function - no loading indicators
+        function refreshMarketDataBackground() {
+            if (isBackgroundRefreshing) {
+                console.log('Background refresh already in progress, skipping...');
+                return;
+            }
+            
+            isBackgroundRefreshing = true;
+            updateRefreshStatus('refreshing');
+            console.log('🔄 Background refresh: Updating market data silently...');
+            
+            // Fetch data without showing loading state
+            fetch('/api/bybit/market-data')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.data) {
+                        // Update data silently without loading indicators
+                        updateMarketDataSilently(data.data);
+                        lastMarketDataUpdate = new Date();
+                        updateLastUpdateTime();
+                        console.log('✅ Background refresh: Market data updated silently');
+                    } else {
+                        console.log('⚠️ Background refresh: No new data available');
+                    }
+                })
+                .catch(error => {
+                    console.log('⚠️ Background refresh: Error occurred, will retry next cycle');
+                })
+                .finally(() => {
+                    isBackgroundRefreshing = false;
+                    updateRefreshStatus('active');
+                });
+        }
+        
+        // Silent update function - no visual changes
+        function updateMarketDataSilently(newData) {
+            const container = document.getElementById('futures-market-data');
+            if (!container) return;
+            
+            // Update existing cards without recreating them
+            Object.keys(newData).forEach(symbol => {
+                const newItem = newData[symbol];
+                const existingCard = container.querySelector(`[data-symbol="${symbol}"]`);
+                
+                if (existingCard) {
+                    // Update existing card silently
+                    updateCardDataSilently(existingCard, newItem);
+                } else {
+                    // Create new card if it doesn't exist
+                    const newCard = createRealMarketDataCard(symbol, newItem);
+                    container.appendChild(newCard);
+                }
+            });
+        }
+        
+        // Update individual card data silently
+        function updateCardDataSilently(card, data) {
+            // Update price without animation
+            const priceElement = card.querySelector('.price-display');
+            if (priceElement) {
+                const newPrice = parseFloat(data.price).toLocaleString();
+                if (priceElement.textContent !== `$${newPrice}`) {
+                    priceElement.textContent = `$${newPrice}`;
+                }
+            }
+            
+            // Update change percentage
+            const changeElement = card.querySelector('.change-positive, .change-negative');
+            if (changeElement) {
+                const prevPrice = parseFloat(data.prev_price) || 0;
+                const currentPrice = parseFloat(data.price) || 0;
+                const changePercent = prevPrice > 0 ? ((currentPrice - prevPrice) / prevPrice) * 100 : 0;
+                
+                const newChangeText = `${changePercent >= 0 ? '+' : ''}${changePercent.toFixed(2)}%`;
+                if (changeElement.textContent !== newChangeText) {
+                    changeElement.textContent = newChangeText;
+                    changeElement.className = changePercent >= 0 ? 'change-positive' : 'change-negative';
+                }
+            }
+            
+            // Update volume
+            const volumeElement = card.querySelector('.text-muted');
+            if (volumeElement && volumeElement.textContent.includes('Vol:')) {
+                const volume = parseFloat(data.volume_24h) || 0;
+                const volumeFormatted = volume > 1000000 ? (volume / 1000000).toFixed(1) + 'M' : 
+                                      volume > 1000 ? (volume / 1000).toFixed(1) + 'K' : volume.toFixed(0);
+                
+                const newVolumeText = `Vol: ${volumeFormatted}`;
+                if (volumeElement.textContent !== newVolumeText) {
+                    volumeElement.textContent = newVolumeText;
+                }
+            }
+        }
+        
+        // Start background refresh
+        function startBackgroundRefresh() {
+            if (marketDataRefreshInterval) {
+                console.log('Background refresh already running');
+                return;
+            }
+            
+            console.log('🚀 Starting background market data refresh...');
+            updateRefreshStatus('active');
+            
+            // Refresh every 30 seconds in background
+            marketDataRefreshInterval = setInterval(() => {
+                refreshMarketDataBackground();
+            }, 30000); // 30 seconds
+            
+            // Also refresh every 5 minutes for more comprehensive data
+            setInterval(() => {
+                console.log('🔄 Comprehensive background refresh...');
+                refreshMarketDataBackground();
+            }, 300000); // 5 minutes
+            
+            // Update initial status
+            updateLastUpdateTime();
+        }
+        
+        // Stop background refresh
+        function stopBackgroundRefresh() {
+            if (marketDataRefreshInterval) {
+                clearInterval(marketDataRefreshInterval);
+                marketDataRefreshInterval = null;
+                console.log('⏹️ Background refresh stopped');
+                updateRefreshStatus('stopped');
+            }
+        }
+        
+        // Update refresh status indicator
+        function updateRefreshStatus(status) {
+            const statusElement = document.getElementById('refresh-status');
+            if (!statusElement) return;
+            
+            switch(status) {
+                case 'active':
+                    statusElement.className = 'badge bg-success';
+                    statusElement.innerHTML = '<i class="fas fa-sync-alt me-1"></i>Auto-refresh';
+                    break;
+                case 'stopped':
+                    statusElement.className = 'badge bg-secondary';
+                    statusElement.innerHTML = '<i class="fas fa-pause me-1"></i>Stopped';
+                    break;
+                case 'refreshing':
+                    statusElement.className = 'badge bg-warning';
+                    statusElement.innerHTML = '<i class="fas fa-sync-alt fa-spin me-1"></i>Refreshing...';
+                    break;
+            }
+        }
+        
+        // Update last update time
+        function updateLastUpdateTime() {
+            const timeElement = document.getElementById('last-update-time');
+            if (!timeElement) return;
+            
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+            timeElement.innerHTML = `<i class="fas fa-clock me-1"></i>Last update: ${timeString}`;
         }
         
         function displayRealMarketData(marketData) {
@@ -3318,6 +3305,7 @@ ${demoMode ?
         function createRealMarketDataCard(symbol, data) {
             const card = document.createElement('div');
             card.className = 'futures-card';
+            card.setAttribute('data-symbol', symbol); // Add data attribute for silent updates
             
             // Calculate 24h change percentage
             const prevPrice = parseFloat(data.prev_price) || 0;
@@ -3494,22 +3482,11 @@ ${demoMode ?
                             const tbody = document.getElementById('positions-table');
                             tbody.innerHTML = `
                                 <tr>
-                                    <td colspan="9" class="text-center">
-                                        <div class="alert alert-info mb-0">
-                                            <i class="fas fa-info-circle me-2"></i>
-                                            <strong>No Active Positions</strong>
-                                            <br><small class="text-muted">You don't have any open positions at the moment</small>
-                                            <br><small class="text-muted">Last checked: ${new Date().toLocaleTimeString()}</small>
-                                        </div>
+                                    <td colspan="9" class="text-center text-muted">
+                                        <i class="fas fa-inbox me-2"></i>No active positions
                                     </td>
                                 </tr>
                             `;
-                            
-                            showNotification(
-                                'No Positions', 
-                                'No active positions found in your account.', 
-                                'info'
-                            );
                         } else {
                             // Display real positions
                             console.log('Displaying positions:', positionsData);
@@ -3654,8 +3631,7 @@ ${demoMode ?
                 console.log('Demo mode enabled - showing mock data');
                 displayRealPositions(getMockPositions());
                 
-                // Show demo mode notification
-                showNotification('Demo Mode Enabled', 'Showing mock positions data for demonstration. Click "Live Mode" to switch back to real data.', 'info');
+
             } else {
                 demoButton.innerHTML = '<i class="fas fa-eye me-1"></i>Demo Mode';
                 demoButton.className = 'btn btn-outline-info btn-sm';
@@ -3735,7 +3711,7 @@ ${demoMode ?
                       `Both positions are now active for ${symbol}\n` +
                       `Quantity: ${quantity} ${symbol.replace('USDT', '')}\n` +
                       `Leverage: ${leverage}x\n\n` +
-                      `Note: This is demo mode - positions are simulated.`);
+                      `Demo positions created successfully.`);
                 
                 // Close modal
                 const modal = bootstrap.Modal.getInstance(document.getElementById('positionModal'));
@@ -3762,7 +3738,7 @@ ${demoMode ?
                 // Show notification
                 showNotification(
                     'Demo Hedge Positions Created', 
-                    `Successfully created hedge positions for ${symbol} in demo mode.`, 
+                    `Successfully created hedge positions for ${symbol}.`, 
                     'success'
                 );
             }, 1500);
@@ -3783,7 +3759,7 @@ ${demoMode ?
             }
             
             if (positions.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="9" class="text-center">No active positions</td></tr>';
+                                        tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted"><i class="fas fa-inbox me-2"></i>No active positions</td></tr>';
                 return;
             }
             
@@ -4389,7 +4365,7 @@ ${demoMode ?
                       `Symbol: ${symbol}\n` +
                       `Quantity: ${quantity} ${symbol.replace('USDT', '')}\n` +
                       `Leverage: ${leverage}x\n\n` +
-                      `Note: This is demo mode - position is simulated.`);
+                      `Demo position created successfully.`);
                 
                 // Close modal
                 const modal = bootstrap.Modal.getInstance(document.getElementById('positionModal'));
@@ -4406,7 +4382,7 @@ ${demoMode ?
                 // Show notification
                 showNotification(
                     'Demo Position Created', 
-                    `Successfully created ${side} position for ${symbol} in demo mode.`, 
+                    `Successfully created ${side} position for ${symbol}.`, 
                     'success'
                 );
             }, 1000);
@@ -7022,5 +6998,171 @@ ${demoMode ?
         </div>
     </div>
 </div>
+
+<script>
+        // New Advanced Trading Functions
+        function showAdvancedTradingPanel() {
+            // Show the advanced trading panel
+            const panel = document.getElementById('advanced-trading-panel');
+            if (panel) {
+                panel.style.display = 'block';
+                panel.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function checkLiquidationRisk() {
+            console.log('Checking liquidation risk...');
+            showNotification('Risk Check', 'Analyzing liquidation risk for current positions...', 'info');
+            
+            fetch('/api/futures/liquidation-risk')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const riskData = data.data;
+                        let riskMessage = '🔒 Liquidation Risk Assessment\n\n';
+                        
+                        if (riskData.overall_risk === 'low') {
+                            riskMessage += '✅ Overall Risk: LOW\n';
+                            riskMessage += 'Your positions are safe from liquidation.\n';
+                        } else if (riskData.overall_risk === 'medium') {
+                            riskMessage += '⚠️ Overall Risk: MEDIUM\n';
+                            riskMessage += 'Monitor your positions closely.\n';
+                        } else {
+                            riskMessage += '🚨 Overall Risk: HIGH\n';
+                            riskMessage += 'Consider reducing position sizes or adding margin.\n';
+                        }
+                        
+                        if (riskData.warnings && riskData.warnings.length > 0) {
+                            riskMessage += '\n⚠️ Warnings:\n';
+                            riskData.warnings.forEach(warning => {
+                                riskMessage += `• ${warning}\n`;
+                            });
+                        }
+                        
+                        alert(riskMessage);
+                    } else {
+                        showNotification('Risk Check Failed', data.error || 'Failed to check liquidation risk', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking liquidation risk:', error);
+                    showNotification('Risk Check Error', 'Failed to check liquidation risk. Check console for details.', 'error');
+                });
+        }
+
+        function getPerformanceMetrics() {
+            console.log('Getting performance metrics...');
+            
+            fetch('/api/futures/performance?timeframe=24h')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const metrics = data.data;
+                        console.log('Performance metrics:', metrics);
+                        
+                        // Update UI with performance data
+                        updatePerformanceDisplay(metrics);
+                    } else {
+                        console.error('Failed to get performance metrics:', data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error getting performance metrics:', error);
+                });
+        }
+
+        function updatePerformanceDisplay(metrics) {
+            // This function would update the UI with performance metrics
+            // For now, just log them
+            console.log('Updating performance display with:', metrics);
+        }
+
+        function runBacktest() {
+            console.log('Running backtest...');
+            
+            const strategy = prompt('Enter strategy name (e.g., grid, momentum, mean_reversion):');
+            if (!strategy) return;
+            
+            const symbol = prompt('Enter symbol (e.g., BTCUSDT):', 'BTCUSDT');
+            if (!symbol) return;
+            
+            showNotification('Backtest', `Running backtest for ${strategy} strategy on ${symbol}...`, 'info');
+            
+            fetch('/api/backtest/run', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    strategy: strategy,
+                    symbol: symbol,
+                    start_date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days ago
+                    end_date: new Date().toISOString().split('T')[0] // Today
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const result = data.data;
+                    let backtestMessage = `📊 Backtest Results for ${strategy} on ${symbol}\n\n`;
+                    backtestMessage += `Total Return: ${result.total_return || 'N/A'}%\n`;
+                    backtestMessage += `Sharpe Ratio: ${result.sharpe_ratio || 'N/A'}\n`;
+                    backtestMessage += `Max Drawdown: ${result.max_drawdown || 'N/A'}%\n`;
+                    backtestMessage += `Win Rate: ${result.win_rate || 'N/A'}%\n`;
+                    backtestMessage += `Total Trades: ${result.total_trades || 'N/A'}\n`;
+                    
+                    alert(backtestMessage);
+                    showNotification('Backtest Complete', 'Backtest completed successfully!', 'success');
+                } else {
+                    showNotification('Backtest Failed', data.error || 'Failed to run backtest', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error running backtest:', error);
+                showNotification('Backtest Error', 'Failed to run backtest. Check console for details.', 'error');
+            });
+        }
+
+        function togglePaperTrading() {
+            const isEnabled = confirm('Do you want to toggle paper trading mode?');
+            if (isEnabled === null) return;
+            
+            const endpoint = isEnabled ? '/api/paper-trading/enable' : '/api/paper-trading/disable';
+            const action = isEnabled ? 'enable' : 'disable';
+            
+            showNotification('Paper Trading', `${action.charAt(0).toUpperCase() + action.slice(1)}ing paper trading...`, 'info');
+            
+            fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    user_id: 1
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification('Paper Trading', `Paper trading ${action}d successfully!`, 'success');
+                } else {
+                    showNotification('Paper Trading Failed', data.error || `Failed to ${action} paper trading`, 'error');
+                }
+            })
+            .catch(error => {
+                console.error(`Error ${action}ing paper trading:`, error);
+                showNotification('Paper Trading Error', `Failed to ${action} paper trading. Check console for details.`, 'error');
+            });
+        }
+
+        // Initialize advanced features when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load performance metrics every 5 minutes
+            setInterval(getPerformanceMetrics, 5 * 60 * 1000);
+            
+            // Initial load
+            getPerformanceMetrics();
+        });
+</script>
 </body>
 </html>
