@@ -62,7 +62,7 @@ from backtesting import (
 )
 # Try to import PionexWebSocket, fallback to None if not available
 try:
-from pionex_ws import PionexWebSocket
+    from pionex_ws import PionexWebSocket
     WEBSOCKET_AVAILABLE = True
     logger.info("PionexWebSocket imported successfully")
 except ImportError as e:
