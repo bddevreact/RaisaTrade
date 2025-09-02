@@ -650,6 +650,181 @@
         .btn:hover {
             box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         }
+
+/* .. Real time market data styles - Modern Bybit Style */
+
+.real-time-market-container {
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 193, 7, 0.05));
+    border: 2px solid #ffc107;
+    border-radius: 16px;
+    padding: 20px;
+    margin: 20px 0;
+    box-shadow: 0 8px 32px rgba(255, 193, 7, 0.15);
+    backdrop-filter: blur(10px);
+}
+
+.real-time-header {
+    text-align: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid rgba(255, 193, 7, 0.3);
+}
+
+.real-time-header h3 {
+    color: #ffc107;
+    font-weight: bold;
+    font-size: 1.5rem;
+    margin: 0;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.real-time-header .subtitle {
+    color: #bdc3c7;
+    font-size: 0.9rem;
+    margin-top: 5px;
+}
+
+.market-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.market-card {
+    background: linear-gradient(145deg, rgba(255, 193, 7, 0.15), rgba(255, 193, 7, 0.05));
+    border: 1px solid rgba(255, 193, 7, 0.3);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.market-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 193, 7, 0.1), transparent);
+    transition: left 0.5s ease;
+}
+
+.market-card:hover::before {
+    left: 100%;
+}
+
+.market-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(255, 193, 7, 0.25);
+    border-color: rgba(255, 193, 7, 0.6);
+}
+
+.market-symbol {
+    color: #ffffff;
+    font-weight: bold;
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+.market-price {
+    color: #ffc107;
+    font-weight: bold;
+    font-size: 1.3rem;
+    margin-bottom: 15px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    font-family: 'Courier New', monospace;
+}
+
+.market-change {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+}
+
+.market-change.positive {
+    background: linear-gradient(135deg, #00c853, #4caf50);
+    color: #ffffff;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+}
+
+.market-change.negative {
+    background: linear-gradient(135deg, #f44336, #d32f2f);
+    color: #ffffff;
+    box-shadow: 0 4px 15px rgba(244, 67, 54, 0.4);
+}
+
+.market-change:hover {
+    transform: scale(1.05);
+}
+
+.market-volume {
+    color: #bdc3c7;
+    font-size: 0.8rem;
+    margin-top: 10px;
+    opacity: 0.8;
+}
+
+.connection-status {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.connection-status.connected {
+    background: linear-gradient(135deg, #4caf50, #45a049);
+    color: white;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+}
+
+.connection-status.disconnected {
+    background: linear-gradient(135deg, #f44336, #d32f2f);
+    color: white;
+    box-shadow: 0 4px 15px rgba(244, 67, 54, 0.4);
+}
+
+.connection-status.connecting {
+    background: linear-gradient(135deg, #ff9800, #f57c00);
+    color: white;
+    box-shadow: 0 4px 15px rgba(255, 152, 0, 0.4);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .market-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+    }
+    
+    .market-card {
+        padding: 15px;
+    }
+    
+    .market-price {
+        font-size: 1.1rem;
+    }
+    
+    .real-time-header h3 {
+        font-size: 1.3rem;
+    }
+}
     </style>
 </head>
 <body>
@@ -736,6 +911,68 @@
                 </div>
             </div>
         </div>
+
+<!--Real time market data - Modern Bybit Style -->  
+
+<div class="real-time-market-container">
+    <div class="real-time-header">
+        <h3><i class="fas fa-chart-line me-2"></i>Real-Time Market Data</h3>
+        <div class="subtitle">Live cryptocurrency prices from Binance</div>
+    </div>
+    
+    <div class="market-grid">
+        <div class="market-card" id="BTCUSDT">
+            <div class="market-symbol">BTC/USDT</div>
+            <div class="market-price">--</div>
+            <div class="market-change">--</div>
+            <div class="market-volume">Vol: --</div>
+        </div>
+        
+        <div class="market-card" id="ETHUSDT">
+            <div class="market-symbol">ETH/USDT</div>
+            <div class="market-price">--</div>
+            <div class="market-change">--</div>
+            <div class="market-volume">Vol: --</div>
+        </div>
+        
+        <div class="market-card" id="BNBUSDT">
+            <div class="market-symbol">BNB/USDT</div>
+            <div class="market-price">--</div>
+            <div class="market-change">--</div>
+            <div class="market-volume">Vol: --</div>
+        </div>
+        
+        <div class="market-card" id="DOTUSDT">
+            <div class="market-symbol">DOT/USDT</div>
+            <div class="market-price">--</div>
+            <div class="market-change">--</div>
+            <div class="market-volume">Vol: --</div>
+        </div>
+        
+        <div class="market-card" id="ADAUSDT">
+            <div class="market-symbol">ADA/USDT</div>
+            <div class="market-price">--</div>
+            <div class="market-change">--</div>
+            <div class="market-volume">Vol: --</div>
+        </div>
+        
+        <div class="market-card" id="SOLUSDT">
+            <div class="market-symbol">SOL/USDT</div>
+            <div class="market-price">--</div>
+            <div class="market-change">--</div>
+            <div class="market-volume">Vol: --</div>
+        </div>
+    </div>
+</div>
+
+<!-- Connection Status Indicator -->
+<div class="connection-status connecting" id="connection-status">
+    <i class="fas fa-wifi me-1"></i>Connecting...
+</div>
+
+<!--Real time market data end -->
+
+
 
         <!-- Main Dashboard -->
         <div class="row">
@@ -837,6 +1074,12 @@
                                 <option value="DOTUSDT">DOTUSDT</option>
                                 <option value="BNBUSDT">BNBUSDT</option>
                             </select>
+                            <div class="mt-2">
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    <strong>Minimum Quantities:</strong> BTC: 0.001 | ETH: 0.01 | SOL: 0.1 | BNB: 0.01 | DOT: 0.1 | ADA: 1.0
+                                </small>
+                            </div>
                         </div>
                         <div class="d-grid gap-2">
                             <button class="btn btn-bybit btn-sm" onclick="openQuickPosition()">
@@ -899,6 +1142,24 @@
                                     </button>
                                     <button class="btn btn-outline-info btn-sm" onclick="toggleDemoMode()" id="demo-toggle">
                                         <i class="fas fa-eye me-1"></i>Demo Mode
+                                    </button>
+                                    <button class="btn btn-outline-secondary btn-sm" onclick="testBalanceUpdate()" title="Test Balance Update">
+                                        <i class="fas fa-vial me-1"></i>Test Balance
+                                    </button>
+                                    <button class="btn btn-outline-info btn-sm" onclick="testDemoPositions()" title="Test Demo Positions">
+                                        <i class="fas fa-list me-1"></i>Test Positions
+                                    </button>
+                                    <button class="btn btn-outline-primary btn-sm" onclick="checkCurrentMode()" title="Check Current Mode">
+                                        <i class="fas fa-info-circle me-1"></i>Check Mode
+                                    </button>
+                                    <button class="btn btn-outline-success btn-sm" onclick="forceRefreshRealData()" title="Force Refresh Real Data">
+                                        <i class="fas fa-sync-alt me-1"></i>Refresh Data
+                                    </button>
+                                    <button class="btn btn-outline-warning btn-sm" onclick="debugPositionsLoading()" title="Debug Positions Loading">
+                                        <i class="fas fa-bug me-1"></i>Debug
+                                    </button>
+                                    <button class="btn btn-outline-info btn-sm" onclick="testPositionsAPI()" title="Test Positions API Directly">
+                                        <i class="fas fa-vial me-1"></i>Test API
                                     </button>
                             </div>
                         </div>
@@ -1730,8 +1991,568 @@
     
     <!-- Bybit Interface JavaScript -->
     <script>
+
+       
+
         // Debug: Check if functions are loaded
         console.log('Bybit Interface JavaScript loaded');
+        
+        // Bybit Official Minimum Quantity Requirements
+        // These are the official minimum quantities set by Bybit for each trading pair
+        // When opening positions, the system will automatically calculate the correct quantity
+        // based on USDT amount and ensure it meets these minimum requirements
+        const BYBIT_MIN_QUANTITIES = {
+            'BTCUSDT': 0.001,    // BTC minimum quantity
+            'ETHUSDT': 0.01,     // ETH minimum quantity  
+            'SOLUSDT': 0.1,      // SOL minimum quantity
+            'BNBUSDT': 0.01,     // BNB minimum quantity
+            'DOTUSDT': 0.1,      // DOT minimum quantity
+            'ADAUSDT': 1.0       // ADA minimum quantity
+        };
+        
+        // Bybit Official Step Sizes for quantity precision
+        // These determine the precision with which quantities can be specified
+        // Quantities are automatically rounded to these step sizes
+        const BYBIT_STEP_SIZES = {
+            'BTCUSDT': 0.001,    // BTC step size
+            'ETHUSDT': 0.01,     // ETH step size
+            'SOLUSDT': 0.1,      // SOL step size
+            'BNBUSDT': 0.01,     // BNB step size
+            'DOTUSDT': 0.1,      // DOT step size
+            'ADAUSDT': 1.0       // ADA step size
+        };
+        
+        // Function to calculate quantity from USDT amount and validate minimum requirements
+        // This function ensures that when a user enters a USDT amount (e.g., 10 USDT),
+        // the system calculates the correct quantity that meets Bybit's minimum requirements
+        // and step size precision. If the calculated quantity is too small, it shows an error.
+        function calculateQuantityFromUSDT(symbol, usdtAmount, currentPrice) {
+            if (!currentPrice || currentPrice <= 0) {
+                throw new Error('Invalid current price');
+            }
+            
+            if (!usdtAmount || usdtAmount <= 0) {
+                throw new Error('Invalid USDT amount');
+            }
+            
+            // Calculate raw quantity
+            let rawQuantity = usdtAmount / currentPrice;
+            
+            // Get minimum quantity for this symbol
+            const minQuantity = BYBIT_MIN_QUANTITIES[symbol];
+            const stepSize = BYBIT_STEP_SIZES[symbol];
+            
+            if (!minQuantity || !stepSize) {
+                throw new Error(`Symbol ${symbol} not supported for quantity calculation`);
+            }
+            
+            // Check if calculated quantity meets minimum requirement
+            if (rawQuantity < minQuantity) {
+                throw new Error(`${symbol} minimum quantity requirement: ${minQuantity}. Your USDT amount (${usdtAmount}) is too small for current price (${currentPrice}).`);
+            }
+            
+            // Round to step size precision
+            const roundedQuantity = Math.floor(rawQuantity / stepSize) * stepSize;
+            
+            // Ensure it's not less than minimum after rounding
+            if (roundedQuantity < minQuantity) {
+                throw new Error(`${symbol} quantity (${roundedQuantity}) is below minimum requirement (${minQuantity}) after rounding.`);
+            }
+            
+            return {
+                quantity: roundedQuantity,
+                minQuantity: minQuantity,
+                stepSize: stepSize,
+                actualUSDT: roundedQuantity * currentPrice,
+                originalUSDT: usdtAmount
+            };
+        }
+        
+        // Function to update quantity preview in real-time
+        function updateQuantityPreview(symbol, usdtAmount) {
+            const currentPriceElement = document.querySelector('#positionModal .form-control-plaintext');
+            if (!currentPriceElement) return;
+            
+            const currentPriceText = currentPriceElement.textContent.replace('$', '').replace(',', '');
+            const currentPrice = parseFloat(currentPriceText);
+            
+            if (!currentPrice || isNaN(currentPrice) || currentPrice <= 0) return;
+            
+            try {
+                const quantityData = calculateQuantityFromUSDT(symbol, usdtAmount, currentPrice);
+                const previewElement = document.getElementById('quantity-preview');
+                if (previewElement) {
+                    previewElement.innerHTML = `
+                        <div class="alert alert-success mt-2" role="alert">
+                            <i class="fas fa-calculator me-2"></i>
+                            <strong>Quantity Preview:</strong><br>
+                            • ${usdtAmount} USDT = ${quantityData.quantity} ${symbol.replace('USDT', '')}<br>
+                            • Actual USDT Used: ${quantityData.actualUSDT.toFixed(2)} USDT<br>
+                            • Meets minimum requirement: ✅
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                const previewElement = document.getElementById('quantity-preview');
+                if (previewElement) {
+                    previewElement.innerHTML = `
+                        <div class="alert alert-danger mt-2" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Quantity Error:</strong><br>
+                            ${error.message}
+                        </div>
+                    `;
+                }
+            }
+        }
+        
+        // Function to initialize minimum quantity display
+        function initializeMinimumQuantityDisplay() {
+            const symbolSelect = document.getElementById('quick-symbol-select');
+            if (symbolSelect) {
+                symbolSelect.addEventListener('change', function() {
+                    const selectedSymbol = this.value;
+                    const minQuantity = BYBIT_MIN_QUANTITIES[selectedSymbol];
+                    const stepSize = BYBIT_STEP_SIZES[selectedSymbol];
+                    
+                    if (minQuantity && stepSize) {
+                        showNotification(
+                            'Symbol Selected', 
+                            `${selectedSymbol} - Min Qty: ${minQuantity}, Step Size: ${stepSize}`, 
+                            'info'
+                        );
+                    }
+                });
+            }
+        }
+        
+        // Function to update balance for demo mode
+        function updateDemoBalance(quantity, currentPrice) {
+            console.log('Updating demo balance:', { quantity, currentPrice });
+            
+            // Get current balance elements
+            const totalBalanceElement = document.getElementById('total-balance');
+            const availableBalanceElement = document.getElementById('available-balance');
+            const usedBalanceElement = document.getElementById('used-balance');
+            
+            if (!totalBalanceElement || !availableBalanceElement || !usedBalanceElement) {
+                console.error('Balance elements not found');
+                return;
+            }
+            
+            // Get current balance values
+            const currentTotal = parseFloat(totalBalanceElement.textContent.replace('$', '').replace(',', '')) || 0;
+            const currentAvailable = parseFloat(availableBalanceElement.textContent.replace('$', '').replace(',', '')) || 0;
+            
+            // Calculate position value (this is the margin used)
+            const positionValue = quantity * currentPrice;
+            
+            // Update available balance (reduce by position value)
+            const newAvailable = Math.max(0, currentAvailable - positionValue);
+            
+            // Update used balance (increase by position value)
+            const newUsed = currentTotal - newAvailable;
+            
+            // Update display
+            availableBalanceElement.textContent = `$${newAvailable.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            usedBalanceElement.textContent = `$${newUsed.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            
+            console.log('Demo balance updated:', {
+                oldAvailable: currentAvailable,
+                newAvailable: newAvailable,
+                positionValue: positionValue,
+                oldUsed: currentTotal - currentAvailable,
+                newUsed: newUsed
+            });
+            
+            // Show notification
+            showNotification(
+                'Balance Updated', 
+                `Position opened: -${positionValue.toFixed(2)} USDT\nAvailable: ${newAvailable.toFixed(2)} USDT`, 
+                'info'
+            );
+        }
+        
+        // Function to add new demo position
+        function addDemoPosition(symbol, side, quantity, leverage, currentPrice) {
+            console.log('Adding demo position:', { symbol, side, quantity, leverage, currentPrice });
+            
+            // Create new position object
+            const newPosition = {
+                symbol: symbol,
+                side: side,
+                size: quantity.toString(),
+                avgPrice: currentPrice.toFixed(2),
+                markPrice: currentPrice.toFixed(2),
+                leverage: leverage.toString(),
+                unrealisedPnl: '0.00', // Start with 0 P&L
+                roe: '0.00'
+            };
+            
+            // Add to demo positions array
+            demoPositions.push(newPosition);
+            
+            console.log('Demo positions updated:', demoPositions);
+            
+            // Refresh positions display
+            displayRealPositions(demoPositions);
+            
+            return newPosition;
+        }
+        
+
+        <!--Real time market data JavaScript - Enhanced -->
+
+        const coins = ["BTCUSDT", "ETHUSDT","SOLUSDT", "BNBUSDT",  "DOTUSDT", "ADAUSDT"];
+        const streams = coins.map(c => c.toLowerCase() + "@ticker").join("/");
+        let ws = null;
+        let reconnectAttempts = 0;
+        const MAX_RECONNECT_ATTEMPTS = 5;
+
+        // Initialize WebSocket connection
+        function initializeWebSocket() {
+            try {
+                ws = new WebSocket(`wss://stream.binance.com:9443/stream?streams=${streams}`);
+                
+                ws.onopen = function(event) {
+                    console.log('✅ WebSocket Connected to Binance');
+                    updateConnectionStatus('connected');
+                    reconnectAttempts = 0;
+                    
+                    // Show loading animation
+                    showLoadingAnimation();
+                };
+                
+                ws.onmessage = function(event) {
+                    try {
+                        const msg = JSON.parse(event.data);
+                        if (msg.data) {
+                            handleMarketDataUpdate(msg.data);
+                        }
+                    } catch (error) {
+                        console.error('Error parsing WebSocket message:', error);
+                    }
+                };
+                
+                ws.onclose = function(event) {
+                    console.log('❌ WebSocket Disconnected from Binance');
+                    updateConnectionStatus('disconnected');
+                    
+                    // Auto-reconnect logic
+                    if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+                        reconnectAttempts++;
+                        console.log(`🔄 Attempting to reconnect (${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})...`);
+                        
+                        setTimeout(() => {
+                            initializeWebSocket();
+                        }, 3000);
+                    } else {
+                        console.log('❌ Max reconnection attempts reached');
+                        updateConnectionStatus('disconnected');
+                    }
+                };
+                
+                ws.onerror = function(error) {
+                    console.error('❌ WebSocket Error:', error);
+                    updateConnectionStatus('disconnected');
+                };
+                
+            } catch (error) {
+                console.error('❌ Failed to initialize WebSocket:', error);
+                updateConnectionStatus('disconnected');
+            }
+        }
+
+        // Handle real-time market data updates
+        function handleMarketDataUpdate(data) {
+            const symbol = data.s;
+            const price = parseFloat(data.c);
+            const priceChange = parseFloat(data.P);
+            const volume = parseFloat(data.v);
+            
+            updateMarketCard(symbol, {
+                price: price,
+                priceChange: priceChange,
+                volume: volume
+            });
+        }
+
+        // Update individual market card
+        function updateMarketCard(symbol, data) {
+            const card = document.getElementById(symbol);
+            if (!card) return;
+            
+            // Update price with animation
+            const priceElement = card.querySelector('.market-price');
+            if (priceElement) {
+                const oldPrice = parseFloat(priceElement.textContent.replace(/[$,]/g, '')) || 0;
+                const newPrice = data.price;
+                
+                // Add price change animation
+                if (oldPrice !== 0 && oldPrice !== newPrice) {
+                    priceElement.style.color = newPrice > oldPrice ? '#4caf50' : '#f44336';
+                    setTimeout(() => {
+                        priceElement.style.color = '#ffc107';
+                    }, 1000);
+                }
+                
+                priceElement.textContent = formatPrice(newPrice);
+            }
+            
+            // Update price change
+            const changeElement = card.querySelector('.market-change');
+            if (changeElement) {
+                const isPositive = data.priceChange >= 0;
+                const indicator = isPositive ? '▲' : '▼';
+                
+                changeElement.innerHTML = `
+                    <i class="fas fa-${isPositive ? 'arrow-up' : 'arrow-down'} me-1"></i>
+                    ${Math.abs(data.priceChange).toFixed(2)}%
+                `;
+                changeElement.className = `market-change ${isPositive ? 'positive' : 'negative'}`;
+            }
+            
+            // Update volume
+            const volumeElement = card.querySelector('.market-volume');
+            if (volumeElement) {
+                volumeElement.textContent = `Vol: ${formatVolume(data.volume)}`;
+            }
+        }
+
+        // Update connection status
+        function updateConnectionStatus(status) {
+            const statusElement = document.getElementById('connection-status');
+            if (!statusElement) return;
+            
+            statusElement.className = `connection-status ${status}`;
+            
+            switch(status) {
+                case 'connected':
+                    statusElement.innerHTML = '<i class="fas fa-wifi me-1"></i>Connected';
+                    break;
+                case 'disconnected':
+                    statusElement.innerHTML = '<i class="fas fa-times me-1"></i>Disconnected';
+                    break;
+                case 'connecting':
+                    statusElement.innerHTML = '<i class="fas fa-wifi me-1"></i>Connecting...';
+                    break;
+            }
+        }
+
+        // Show loading animation
+        function showLoadingAnimation() {
+            const cards = document.querySelectorAll('.market-card');
+            cards.forEach(card => {
+                const priceElement = card.querySelector('.market-price');
+                const changeElement = card.querySelector('.market-change');
+                const volumeElement = card.querySelector('.market-volume');
+                
+                if (priceElement) priceElement.textContent = 'Loading...';
+                if (changeElement) changeElement.textContent = '--';
+                if (volumeElement) volumeElement.textContent = 'Vol: --';
+            });
+        }
+
+        // Utility functions
+        function formatPrice(price) {
+            if (price >= 1) {
+                return '$' + price.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            } else if (price >= 0.01) {
+                return '$' + price.toFixed(4);
+            } else {
+                return '$' + price.toFixed(6);
+            }
+        }
+
+        function formatVolume(volume) {
+            if (volume >= 1_000_000_000) {
+                return `${(volume / 1_000_000_000).toFixed(1)}B`;
+            } else if (volume >= 1_000_000) {
+                return `${(volume / 1_000_000).toFixed(1)}M`;
+            } else if (volume >= 1_000) {
+                return `${(volume / 1_000).toFixed(1)}K`;
+            } else {
+                return volume.toFixed(0);
+            }
+        }
+
+        // Initialize WebSocket when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                console.log('🚀 Initializing Binance WebSocket...');
+                initializeWebSocket();
+            }, 2000);
+        });
+
+
+
+
+
+
+        // Function to test demo positions
+        function testDemoPositions() {
+            console.log('Testing demo positions...');
+            
+            alert(`📊 Demo Positions Status:\n\n` +
+                  `Demo Mode: ${demoMode ? '✅ Active' : '❌ Inactive'}\n` +
+                  `Real API Available: ${window.bybitApiAvailable ? '✅ Yes' : '❌ No'}\n` +
+                  `Total Demo Positions: ${demoPositions.length}\n` +
+                  `Current Mode: ${demoMode ? 'Demo Mode (Simulated Data)' : 'Real Mode (Live Data)'}\n\n` +
+                  `Ready for Position Updates: ${demoMode ? '✅ Demo Mode' : '✅ Real Mode'}`);
+        }
+        
+        // Function to check current mode and data source
+        function checkCurrentMode() {
+            console.log('Checking current mode...');
+            
+            const modeInfo = `
+🔍 **Current System Status**
+
+📊 **Mode Information:**
+• Demo Mode: ${demoMode ? '✅ ACTIVE' : '❌ INACTIVE'}
+• Real API: ${window.bybitApiAvailable ? '✅ AVAILABLE' : '❌ NOT AVAILABLE'}
+• Current Mode: ${demoMode ? 'Demo Mode' : 'Real Mode'}
+
+📈 **Data Source:**
+• Positions: ${demoMode ? 'Mock/Simulated Data' : 'Real Bybit API'}
+• Balance: ${demoMode ? 'Simulated Updates' : 'Real Account Balance'}
+• Market Data: ${demoMode ? 'Sample Data' : 'Live Market Data'}
+
+💡 **What This Means:**
+${demoMode ? 
+    '• You are in DEMO MODE - all data is simulated\n• Positions are not real trades\n• Balance updates are simulated\n• Perfect for testing and learning' : 
+    '• You are in REAL MODE - all data is live\n• Positions are real trades\n• Balance is real account balance\n• Real money involved - be careful!'
+}
+
+⚠️ **Important Notes:**
+• Demo Mode: Safe for testing, no real money
+• Real Mode: Real trading, real money at risk
+• Switch modes using the Demo Mode button
+            `;
+            
+            alert(modeInfo);
+        }
+        
+        // Function to force refresh real mode data
+        function forceRefreshRealData() {
+            console.log('Force refreshing real mode data...');
+            
+            if (!window.bybitApiAvailable) {
+                alert('❌ Real API not available!\n\nPlease test API connection first.');
+                return;
+            }
+            
+            if (demoMode) {
+                alert('❌ Demo mode is active!\n\nPlease switch to real mode first.');
+                return;
+            }
+            
+            // Force refresh all real data
+            showNotification('Refreshing Data', 'Loading real positions and balance...', 'info');
+            
+            setTimeout(() => {
+                loadPositions();
+                loadAccountBalance();
+                loadMarketData();
+                
+                showNotification('Data Refreshed', 'Real mode data loaded successfully!', 'success');
+            }, 1000);
+        }
+        
+        // Function to debug positions loading
+        function debugPositionsLoading() {
+            console.log('=== POSITIONS DEBUG INFO ===');
+            console.log('Current mode:', demoMode ? 'Demo' : 'Real');
+            console.log('API available:', window.bybitApiAvailable);
+            console.log('Demo positions count:', demoPositions.length);
+            console.log('Demo positions:', demoPositions);
+            
+            // Check if positions table exists
+            const positionsTable = document.getElementById('positions-table');
+            console.log('Positions table element:', positionsTable);
+            
+            if (positionsTable) {
+                console.log('Positions table HTML:', positionsTable.innerHTML);
+            }
+            
+            // Check current positions display
+            const currentPositions = demoMode ? demoPositions : [];
+            console.log('Current positions to display:', currentPositions);
+            
+            // Show debug info to user
+            alert(`🔍 **Positions Debug Info**\n\n` +
+                  `Mode: ${demoMode ? 'Demo' : 'Real'}\n` +
+                  `API Available: ${window.bybitApiAvailable ? 'Yes' : 'No'}\n` +
+                  `Demo Positions: ${demoPositions.length}\n` +
+                  `Table Element: ${positionsTable ? 'Found' : 'Missing'}\n\n` +
+                  `Check console for detailed logs.`);
+        }
+        
+        // Function to test positions API directly
+        function testPositionsAPI() {
+            console.log('Testing positions API directly...');
+            
+            if (!window.bybitApiAvailable) {
+                alert('❌ Real API not available!\n\nPlease test API connection first.');
+                return;
+            }
+            
+            if (demoMode) {
+                alert('❌ Demo mode is active!\n\nPlease switch to real mode first.');
+                return;
+            }
+            
+            // Test positions API directly
+            showNotification('Testing API', 'Testing positions API endpoint...', 'info');
+            
+            fetch('/api/bybit/positions')
+                .then(response => {
+                    console.log('Direct API test response:', response);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Direct API test data:', data);
+                    
+                    alert(`🔍 **Positions API Test Result**\n\n` +
+                          `Response Status: ${data.success ? 'Success' : 'Failed'}\n` +
+                          `Has Data: ${!!data.data ? 'Yes' : 'No'}\n` +
+                          `Data Type: ${typeof data.data}\n` +
+                          `Is Array: ${Array.isArray(data.data) ? 'Yes' : 'No'}\n` +
+                          `Data Length: ${data.data ? data.data.length : 'N/A'}\n` +
+                          `Error: ${data.error || 'None'}\n\n` +
+                          `Check console for full response.`);
+                })
+                .catch(error => {
+                    console.error('Direct API test error:', error);
+                    alert(`❌ **API Test Error**\n\n${error.message}\n\nCheck console for details.`);
+                });
+        }
+        
+        // Function to test balance update
+        function testBalanceUpdate() {
+            console.log('Testing balance update...');
+            
+            // Get current balance
+            const totalBalanceElement = document.getElementById('total-balance');
+            const availableBalanceElement = document.getElementById('available-balance');
+            const usedBalanceElement = document.getElementById('used-balance');
+            
+            if (!totalBalanceElement || !availableBalanceElement || !usedBalanceElement) {
+                alert('❌ Balance elements not found. Please check the page.');
+                return;
+            }
+            
+            const currentTotal = parseFloat(totalBalanceElement.textContent.replace('$', '').replace(',', '')) || 0;
+            const currentAvailable = parseFloat(availableBalanceElement.textContent.replace('$', '').replace(',', '')) || 0;
+            const currentUsed = parseFloat(availableBalanceElement.textContent.replace('$', '').replace(',', '')) || 0;
+            
+            alert(`💰 Current Balance Status:\n\n` +
+                  `Total Balance: $${currentTotal.toFixed(2)}\n` +
+                  `Available Balance: $${currentAvailable.toFixed(2)}\n` +
+                  `Used Balance: $${currentUsed.toFixed(2)}\n\n` +
+                  `Balance Elements Found: ✅\n` +
+                  `Ready for Position Updates: ✅`);
+        }
         
         // Initialize when DOM is loaded
         document.addEventListener('DOMContentLoaded', function() {
@@ -1749,6 +2570,18 @@
             
             // Initialize mode indicator
             updateModeIndicator();
+            
+            // Initialize minimum quantity display
+            initializeMinimumQuantityDisplay();
+            
+            // Show initial mode status
+            setTimeout(() => {
+                console.log('Initial mode status:', {
+                    demoMode: demoMode,
+                    apiAvailable: window.bybitApiAvailable,
+                    currentMode: demoMode ? 'Demo Mode' : 'Real Mode'
+                });
+            }, 1000);
             
             // Show initial demo mode notification
             setTimeout(() => {
@@ -1778,13 +2611,28 @@
                     if (data.success) {
                         showNotification('API Test Success', 'Bybit API is working correctly! Real mode is available.', 'success');
                         window.bybitApiAvailable = true;
+                        
+                        // Update mode indicator immediately
+                        updateModeIndicator();
+                        
                         // Enable real mode if API is available
                         if (demoMode) {
                             toggleDemoMode();
                         }
+                        
+                        // Load real data immediately
+                        setTimeout(() => {
+                            loadPositions();
+                            loadAccountBalance();
+                        }, 1000);
+                        
                     } else {
                         showNotification('API Test Failed', `Error: ${data.error}`, 'error');
                         window.bybitApiAvailable = false;
+                        
+                        // Update mode indicator immediately
+                        updateModeIndicator();
+                        
                         // Enable demo mode if API is not available
                         if (!demoMode) {
                             toggleDemoMode();
@@ -2417,6 +3265,14 @@
             console.log('Initializing Bybit Interface');
             // Set up auto-refresh
             setInterval(refreshData, 30000); // Refresh every 30 seconds
+            
+            // Set up positions auto-refresh for real mode
+            setInterval(() => {
+                if (!demoMode && window.bybitApiAvailable) {
+                    console.log('Auto-refreshing real positions...');
+                    loadPositions();
+                }
+            }, 60000); // Refresh positions every 1 minute in real mode
         }
         
         function loadMarketData() {
@@ -2501,6 +3357,48 @@
             return card;
         }
         
+        function createMarketDataCard(item) {
+            const card = document.createElement('div');
+            card.className = 'futures-card';
+            
+            // Format price with proper decimal places
+            const price = parseFloat(item.price);
+            const priceFormatted = price >= 1000 ? price.toLocaleString() : price.toFixed(4);
+            
+            // Format volume
+            const volume = item.volume;
+            const volumeFormatted = volume.includes('B') ? volume : 
+                                  volume.includes('M') ? volume : 
+                                  volume.includes('K') ? volume : volume;
+            
+            card.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="mb-0">${item.symbol}</h6>
+                    <span class="badge bg-primary">FUTURES</span>
+                </div>
+                <div class="price-display mb-2">$${priceFormatted}</div>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="${item.change >= 0 ? 'change-positive' : 'change-negative'}">
+                        ${item.change >= 0 ? '+' : ''}${item.change.toFixed(2)}%
+                    </span>
+                    <span class="text-muted">Vol: ${volumeFormatted}</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="text-muted">Funding: ${(item.funding * 100).toFixed(4)}%</span>
+                    <button class="btn btn-bybit btn-sm" onclick="openPosition('${item.symbol}')">
+                        Trade
+                    </button>
+                </div>
+                <div class="mt-2">
+                    <small class="text-muted">
+                        Min Qty: ${BYBIT_MIN_QUANTITIES[item.symbol] || 'N/A'} | 
+                        Step: ${BYBIT_STEP_SIZES[item.symbol] || 'N/A'}
+                    </small>
+                </div>
+            `;
+            return card;
+        }
+        
         function loadMockMarketData() {
             console.log('Loading mock market data as fallback');
             const marketData = [
@@ -2522,17 +3420,62 @@
         }
         
         function loadPositions() {
+            console.log('Loading positions...');
+            
+            // Check if we're in demo mode
+            if (demoMode) {
+                console.log('Demo mode active - showing demo positions');
+                displayRealPositions(demoPositions);
+                return;
+            }
+            
+            // Check if API is available
+            if (!window.bybitApiAvailable) {
+                console.log('API not available - switching to demo mode');
+                demoMode = true;
+                updateModeIndicator();
+                displayRealPositions(demoPositions);
+                return;
+            }
+            
             console.log('Loading real Bybit positions...');
             
             // Show loading state
             const tbody = document.getElementById('positions-table');
-            tbody.innerHTML = '<tr><td colspan="9" class="text-center"><div class="loading-spinner mx-auto"></div><p class="mt-2">Loading positions...</p></td></tr>';
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="9" class="text-center">
+                        <div class="loading-spinner mx-auto"></div>
+                        <p class="mt-2">Loading positions...</p>
+                        <small class="text-muted">Fetching from Bybit API...</small>
+                        <br><small class="text-muted">Time: ${new Date().toLocaleTimeString()}</small>
+                    </td>
+                </tr>
+            `;
+            
+            // Show loading notification
+            showNotification(
+                'Loading Positions', 
+                'Fetching active positions from Bybit...', 
+                'info'
+            );
             
             // Fetch real positions from Bybit API
             fetch('/api/bybit/positions')
-                .then(response => response.json())
+                .then(response => {
+                    console.log('Positions API response status:', response.status);
+                    console.log('Positions API response headers:', response.headers);
+                    return response.json();
+                })
                 .then(data => {
                     console.log('Real Bybit positions received:', data);
+                    console.log('Data structure:', {
+                        success: data.success,
+                        hasData: !!data.data,
+                        dataType: typeof data.data,
+                        isArray: Array.isArray(data.data),
+                        dataLength: data.data ? data.data.length : 'N/A'
+                    });
                     
                     if (data.success && data.data) {
                         // Ensure data.data is an array
@@ -2541,24 +3484,97 @@
                             console.warn('API returned non-array positions data:', positionsData);
                             positionsData = [];
                         }
-                        displayRealPositions(positionsData);
+                        
+                        console.log('Processed positions data:', positionsData);
+                        console.log('Positions count:', positionsData.length);
+                        
+                        if (positionsData.length === 0) {
+                            // No active positions
+                            console.log('No active positions found - showing empty state');
+                            const tbody = document.getElementById('positions-table');
+                            tbody.innerHTML = `
+                                <tr>
+                                    <td colspan="9" class="text-center">
+                                        <div class="alert alert-info mb-0">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            <strong>No Active Positions</strong>
+                                            <br><small class="text-muted">You don't have any open positions at the moment</small>
+                                            <br><small class="text-muted">Last checked: ${new Date().toLocaleTimeString()}</small>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `;
+                            
+                            showNotification(
+                                'No Positions', 
+                                'No active positions found in your account.', 
+                                'info'
+                            );
+                        } else {
+                            // Display real positions
+                            console.log('Displaying positions:', positionsData);
+                            displayRealPositions(positionsData);
+                            
+                            showNotification(
+                                'Positions Loaded', 
+                                `Successfully loaded ${positionsData.length} active position(s) from Bybit.`, 
+                                'success'
+                            );
+                        }
                     } else {
                         console.error('Failed to load positions:', data.error || 'Unknown error');
-                        // Show mock data for demonstration if API fails
-                        console.log('Showing mock positions data for demonstration');
-                        displayRealPositions(getMockPositions());
+                        console.error('Full error response:', data);
+                        
+                        // Show error message in positions table
+                        const tbody = document.getElementById('positions-table');
+                        tbody.innerHTML = `
+                            <tr>
+                                <td colspan="9" class="text-center">
+                                    <div class="alert alert-warning mb-0">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        <strong>API Error:</strong> ${data.error || 'Failed to load positions'}
+                                        <br><small class="text-muted">Check your API credentials and try again</small>
+                                        <br><small class="text-muted">Error time: ${new Date().toLocaleTimeString()}</small>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                        
+                        // Show notification
+                        showNotification(
+                            'Positions Load Failed', 
+                            `Error: ${data.error || 'Unknown error'}. Check API credentials.`, 
+                            'error'
+                        );
                     }
                 })
                 .catch(error => {
                     console.error('Error fetching positions:', error);
-                    // Show mock data for demonstration
-                    console.log('Showing mock positions data due to API error');
-                    displayRealPositions(getMockPositions());
+                    
+                    // Show error message in positions table
+                    const tbody = document.getElementById('positions-table');
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="9" class="text-center">
+                                <div class="alert alert-danger mb-0">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    <strong>Connection Error:</strong> ${error.message}
+                                    <br><small class="text-muted">Network issue or API endpoint not available</small>
+                                </td>
+                            </tr>
+                        `;
+                    
+                    // Show notification
+                    showNotification(
+                        'Connection Failed', 
+                        `Network error: ${error.message}. Check your connection.`, 
+                        'error'
+                    );
                 });
         }
         
-        function getMockPositions() {
-            // Return mock positions data for demonstration
+        function getInitialMockPositions() {
+            // Return initial mock positions data for demonstration
             return [
                 {
                     symbol: 'BTCUSDT',
@@ -2589,11 +3605,41 @@
                     leverage: '5',
                     unrealisedPnl: '5.00',
                     roe: '0.89'
+                },
+                {
+                    symbol: 'DOTUSDT',
+                    side: 'Buy',
+                    size: '0.1',
+                    avgPrice: '3.80',
+                    markPrice: '3.85',
+                    leverage: '10',
+                    unrealisedPnl: '0.50',
+                    roe: '1.32'
+                },
+                {
+                    symbol: 'ADAUSDT',
+                    side: 'Sell',
+                    size: '1.0',
+                    avgPrice: '0.86',
+                    markPrice: '0.84',
+                    leverage: '5',
+                    unrealisedPnl: '2.00',
+                    roe: '4.65'
                 }
             ];
         }
         
+        function getMockPositions() {
+            // Return current demo positions (dynamic)
+            if (demoMode) {
+                return demoPositions;
+            }
+            // Return initial mock positions for non-demo mode
+            return getInitialMockPositions();
+        }
+        
         let demoMode = false;
+        let demoPositions = []; // Track demo positions dynamically
         
         function toggleDemoMode() {
             demoMode = !demoMode;
@@ -2601,6 +3647,9 @@
             
             if (demoMode) {
                 demoButton.innerHTML = '<i class="fas fa-eye-slash me-1"></i>Live Mode';
+                // Initialize demo positions when entering demo mode
+                demoPositions = getInitialMockPositions();
+                displayRealPositions(demoPositions);
                 demoButton.className = 'btn btn-outline-warning btn-sm';
                 console.log('Demo mode enabled - showing mock data');
                 displayRealPositions(getMockPositions());
@@ -2627,9 +3676,18 @@
                 if (demoMode) {
                     modeIndicator.innerHTML = '<i class="fas fa-eye me-1"></i>DEMO MODE';
                     modeIndicator.className = 'badge bg-warning text-dark';
+                    modeIndicator.title = 'Demo Mode: Simulated data, no real money';
                 } else {
-                    modeIndicator.innerHTML = '<i class="fas fa-rocket me-1"></i>REAL MODE';
-                    modeIndicator.className = 'badge bg-success';
+                    // Check if API is available and working
+                    if (window.bybitApiAvailable) {
+                        modeIndicator.innerHTML = '<i class="fas fa-rocket me-1"></i>REAL MODE API: ✅';
+                        modeIndicator.className = 'badge bg-success';
+                        modeIndicator.title = 'Real Mode: Live trading with real money - API working';
+                    } else {
+                        modeIndicator.innerHTML = '<i class="fas fa-rocket me-1"></i>REAL MODE API: ❌';
+                        modeIndicator.className = 'badge bg-danger';
+                        modeIndicator.title = 'Real Mode: API not available - check credentials';
+                    }
                 }
             }
         }
@@ -2656,13 +3714,17 @@
             }, 5000);
         }
         
-        function simulateHedgePositions(symbol, size, leverage) {
+        function simulateHedgePositions(symbol, quantity, leverage) {
             // Simulate hedge position creation for demo mode
-            console.log('Simulating hedge positions for demo:', { symbol, size, leverage });
+            console.log('Simulating hedge positions for demo:', { symbol, quantity, leverage });
+            
+            // Get current price for balance calculation
+            const currentPriceElement = document.querySelector('#positionModal .form-control-plaintext');
+            const currentPrice = currentPriceElement ? parseFloat(currentPriceElement.textContent.replace('$', '').replace(',', '')) : 0;
             
             // Generate mock order IDs
-            const longOrderId = `demo_long_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-            const shortOrderId = `demo_short_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            const longOrderId = `demo_long_${Date.now()}_${Math.random().toString(36).substr(2, 36).substr(2, 9)}`;
+            const shortOrderId = `demo_short_${Date.now()}_${Math.random().toString(36).substr(2, 36).substr(2, 9)}`;
             
             // Simulate API delay
             setTimeout(() => {
@@ -2670,7 +3732,9 @@
                 alert(`✅ Demo Hedge Positions Created Successfully!\n\n` +
                       `LONG Position: ${longOrderId}\n` +
                       `SHORT Position: ${shortOrderId}\n\n` +
-                      `Both positions are now active for ${symbol}\n\n` +
+                      `Both positions are now active for ${symbol}\n` +
+                      `Quantity: ${quantity} ${symbol.replace('USDT', '')}\n` +
+                      `Leverage: ${leverage}x\n\n` +
                       `Note: This is demo mode - positions are simulated.`);
                 
                 // Close modal
@@ -2679,8 +3743,21 @@
                     modal.hide();
                 }
                 
-                // Refresh positions to show new hedge positions
-                displayRealPositions(getMockPositions());
+                // Add both long and short positions to demo positions
+                addDemoPosition(symbol, 'Buy', quantity, leverage, currentPrice);
+                addDemoPosition(symbol, 'Sell', quantity, leverage, currentPrice);
+                
+                // Update balance display for hedge positions (both long and short)
+                updateDemoBalance(quantity * 2, currentPrice); // Double quantity for hedge mode
+                
+                // Force refresh positions display
+                setTimeout(() => {
+                    if (demoMode) {
+                        displayRealPositions(demoPositions);
+                    } else {
+                        loadPositions();
+                    }
+                }, 500);
                 
                 // Show notification
                 showNotification(
@@ -2710,15 +3787,47 @@
                 return;
             }
             
+            // Validate position data structure
+            const validPositions = positions.filter(pos => {
+                const isValid = pos && pos.symbol && pos.side && pos.size !== undefined;
+                if (!isValid) {
+                    console.warn('Invalid position data:', pos);
+                }
+                return isValid;
+            });
+            
+            if (validPositions.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" class="text-center">
+                            <div class="alert alert-warning mb-0">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>Data Validation Error</strong>
+                                <br><small class="text-muted">Position data format is invalid. Check API response.</small>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
             // Identify hedge mode positions (same symbol with both long and short)
-            const hedgePositions = identifyHedgePositions(positions);
+            const hedgePositions = identifyHedgePositions(validPositions);
             
             // Update hedge summary
-            updateHedgeSummary(hedgePositions, positions);
+            updateHedgeSummary(hedgePositions, validPositions);
             
-            tbody.innerHTML = positions.map(pos => {
+            tbody.innerHTML = validPositions.map(pos => {
                 const isHedge = hedgePositions.includes(pos.symbol);
                 const hedgeBadge = isHedge ? '<span class="badge bg-warning ms-1" title="Hedge Mode"><i class="fas fa-shield-alt"></i></span>' : '';
+                
+                // Safe parsing with fallbacks
+                const size = parseFloat(pos.size) || 0;
+                const avgPrice = parseFloat(pos.avgPrice) || 0;
+                const markPrice = parseFloat(pos.markPrice) || 0;
+                const leverage = parseFloat(pos.leverage) || 1;
+                const unrealisedPnl = parseFloat(pos.unrealisedPnl) || 0;
+                const roe = parseFloat(pos.roe) || 0;
                 
                 return `
                     <tr class="${isHedge ? 'table-warning' : ''}">
@@ -2727,22 +3836,22 @@
                             ${hedgeBadge}
                         </td>
                         <td><span class="badge bg-${pos.side === 'Buy' ? 'success' : 'danger'}">${pos.side}</span></td>
-                        <td>${parseFloat(pos.size).toFixed(4)}</td>
-                        <td>$${parseFloat(pos.avgPrice).toLocaleString()}</td>
-                        <td>$${parseFloat(pos.markPrice).toLocaleString()}</td>
-                        <td><span class="badge bg-warning">${pos.leverage}x</span></td>
-                        <td class="${parseFloat(pos.unrealisedPnl) >= 0 ? 'text-success' : 'text-danger'} fw-bold">
-                            ${parseFloat(pos.unrealisedPnl) >= 0 ? '+' : ''}$${parseFloat(pos.unrealisedPnl).toFixed(2)}
+                        <td>${size.toFixed(4)}</td>
+                        <td>$${avgPrice.toLocaleString()}</td>
+                        <td>$${markPrice.toLocaleString()}</td>
+                        <td><span class="badge bg-warning">${leverage}x</span></td>
+                        <td class="${unrealisedPnl >= 0 ? 'text-success' : 'text-danger'} fw-bold">
+                            ${unrealisedPnl >= 0 ? '+' : ''}$${unrealisedPnl.toFixed(2)}
                         </td>
-                        <td class="${parseFloat(pos.roe) >= 0 ? 'text-success' : 'text-danger'} fw-bold">
-                            ${parseFloat(pos.roe) >= 0 ? '+' : ''}${parseFloat(pos.roe).toFixed(2)}%
+                        <td class="${roe >= 0 ? 'text-success' : 'text-danger'} fw-bold">
+                            ${roe >= 0 ? '+' : ''}${roe.toFixed(2)}%
                         </td>
                         <td>
                             <div class="btn-group btn-group-sm">
                                 <button class="btn btn-outline-warning btn-sm" onclick="editPosition('${pos.symbol}')">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <button class="btn btn-outline-danger btn-sm" onclick="closePosition('${pos.symbol}', '${pos.side}', ${pos.size})">
+                                <button class="btn btn-outline-danger btn-sm" onclick="closePosition('${pos.symbol}', '${pos.side}', ${size})">
                                     <i class="fas fa-times"></i>
                                 </button>
                                 ${isHedge ? `<button class="btn btn-outline-info btn-sm" onclick="closeHedgePositions('${pos.symbol}')" title="Close All Hedge Positions">
@@ -3046,6 +4155,14 @@
                                     <i class="fas fa-info-circle me-1"></i>
                                     Minimum order value: 5 USDT (Bybit requirement)
                                 </small>
+                                <div class="alert alert-info mt-2" role="alert">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <strong>${symbol} Minimum Requirements:</strong><br>
+                                    • Minimum Quantity: ${BYBIT_MIN_QUANTITIES[symbol] || 'N/A'}<br>
+                                    • Step Size: ${BYBIT_STEP_SIZES[symbol] || 'N/A'}<br>
+                                    • With 10 USDT: ~${((10 / currentPrice) * (BYBIT_STEP_SIZES[symbol] || 1)).toFixed(4)} ${symbol.replace('USDT', '')}
+                                </div>
+                                <div id="quantity-preview"></div>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">
@@ -3078,6 +4195,27 @@
             const bsModal = new bootstrap.Modal(modal);
             bsModal.show();
             
+            // Add event listener for real-time quantity preview
+            const positionSizeInput = modal.querySelector('#positionSize');
+            if (positionSizeInput) {
+                positionSizeInput.addEventListener('input', function() {
+                    const usdtAmount = parseFloat(this.value) || 0;
+                    if (usdtAmount > 0) {
+                        updateQuantityPreview(symbol, usdtAmount);
+                    } else {
+                        const previewElement = modal.querySelector('#quantity-preview');
+                        if (previewElement) {
+                            previewElement.innerHTML = '';
+                        }
+                    }
+                });
+                
+                // Show initial preview
+                setTimeout(() => {
+                    updateQuantityPreview(symbol, 100.00);
+                }, 100);
+            }
+            
             // Remove modal from DOM when hidden
             modal.addEventListener('hidden.bs.modal', function() {
                 document.body.removeChild(modal);
@@ -3086,36 +4224,83 @@
         
         function executePosition(symbol) {
             const side = document.querySelector('input[name="positionSide"]:checked').value;
-            const size = parseFloat(document.getElementById('positionSize').value);
+            const usdtAmount = parseFloat(document.getElementById('positionSize').value);
             const leverage = parseInt(document.getElementById('leverage').value);
             
-            if (!size || size <= 0) {
+            if (!usdtAmount || usdtAmount <= 0) {
                 alert('Please enter a valid position size');
                 return;
             }
             
             // Check minimum order value
-            if (size < 5) {
+            if (usdtAmount < 5) {
                 alert('❌ Order size too small!\n\nBybit requires minimum 5 USDT order value.\n\nPlease increase your position size to at least 5 USDT.');
                 return;
             }
             
-            console.log('Executing position:', { symbol, side, size, leverage });
+            // Get current market price for quantity calculation
+            const currentPriceElement = document.querySelector('#positionModal .form-control-plaintext');
+            if (!currentPriceElement) {
+                alert('❌ Error: Could not get current price. Please try again.');
+                return;
+            }
             
-            if (side === 'Both') {
-                // Execute both long and short positions for hedge mode
-                executeHedgePositions(symbol, size, leverage);
-            } else {
-                // Execute single position
-                executeSinglePosition(symbol, side, size, leverage);
+            // Extract price from the display (remove $ symbol)
+            const currentPriceText = currentPriceElement.textContent.replace('$', '').replace(',', '');
+            const currentPrice = parseFloat(currentPriceText);
+            
+            if (!currentPrice || isNaN(currentPrice) || currentPrice <= 0) {
+                alert('❌ Error: Invalid current price. Please refresh and try again.');
+                return;
+            }
+            
+            try {
+                // Calculate quantity based on USDT amount and validate minimum requirements
+                const quantityData = calculateQuantityFromUSDT(symbol, usdtAmount, currentPrice);
+                
+                console.log('Quantity calculation:', quantityData);
+                
+                // Show quantity information to user
+                const quantityInfo = `📊 Quantity Calculation:\n\n` +
+                    `Symbol: ${symbol}\n` +
+                    `USDT Amount: ${usdtAmount} USDT\n` +
+                    `Current Price: $${currentPrice}\n` +
+                    `Calculated Quantity: ${quantityData.quantity}\n` +
+                    `Minimum Required: ${quantityData.minQuantity}\n` +
+                    `Step Size: ${quantityData.stepSize}\n` +
+                    `Actual USDT Used: ${quantityData.actualUSDT.toFixed(2)} USDT`;
+                
+                if (Math.abs(quantityData.actualUSDT - usdtAmount) > 0.01) {
+                    const adjustedMsg = quantityInfo + `\n\n⚠️ Note: Quantity adjusted to meet step size requirements.`;
+                    if (!confirm(adjustedMsg + '\n\nDo you want to proceed with this adjusted quantity?')) {
+                        return;
+                    }
+                } else {
+                    alert(quantityInfo);
+                }
+                
+                console.log('Executing position:', { symbol, side, usdtAmount, calculatedQuantity: quantityData.quantity, leverage });
+                
+                if (side === 'Both') {
+                    // Execute both long and short positions for hedge mode
+                    executeHedgePositions(symbol, quantityData.quantity, leverage);
+                } else {
+                    // Execute single position
+                    executeSinglePosition(symbol, side, quantityData.quantity, leverage);
+                }
+                
+            } catch (error) {
+                alert(`❌ Quantity Calculation Error:\n\n${error.message}\n\nPlease increase your USDT amount to meet the minimum quantity requirements.`);
+                console.error('Quantity calculation error:', error);
+                return;
             }
         }
         
-        function executeSinglePosition(symbol, side, size, leverage) {
+        function executeSinglePosition(symbol, side, quantity, leverage) {
             // Check if we're in demo mode or if API is not available
             if (demoMode || !window.bybitApiAvailable) {
                 // Simulate single position creation for demo
-                simulateSinglePosition(symbol, side, size, leverage);
+                simulateSinglePosition(symbol, side, quantity, leverage);
                 return;
             }
             
@@ -3129,7 +4314,7 @@
                     symbol: symbol,
                     side: side,
                     orderType: 'Market',
-                    qty: size,
+                    qty: quantity,
                     leverage: leverage
                 })
             })
@@ -3155,7 +4340,7 @@
                           `Order ID: ${data.data?.orderId || 'N/A'}\n` +
                           `Symbol: ${symbol}\n` +
                           `Side: ${side}\n` +
-                          `Size: ${size} USDT\n` +
+                          `Quantity: ${quantity} ${symbol.replace('USDT', '')}\n` +
                           `Leverage: ${leverage}x`);
                     
                     // Close modal
@@ -3164,9 +4349,16 @@
                     modal.hide();
                     }
                     
-                    // Refresh data
+                    // Refresh data immediately
                     loadPositions();
                     loadAccountBalance();
+                    
+                    // Show success notification
+                    showNotification(
+                        'Position Opened', 
+                        `Successfully opened ${side} position for ${symbol}`, 
+                        'success'
+                    );
                 } else {
                     throw new Error(`Failed to open position: ${data.error}`);
                 }
@@ -3178,12 +4370,16 @@
             });
         }
         
-        function simulateSinglePosition(symbol, side, size, leverage) {
+        function simulateSinglePosition(symbol, side, quantity, leverage) {
             // Simulate single position creation for demo mode
-            console.log('Simulating single position for demo:', { symbol, side, size, leverage });
+            console.log('Simulating single position for demo:', { symbol, side, quantity, leverage });
+            
+            // Get current price for balance calculation
+            const currentPriceElement = document.querySelector('#positionModal .form-control-plaintext');
+            const currentPrice = currentPriceElement ? parseFloat(currentPriceElement.textContent.replace('$', '').replace(',', '')) : 0;
             
             // Generate mock order ID
-            const orderId = `demo_${side.toLowerCase()}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+            const orderId = `demo_${side.toLowerCase()}_${Date.now()}_${Math.random().toString(36).substr(2, 36).substr(2, 9)}`;
             
             // Simulate API delay
             setTimeout(() => {
@@ -3191,7 +4387,7 @@
                 alert(`✅ Demo Position Created Successfully!\n\n` +
                       `${side.toUpperCase()} Position: ${orderId}\n` +
                       `Symbol: ${symbol}\n` +
-                      `Size: ${size} USDT\n` +
+                      `Quantity: ${quantity} ${symbol.replace('USDT', '')}\n` +
                       `Leverage: ${leverage}x\n\n` +
                       `Note: This is demo mode - position is simulated.`);
                 
@@ -3201,8 +4397,11 @@
                     modal.hide();
                 }
                 
-                // Refresh positions to show new position
-                displayRealPositions(getMockPositions());
+                // Add new position to demo positions
+                addDemoPosition(symbol, side, quantity, leverage, currentPrice);
+                
+                // Update balance display for demo mode
+                updateDemoBalance(quantity, currentPrice);
                 
                 // Show notification
                 showNotification(
@@ -3213,9 +4412,9 @@
             }, 1000);
         }
         
-        function executeHedgePositions(symbol, size, leverage) {
+        function executeHedgePositions(symbol, quantity, leverage) {
             // Execute both long and short positions for hedge mode
-            console.log('Executing hedge positions:', { symbol, size, leverage });
+            console.log('Executing hedge positions:', { symbol, quantity, leverage });
             
             // Show loading message
             const loadingMsg = `Creating hedge positions for ${symbol}...\n\nThis will create both LONG and SHORT positions simultaneously.`;
@@ -3226,7 +4425,7 @@
             // Check if we're in demo mode or if API is not available
             if (demoMode || !window.bybitApiAvailable) {
                 // Simulate hedge position creation for demo
-                simulateHedgePositions(symbol, size, leverage);
+                simulateHedgePositions(symbol, quantity, leverage);
                 return;
             }
             
@@ -3240,7 +4439,7 @@
                     symbol: symbol,
                     side: 'Buy',
                     orderType: 'Market',
-                    qty: size,
+                    qty: quantity,
                     leverage: leverage
                 })
             })
@@ -3273,7 +4472,7 @@
                             symbol: symbol,
                             side: 'Sell',
                             orderType: 'Market',
-                            qty: size,
+                            qty: quantity,
                             leverage: leverage
                         })
                     });
@@ -3310,9 +4509,24 @@
                     const modal = bootstrap.Modal.getInstance(document.getElementById('positionModal'));
                     modal.hide();
                     
-                    // Refresh data
-                    loadPositions();
-                    loadAccountBalance();
+                    // Force refresh data with delay to ensure positions are settled
+                    showNotification(
+                        'Hedge Positions Created', 
+                        `Successfully created hedge positions for ${symbol}. Refreshing data...`, 
+                        'success'
+                    );
+                    
+                    setTimeout(() => {
+                        console.log('Refreshing data after hedge positions creation...');
+                        loadPositions();
+                        loadAccountBalance();
+                        
+                        showNotification(
+                            'Data Refreshed', 
+                            `Positions and balance updated for ${symbol}`, 
+                            'info'
+                        );
+                    }, 2000); // Wait 2 seconds for positions to settle
                 } else {
                     throw new Error(`Failed to create short position: ${shortData.error}`);
                 }
@@ -3603,6 +4817,22 @@
                     low: 4200.0,
                     range: 50.0,
                     calculated_at: new Date().toISOString()
+                },
+                'DOTUSDT_european_session': {
+                    symbol: 'DOTUSDT',
+                    session: 'european_session',
+                    high: 3.85,
+                    low: 3.75,
+                    range: 0.10,
+                    calculated_at: new Date().toISOString()
+                },
+                'ADAUSDT_global_session': {
+                    symbol: 'ADAUSDT',
+                    session: 'global_session',
+                    high: 0.88,
+                    low: 0.82,
+                    range: 0.06,
+                    calculated_at: new Date().toISOString()
                 }
             };
             
@@ -3757,16 +4987,29 @@
         function testBreakoutDetection() {
             console.log('Testing breakout detection...');
             
-            // Simulate breakout detection test
-            const testSymbol = 'BTCUSDT';
-            const testPrice = 113900.0;
+            // Simulate breakout detection test for multiple symbols
+            const testSymbols = ['BTCUSDT', 'ETHUSDT', 'DOTUSDT', 'ADAUSDT'];
+            const testPrices = {
+                'BTCUSDT': 113900.0,
+                'ETHUSDT': 4230.0,
+                'DOTUSDT': 3.80,
+                'ADAUSDT': 0.85
+            };
             
-            // Show test results
-            alert(`Breakout Detection Test:\nSymbol: ${testSymbol}\nPrice: $${testPrice}\nStatus: Testing breakout conditions...`);
+            // Show test results for all symbols
+            let testResults = 'Breakout Detection Test:\n\n';
+            testSymbols.forEach(symbol => {
+                const price = testPrices[symbol];
+                const minQty = BYBIT_MIN_QUANTITIES[symbol] || 'N/A';
+                const stepSize = BYBIT_STEP_SIZES[symbol] || 'N/A';
+                testResults += `${symbol}: $${price} | Min Qty: ${minQty} | Step: ${stepSize}\n`;
+            });
+            
+            alert(testResults + '\nStatus: Testing breakout conditions...');
             
             // Simulate test completion
             setTimeout(() => {
-                alert('Breakout detection test completed!\nResult: No breakout detected at current price level.');
+                alert('Breakout detection test completed!\nResult: No breakout detected at current price levels for any symbol.');
             }, 2000);
         }
         
@@ -3783,6 +5026,8 @@
                     <div style="background: #2c3e50; padding: 15px; border-radius: 5px; margin: 10px 0;">
                         <strong>[2024-01-20 14:30:15]</strong> US Session started<br>
                         <strong>[2024-01-20 14:30:20]</strong> Range box calculated for BTCUSDT: High=$113,850, Low=$112,500<br>
+                        <strong>[2024-01-20 14:30:25]</strong> Range box calculated for DOTUSDT: High=$3.85, Low=$3.75<br>
+                        <strong>[2024-01-20 14:30:30]</strong> Range box calculated for ADAUSDT: High=$0.88, Low=$0.82<br>
                         <strong>[2024-01-20 14:35:10]</strong> No breakout detected - price within range<br>
                         <strong>[2024-01-20 14:40:05]</strong> Volume filter passed: 1.8x EMA20<br>
                         <strong>[2024-01-20 14:45:30]</strong> MTF RSI conditions met for LONG signal
