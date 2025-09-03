@@ -777,3 +777,70 @@ class BybitAPI:
         except Exception as e:
             logger.error(f"Error setting leverage: {e}")
             return {'success': False, 'error': str(e)} 
+
+    def get_performance_metrics(self, timeframe: str = '24h') -> Dict:
+        """Get performance metrics for the specified timeframe"""
+        try:
+            if not PYBIT_AVAILABLE:
+                return {'success': False, 'error': 'pybit library not available'}
+            
+            # Get account performance metrics using the correct pybit method
+            try:
+                # Try to get account info and calculate basic metrics
+                account_info = self.session.get_account_info()
+                if account_info.get('retCode') == 0:
+                    account_data = account_info.get('result', {})
+                    
+                    # Calculate basic performance metrics
+                    performance_data = {
+                        'totalEquity': float(account_data.get('totalEquity', 0)),
+                        'totalWalletBalance': float(account_data.get('totalWalletBalance', 0)),
+                        'totalUnrealizedProfit': float(account_data.get('totalUnrealizedProfit', 0)),
+                        'totalMarginBalance': float(account_data.get('totalMarginBalance', 0)),
+                        'timeframe': timeframe,
+                        'timestamp': int(time.time() * 1000)
+                    }
+                    
+                    return {'success': True, 'data': performance_data}
+                else:
+                    return {
+                        'success': False,
+                        'error': account_info.get('retMsg', 'Unknown error'),
+                        'code': account_info.get('retCode')
+                    }
+            except AttributeError:
+                # Fallback to manual implementation
+                return self._get_manual_performance_metrics(timeframe)
+                
+        except Exception as e:
+            logger.error(f"Error getting performance metrics: {e}")
+            return {'success': False, 'error': str(e)}
+    
+    def _get_manual_performance_metrics(self, timeframe: str = '24h') -> Dict:
+        """Manual fallback for performance metrics"""
+        try:
+            # Get basic account balance as fallback
+            balance_response = self.get_unified_balance()
+            if balance_response.get('success'):
+                balance_data = balance_response.get('data', {})
+                total_balance = 0
+                
+                for coin in balance_data.get('list', []):
+                    total_balance += float(coin.get('totalWalletBalance', 0))
+                
+                return {
+                    'success': True,
+                    'data': {
+                        'totalEquity': total_balance,
+                        'totalWalletBalance': total_balance,
+                        'totalUnrealizedProfit': 0,
+                        'totalMarginBalance': total_balance,
+                        'timeframe': timeframe,
+                        'timestamp': int(time.time() * 1000)
+                    }
+                }
+            else:
+                return {'success': False, 'error': 'Failed to get balance data'}
+        except Exception as e:
+            logger.error(f"Error in manual performance metrics: {e}")
+            return {'success': False, 'error': str(e)} 
