@@ -6,6 +6,7 @@
     <title>Bybit Futures Trading Bot</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --bybit-primary: #f7931a;
@@ -1144,6 +1145,9 @@
                                     <button class="btn btn-outline-success btn-sm me-2" onclick="checkBalance()">
                                         <i class="fas fa-wallet me-1"></i>Check Balance
                                     </button>
+                                    <button class="btn btn-outline-warning btn-sm me-2" onclick="testBybitAPI()" title="Test Bybit API Connection">
+                                        <i class="fas fa-plug me-1"></i>Test API
+                                    </button>
                                     <button class="btn btn-outline-info btn-sm" onclick="toggleDemoMode()" id="demo-toggle">
                                         <i class="fas fa-eye me-1"></i>Demo Mode
                                     </button>
@@ -1158,6 +1162,9 @@
                                     </button>
                                     <button class="btn btn-outline-primary btn-sm me-2" onclick="checkLiquidationRisk()" title="Check Liquidation Risk">
                                         <i class="fas fa-shield-alt me-1"></i>Risk Check
+                                    </button>
+                                    <button class="btn btn-outline-danger btn-sm me-2" onclick="diagnoseAPI()" title="Comprehensive API Diagnosis">
+                                        <i class="fas fa-stethoscope me-1"></i>API Diagnosis
                                     </button>
                             </div>
                         </div>
@@ -1176,6 +1183,28 @@
                                         <th>P&L</th>
                                         <th>ROE %</th>
                                         <th>Actions</th>
+                                    </tr>
+                                    <tr class="table-secondary">
+                                        <td colspan="9" class="text-center py-2">
+                                            <button class="btn btn-sm btn-outline-primary me-2" onclick="loadPositions()" title="Refresh Positions">
+                                                <i class="fas fa-sync-alt me-1"></i>Refresh Positions
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-info me-2" onclick="testPositionsAPI()" title="Test Positions API">
+                                                <i class="fas fa-vial me-1"></i>Test API
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-warning me-2" onclick="debugPositions()" title="Debug Positions Display">
+                                                <i class="fas fa-bug me-1"></i>Debug
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-secondary me-2" onclick="showRawPositionsData()" title="Show Raw API Data">
+                                                <i class="fas fa-code me-1"></i>Raw Data
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-dark me-2" onclick="showDataStructure()" title="Show Data Structure Analysis">
+                                                <i class="fas fa-sitemap me-1"></i>Structure
+                                            </button>
+                                            <small class="text-muted">
+                                                Last updated: <span id="positions-last-update">Never</span>
+                                            </small>
+                                        </td>
                                     </tr>
                                 </thead>
                                 <tbody id="positions-table">
@@ -1250,8 +1279,8 @@
                         <!-- US Trading Session -->
                         <div class="mb-3">
                             <h6 style="color: #ffffff !important; font-weight: bold;">🇺🇸 US Session (New York)</h6>
-                            <div class="session-status" id="us-session-status" style="color: #ffffff !important; background: #28a745 !important; padding: 10px; border-radius: 10px; margin: 10px 0; text-align: center; font-weight: bold;">
-                                <i class="fas fa-clock me-2"></i>Status: Active
+                            <div class="session-status session-active" id="us-session-status">
+                                <i class="fas fa-clock me-2"></i>US Session: ACTIVE
                             </div>
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" id="us-session-toggle" checked>
@@ -1275,8 +1304,8 @@
                         <!-- Asian Trading Session -->
                         <div class="mb-3">
                             <h6 style="color: #ffffff !important; font-weight: bold;">🌏 Asian Session</h6>
-                            <div class="session-status" id="asian-session-status" style="color: #ffffff !important; background: #28a745 !important; padding: 10px; border-radius: 10px; margin: 10px 0; text-align: center; font-weight: bold;">
-                                <i class="fas fa-clock me-2"></i>Status: Active
+                            <div class="session-status session-active" id="asian-session-status">
+                                <i class="fas fa-clock me-2"></i>Asian Session: ACTIVE
                             </div>
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" id="asian-session-toggle" checked>
@@ -1295,8 +1324,11 @@
                             <button class="btn btn-info w-100" onclick="updateTradingSessions()" style="color: #ffffff !important; font-weight: bold;">
                                 <i class="fas fa-save me-2"></i>Update Sessions
                             </button>
-                            <button class="btn btn-outline-warning btn-sm" onclick="checkSessionStatus()" style="color: #ffc107 !important; font-weight: bold;">
-                                <i class="fas fa-sync-alt me-2"></i>Check Status
+                            <button class="btn btn-outline-warning btn-sm" onclick="refreshSessionStatus()" style="color: #ffc107 !important; font-weight: bold;">
+                                <i class="fas fa-sync-alt me-2"></i>Refresh Status
+                            </button>
+                            <button class="btn btn-outline-info btn-sm" onclick="showSessionInfo()" style="color: #17a2b8 !important; font-weight: bold;">
+                                <i class="fas fa-info-circle me-2"></i>Session Info
                             </button>
                         </div>
                     </div>
@@ -1865,6 +1897,7 @@
                                 <input type="number" class="form-control mt-1" id="daily-loss-limit" value="5.0" step="0.1" min="1.0" max="20.0" style="color: #2c3e50 !important; background: #ffffff !important; font-weight: 500 !important;">
                             </div>
                             
+                            
 
                             
 
@@ -2421,7 +2454,7 @@
         
         // Function to test positions API directly
         function testPositionsAPI() {
-            console.log('Testing positions API directly...');
+            console.log('🧪 Testing positions API directly...');
             
             if (!window.bybitApiAvailable) {
                 alert('❌ Real API not available!\n\nPlease test API connection first.');
@@ -2438,11 +2471,11 @@
             
             fetch('/api/bybit/positions')
                 .then(response => {
-                    console.log('Direct API test response:', response);
+                    console.log('📡 Direct API test response:', response);
                     return response.json();
                 })
                 .then(data => {
-                    console.log('Direct API test data:', data);
+                    console.log('📊 Direct API test data:', data);
                     
                     alert(`🔍 **Positions API Test Result**\n\n` +
                           `Response Status: ${data.success ? 'Success' : 'Failed'}\n` +
@@ -2454,9 +2487,428 @@
                           `Check console for full response.`);
                 })
                 .catch(error => {
-                    console.error('Direct API test error:', error);
+                    console.error('❌ Direct API test error:', error);
                     alert(`❌ **API Test Error**\n\n${error.message}\n\nCheck console for details.`);
                 });
+        }
+        
+        // Comprehensive API diagnostic function
+        function diagnoseAPI() {
+            console.log('🔍 Starting comprehensive API diagnosis...');
+            
+            const diagnosis = {
+                timestamp: new Date().toISOString(),
+                demoMode: demoMode,
+                apiAvailable: window.bybitApiAvailable,
+                endpoints: {},
+                errors: []
+            };
+            
+            showNotification('API Diagnosis', 'Running comprehensive API tests...', 'info');
+            
+            // Test 1: Basic API test
+            console.log('🧪 Test 1: Basic API connection...');
+            fetch('/api/bybit/test')
+                .then(response => {
+                    diagnosis.endpoints.test = {
+                        status: response.status,
+                        ok: response.ok,
+                        statusText: response.statusText
+                    };
+                    return response.json();
+                })
+                .then(data => {
+                    diagnosis.endpoints.test.data = data;
+                    console.log('✅ Test endpoint result:', data);
+                    
+                    // Test 2: Positions endpoint
+                    console.log('🧪 Test 2: Positions endpoint...');
+                    return fetch('/api/bybit/positions');
+                })
+                .then(response => {
+                    diagnosis.endpoints.positions = {
+                        status: response.status,
+                        ok: response.ok,
+                        statusText: response.statusText
+                    };
+                    return response.json();
+                })
+                .then(data => {
+                    diagnosis.endpoints.positions.data = data;
+                    console.log('✅ Positions endpoint result:', data);
+                    
+                    // Test 3: Balance endpoint
+                    console.log('🧪 Test 3: Balance endpoint...');
+                    return fetch('/api/bybit/balance');
+                })
+                .then(response => {
+                    diagnosis.endpoints.balance = {
+                        status: response.status,
+                        ok: response.ok,
+                        statusText: response.statusText
+                    };
+                    return response.json();
+                })
+                .then(data => {
+                    diagnosis.endpoints.balance.data = data;
+                    console.log('✅ Balance endpoint result:', data);
+                    
+                    // Generate diagnosis report
+                    generateDiagnosisReport(diagnosis);
+                })
+                .catch(error => {
+                    console.error('❌ API diagnosis error:', error);
+                    diagnosis.errors.push(error.message);
+                    generateDiagnosisReport(diagnosis);
+                });
+        }
+        
+        // Generate and display diagnosis report
+        function generateDiagnosisReport(diagnosis) {
+            console.log('📊 Generating diagnosis report...', diagnosis);
+            
+            let report = `🔍 API Diagnosis Report\n`;
+            report += `⏰ Time: ${new Date(diagnosis.timestamp).toLocaleString()}\n`;
+            report += `🎭 Mode: ${diagnosis.demoMode ? 'DEMO' : 'REAL'}\n`;
+            report += `🔌 API Available: ${diagnosis.apiAvailable ? '✅ YES' : '❌ NO'}\n\n`;
+            
+            report += `📡 Endpoint Tests:\n`;
+            
+            // Test endpoint
+            if (diagnosis.endpoints.test) {
+                const test = diagnosis.endpoints.test;
+                report += `• /api/bybit/test: ${test.ok ? '✅ OK' : '❌ FAILED'} (${test.status})\n`;
+                if (test.data && test.data.success) {
+                    report += `  - Message: ${test.data.message}\n`;
+                } else if (test.data && test.data.error) {
+                    report += `  - Error: ${test.data.error}\n`;
+                }
+            }
+            
+            // Positions endpoint
+            if (diagnosis.endpoints.positions) {
+                const pos = diagnosis.endpoints.positions;
+                report += `• /api/bybit/positions: ${pos.ok ? '✅ OK' : '❌ FAILED'} (${pos.status})\n`;
+                if (pos.data && pos.data.success) {
+                    report += `  - Data: ${pos.data.data ? 'Available' : 'No data'}\n`;
+                } else if (pos.data && pos.data.error) {
+                    report += `  - Error: ${pos.data.error}\n`;
+                }
+                }
+            
+            // Balance endpoint
+            if (diagnosis.endpoints.balance) {
+                const bal = diagnosis.endpoints.balance;
+                report += `• /api/bybit/balance: ${bal.ok ? '✅ OK' : '❌ FAILED'} (${bal.status})\n`;
+                if (bal.data && bal.data.success) {
+                    report += `  - Data: ${bal.data.data ? 'Available' : 'No data'}\n`;
+                } else if (bal.data && bal.data.error) {
+                    report += `  - Error: ${bal.data.error}\n`;
+                }
+            }
+            
+            // Errors
+            if (diagnosis.errors.length > 0) {
+                report += `\n❌ Errors:\n`;
+                diagnosis.errors.forEach((error, index) => {
+                    report += `${index + 1}. ${error}\n`;
+                });
+            }
+            
+            // Recommendations
+            report += `\n💡 Recommendations:\n`;
+            if (diagnosis.demoMode) {
+                report += `• Switch to REAL mode to test API\n`;
+            }
+            if (!diagnosis.apiAvailable) {
+                report += `• Check API credentials in config.yaml\n`;
+                report += `• Verify Bybit API key and secret\n`;
+                report += `• Check if testnet is enabled\n`;
+            }
+            if (diagnosis.endpoints.test && !diagnosis.endpoints.test.ok) {
+                report += `• Basic API connection failed - check credentials\n`;
+            }
+            
+            console.log('📋 Diagnosis Report:', report);
+            alert(report);
+            
+            showNotification('Diagnosis Complete', 'API diagnosis report generated!', 'success');
+        }
+        
+        // Enhanced positions debugging function
+        function debugPositions() {
+            console.log('🔍 Starting positions debugging...');
+            
+            const debugInfo = {
+                timestamp: new Date().toISOString(),
+                demoMode: demoMode,
+                apiAvailable: window.bybitApiAvailable,
+                currentPositions: demoMode ? demoPositions : 'Real mode - positions loaded from API',
+                tableElement: document.getElementById('positions-table'),
+                modeIndicator: document.getElementById('mode-indicator')
+            };
+            
+            console.log('📊 Debug Info:', debugInfo);
+            
+            // Test positions API directly
+            if (!demoMode && window.bybitApiAvailable) {
+                console.log('🧪 Testing positions API for debugging...');
+                fetch('/api/bybit/positions')
+                    .then(response => {
+                        console.log('📡 Debug API Response:', {
+                            status: response.status,
+                            ok: response.ok,
+                            statusText: response.statusText
+                        });
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('📊 Debug API Data:', data);
+                        
+                        let debugReport = `🔍 Positions Debug Report\n`;
+                        debugReport += `⏰ Time: ${new Date(debugInfo.timestamp).toLocaleString()}\n`;
+                        debugReport += `🎭 Mode: ${demoMode ? 'DEMO' : 'REAL'}\n`;
+                        debugReport += `🔌 API Available: ${window.bybitApiAvailable ? '✅ YES' : '❌ NO'}\n\n`;
+                        
+                        debugReport += `📡 API Response:\n`;
+                        debugReport += `• Status: ${data.success ? '✅ Success' : '❌ Failed'}\n`;
+                        debugReport += `• Has Data: ${!!data.data ? 'Yes' : 'No'}\n`;
+                        debugReport += `• Data Type: ${typeof data.data}\n`;
+                        debugReport += `• Is Array: ${Array.isArray(data.data) ? 'Yes' : 'No'}\n`;
+                        debugReport += `• Data Length: ${data.data ? data.data.length : 'N/A'}\n`;
+                        
+                        if (data.error) {
+                            debugReport += `• Error: ${data.error}\n`;
+                        }
+                        
+                        if (data.data && Array.isArray(data.data)) {
+                            debugReport += `\n📋 Positions Found:\n`;
+                            data.data.forEach((pos, index) => {
+                                debugReport += `${index + 1}. ${pos.symbol} - ${pos.side} - Size: ${pos.size}\n`;
+                            });
+                        }
+                        
+                        debugReport += `\n💡 Recommendations:\n`;
+                        if (!data.success) {
+                            debugReport += `• API call failed: ${data.error}\n`;
+                        } else if (!data.data || data.data.length === 0) {
+                            debugReport += `• No positions found - this might be normal if you have no open positions\n`;
+                            debugReport += `• Try opening a new position and wait a few minutes\n`;
+                        } else {
+                            debugReport += `• Positions found but not displaying - check displayRealPositions function\n`;
+                        }
+                        
+                        console.log('📋 Debug Report:', debugReport);
+                        alert(debugReport);
+                    })
+                    .catch(error => {
+                        console.error('❌ Debug API Error:', error);
+                        alert(`❌ Debug API Error:\n\n${error.message}\n\nCheck console for details.`);
+                    });
+            } else {
+                // Show demo mode debug info
+                let debugReport = `🔍 Demo Mode Debug Report\n`;
+                debugReport += `⏰ Time: ${new Date(debugInfo.timestamp).toLocaleString()}\n`;
+                debugReport += `🎭 Mode: DEMO\n`;
+                debugReport += `📋 Demo Positions: ${demoPositions ? demoPositions.length : 0}\n`;
+                debugReport += `📊 Table Element: ${debugInfo.tableElement ? 'Found' : 'Not found'}\n`;
+                debugReport += `🎯 Mode Indicator: ${debugInfo.modeIndicator ? 'Found' : 'Not found'}\n\n`;
+                
+                if (demoPositions && demoPositions.length > 0) {
+                    debugReport += `📋 Demo Positions:\n`;
+                    demoPositions.forEach((pos, index) => {
+                        debugReport += `${index + 1}. ${pos.symbol} - ${pos.side} - Size: ${pos.size}\n`;
+                    });
+                }
+                
+                console.log('📋 Demo Debug Report:', debugReport);
+                alert(debugReport);
+            }
+        }
+        
+        // Show raw positions data from API
+        function showRawPositionsData() {
+            console.log('📊 Fetching raw positions data...');
+            
+            if (demoMode) {
+                alert('📊 Demo Mode Raw Data:\n\n' + JSON.stringify(demoPositions, null, 2));
+                return;
+            }
+            
+            if (!window.bybitApiAvailable) {
+                alert('❌ API not available. Please test API connection first.');
+                return;
+            }
+            
+            fetch('/api/bybit/positions')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('📊 Raw API response:', data);
+                    
+                    let rawDataReport = `📊 Raw API Response\n\n`;
+                    rawDataReport += `Status: ${data.success ? '✅ Success' : '❌ Failed'}\n`;
+                    rawDataReport += `Timestamp: ${new Date().toLocaleString()}\n\n`;
+                    
+                    if (data.error) {
+                        rawDataReport += `Error: ${data.error}\n\n`;
+                    }
+                    
+                    rawDataReport += `Full Response Structure:\n`;
+                    rawDataReport += JSON.stringify(data, null, 2);
+                    
+                    // Show in a scrollable alert
+                    const textarea = document.createElement('textarea');
+                    textarea.value = rawDataReport;
+                    textarea.style.width = '600px';
+                    textarea.style.height = '400px';
+                    textarea.style.fontFamily = 'monospace';
+                    textarea.style.fontSize = '12px';
+                    textarea.readOnly = true;
+                    
+                    const modal = document.createElement('div');
+                    modal.style.cssText = `
+                        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                        background: rgba(0,0,0,0.8); z-index: 9999; display: flex;
+                        align-items: center; justify-content: center;
+                    `;
+                    
+                    const modalContent = document.createElement('div');
+                    modalContent.style.cssText = `
+                        background: white; padding: 20px; border-radius: 10px;
+                        max-width: 90%; max-height: 90%; overflow: auto;
+                    `;
+                    
+                    const closeBtn = document.createElement('button');
+                    closeBtn.textContent = 'Close';
+                    closeBtn.onclick = () => document.body.removeChild(modal);
+                    closeBtn.style.cssText = `
+                        position: absolute; top: 10px; right: 10px;
+                        padding: 5px 10px; background: #dc3545; color: white;
+                        border: none; border-radius: 5px; cursor: pointer;
+                    `;
+                    
+                    modalContent.appendChild(closeBtn);
+                    modalContent.appendChild(document.createElement('h3')).textContent = 'Raw API Response';
+                    modalContent.appendChild(textarea);
+                    modalContent.appendChild(textarea);
+                    modal.appendChild(modalContent);
+                    document.body.appendChild(modal);
+                    
+                    console.log('📊 Raw data displayed in modal');
+                })
+                .catch(error => {
+                    console.error('❌ Error fetching raw data:', error);
+                    alert(`❌ Error fetching raw data:\n\n${error.message}`);
+                });
+        }
+        
+        // Analyze and display data structure
+        function showDataStructure() {
+            console.log('🔍 Analyzing data structure...');
+            
+            if (demoMode) {
+                alert('🔍 Demo Mode Structure:\n\n' + analyzeObjectStructure(demoPositions));
+                return;
+            }
+            
+            if (!window.bybitApiAvailable) {
+                alert('❌ API not available. Please test API connection first.');
+                return;
+            }
+            
+            fetch('/api/bybit/positions')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('🔍 Analyzing API response structure:', data);
+                    
+                    let structureReport = `🔍 Data Structure Analysis\n\n`;
+                    structureReport += `Timestamp: ${new Date().toLocaleString()}\n`;
+                    structureReport += `API Status: ${data.success ? '✅ Success' : '❌ Failed'}\n\n`;
+                    
+                    if (data.error) {
+                        structureReport += `Error: ${data.error}\n\n`;
+                    }
+                    
+                    structureReport += `Structure Analysis:\n`;
+                    structureReport += analyzeObjectStructure(data);
+                    
+                    // Show in a scrollable alert
+                    const textarea = document.createElement('textarea');
+                    textarea.value = structureReport;
+                    textarea.style.width = '600px';
+                    textarea.style.height = '400px';
+                    textarea.style.fontFamily = 'monospace';
+                    textarea.style.fontSize = '12px';
+                    textarea.readOnly = true;
+                    
+                    const modal = document.createElement('div');
+                    modal.style.cssText = `
+                        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                        background: rgba(0,0,0,0.8); z-index: 9999; display: flex;
+                        align-items: center; justify-content: center;
+                    `;
+                    
+                    const modalContent = document.createElement('div');
+                    modalContent.style.cssText = `
+                        background: white; padding: 20px; border-radius: 10px;
+                        max-width: 90%; max-height: 90%; overflow: auto;
+                    `;
+                    
+                    const closeBtn = document.createElement('button');
+                    closeBtn.textContent = 'Close';
+                    closeBtn.onclick = () => document.body.removeChild(modal);
+                    closeBtn.style.cssText = `
+                        position: absolute; top: 10px; right: 10px;
+                        padding: 5px 10px; background: #dc3545; color: white;
+                        border: none; border-radius: 5px; cursor: pointer;
+                    `;
+                    
+                    modalContent.appendChild(closeBtn);
+                    modalContent.appendChild(document.createElement('h3')).textContent = 'Data Structure Analysis';
+                    modalContent.appendChild(textarea);
+                    modal.appendChild(modalContent);
+                    document.body.appendChild(modal);
+                    
+                    console.log('🔍 Structure analysis displayed in modal');
+                })
+                .catch(error => {
+                    console.error('❌ Error analyzing structure:', error);
+                    alert(`❌ Error analyzing structure:\n\n${error.message}`);
+                });
+        }
+        
+        // Helper function to analyze object structure
+        function analyzeObjectStructure(obj, maxDepth = 4, currentDepth = 0) {
+            if (currentDepth >= maxDepth || !obj || typeof obj !== 'object') {
+                return typeof obj;
+            }
+            
+            let analysis = '';
+            const indent = '  '.repeat(currentDepth);
+            
+            if (Array.isArray(obj)) {
+                analysis += `${indent}Array[${obj.length}]\n`;
+                if (obj.length > 0 && currentDepth < maxDepth - 1) {
+                    analysis += `${indent}  First item: ${analyzeObjectStructure(obj[0], maxDepth, currentDepth + 1)}\n`;
+                }
+            } else {
+                analysis += `${indent}Object {\n`;
+                for (const key in obj) {
+                    if (obj.hasOwnProperty(key)) {
+                        const value = obj[key];
+                        const valueType = typeof value;
+                        
+                        if (valueType === 'object' && value !== null) {
+                            analysis += `${indent}  ${key}: ${analyzeObjectStructure(value, maxDepth, currentDepth + 1)}\n`;
+                        } else {
+                            analysis += `${indent}  ${key}: ${valueType} = ${JSON.stringify(value).substring(0, 100)}\n`;
+                        }
+                    }
+                }
+                analysis += `${indent}}\n`;
+            }
+            
+            return analysis;
         }
         
 
@@ -2556,12 +3008,12 @@
         const BALANCE_CACHE_DURATION = 30000; // 30 seconds
 
         function checkBalance() {
-            console.log('Checking Bybit account balance...');
+            console.log('💰 Checking Bybit account balance...');
             
             // Check if we have a recent cache
             const now = Date.now();
             if (balanceCache && (now - balanceCacheTime) < BALANCE_CACHE_DURATION) {
-                console.log('Using cached balance data');
+                console.log('📋 Using cached balance data');
                 const accountData = balanceCache.data?.list?.[0];
                 if (accountData) {
                     const totalBalance = accountData.totalWalletBalance || 0;
@@ -3408,7 +3860,9 @@
         }
         
         function loadPositions() {
-            console.log('Loading positions...');
+            console.log('🔄 Loading positions...');
+            console.log('Current mode:', demoMode ? 'DEMO' : 'REAL');
+            console.log('API available:', window.bybitApiAvailable);
             
             // Check if we're in demo mode
             if (demoMode) {
@@ -3419,7 +3873,7 @@
             
             // Check if API is available
             if (!window.bybitApiAvailable) {
-                console.log('API not available - switching to demo mode');
+                console.log('❌ API not available - switching to demo mode');
                 demoMode = true;
                 updateModeIndicator();
                 displayRealPositions(demoPositions);
@@ -3441,6 +3895,12 @@
                 </tr>
             `;
             
+            // Update last update timestamp
+            const lastUpdateElement = document.getElementById('positions-last-update');
+            if (lastUpdateElement) {
+                lastUpdateElement.textContent = new Date().toLocaleTimeString();
+            }
+            
             // Show loading notification
             showNotification(
                 'Loading Positions', 
@@ -3449,10 +3909,14 @@
             );
             
             // Fetch real positions from Bybit API
+            console.log('🌐 Fetching from /api/bybit/positions...');
             fetch('/api/bybit/positions')
                 .then(response => {
-                    console.log('Positions API response status:', response.status);
-                    console.log('Positions API response headers:', response.headers);
+                    console.log('📡 Positions API response status:', response.status);
+                    console.log('📡 Positions API response headers:', response.headers);
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
                     return response.json();
                 })
                 .then(data => {
@@ -3465,39 +3929,31 @@
                         dataLength: data.data ? data.data.length : 'N/A'
                     });
                     
-                    if (data.success && data.data) {
-                        // Ensure data.data is an array
-                        let positionsData = data.data;
-                        if (!Array.isArray(positionsData)) {
-                            console.warn('API returned non-array positions data:', positionsData);
-                            positionsData = [];
+                    if (data.success) {
+                        console.log('✅ API call successful, processing response...');
+                        console.log('🔍 Full API response structure:', data);
+                        console.log('🔍 Response keys:', Object.keys(data));
+                        console.log('🔍 Data property type:', typeof data.data);
+                        console.log('🔍 Data property value:', data.data);
+                        
+                        // Check if we have any array data
+                        const arrayKeys = Object.keys(data).filter(key => Array.isArray(data[key]));
+                        console.log('🔍 Array properties found:', arrayKeys);
+                        
+                        if (arrayKeys.length > 0) {
+                            console.log('🔍 First array data:', data[arrayKeys[0]]);
                         }
                         
-                        console.log('Processed positions data:', positionsData);
-                        console.log('Positions count:', positionsData.length);
+                        // Pass the entire response to displayRealPositions
+                        // It will handle the data structure parsing
+                        displayRealPositions(data);
                         
-                        if (positionsData.length === 0) {
-                            // No active positions
-                            console.log('No active positions found - showing empty state');
-                            const tbody = document.getElementById('positions-table');
-                            tbody.innerHTML = `
-                                <tr>
-                                    <td colspan="9" class="text-center text-muted">
-                                        <i class="fas fa-inbox me-2"></i>No active positions
-                                    </td>
-                                </tr>
-                            `;
-                        } else {
-                            // Display real positions
-                            console.log('Displaying positions:', positionsData);
-                            displayRealPositions(positionsData);
-                            
-                            showNotification(
-                                'Positions Loaded', 
-                                `Successfully loaded ${positionsData.length} active position(s) from Bybit.`, 
-                                'success'
-                            );
-                        }
+                        // Show success notification
+                        showNotification(
+                            'Positions Loaded', 
+                            `Successfully processed API response from Bybit. Found ${arrayKeys.length} array properties.`, 
+                            'success'
+                        );
                     } else {
                         console.error('Failed to load positions:', data.error || 'Unknown error');
                         console.error('Full error response:', data);
@@ -3744,33 +4200,129 @@
             }, 1500);
         }
         
+        // Helper function to find nested arrays in objects
+        function findNestedArrays(obj, maxDepth = 3, currentDepth = 0) {
+            if (currentDepth >= maxDepth || !obj || typeof obj !== 'object') {
+                return [];
+            }
+            
+            const arrays = [];
+            
+            for (const key in obj) {
+                if (obj.hasOwnProperty(key)) {
+                    const value = obj[key];
+                    
+                    if (Array.isArray(value)) {
+                        // Check if this array looks like positions data
+                        if (value.length > 0 && value[0] && typeof value[0] === 'object') {
+                            const firstItem = value[0];
+                            if (firstItem.symbol || firstItem.side || firstItem.size !== undefined) {
+                                console.log('✅ Found likely positions array at depth', currentDepth, 'in key:', key);
+                                arrays.push(value);
+                            }
+                        }
+                    } else if (typeof value === 'object' && value !== null) {
+                        // Recursively search deeper
+                        const nestedArrays = findNestedArrays(value, maxDepth, currentDepth + 1);
+                        arrays.push(...nestedArrays);
+                    }
+                }
+            }
+            
+            return arrays;
+        }
+        
         function displayRealPositions(positions) {
+            console.log('🔍 displayRealPositions called with:', positions);
+            console.log('🔍 Data type:', typeof positions);
+            console.log('🔍 Is array:', Array.isArray(positions));
+            
             const tbody = document.getElementById('positions-table');
             
-            // Ensure positions is an array
+            // Handle different data formats from Bybit API
+            let positionsArray = [];
+            
             if (!positions) {
-                positions = [];
+                console.warn('No positions data provided');
+                positionsArray = [];
+            } else if (Array.isArray(positions)) {
+                // Direct array - use as is
+                console.log('✅ Positions is already an array');
+                positionsArray = positions;
+            } else if (positions && typeof positions === 'object') {
+                // Object with nested data structure
+                console.log('🔍 Processing object data structure:', positions);
+                console.log('🔍 Object keys:', Object.keys(positions));
+                
+                // First, try standard API response formats
+                if (positions.data && Array.isArray(positions.data)) {
+                    // Standard API response format: { data: [...] }
+                    console.log('✅ Found positions.data array');
+                    positionsArray = positions.data;
+                } else if (positions.list && Array.isArray(positions.list)) {
+                    // Alternative API response format: { list: [...] }
+                    console.log('✅ Found positions.list array');
+                    positionsArray = positions.list;
+                } else if (positions.result && Array.isArray(positions.result)) {
+                    // Another possible format: { result: [...] }
+                    console.log('✅ Found positions.result array');
+                    positionsArray = positions.result;
+                } else {
+                    // Try to find any array property
+                    const arrayProps = Object.keys(positions).filter(key => Array.isArray(positions[key]));
+                    console.log('🔍 All array properties found:', arrayProps);
+                    
+                    if (arrayProps.length > 0) {
+                        // Try to find the most likely positions array
+                        const likelyPositionsKey = arrayProps.find(key => {
+                            const arr = positions[key];
+                            return arr.length > 0 && arr[0] && 
+                                   (arr[0].symbol || arr[0].side || arr[0].size !== undefined);
+                        });
+                        
+                        if (likelyPositionsKey) {
+                            console.log('✅ Found likely positions array in:', likelyPositionsKey);
+                            positionsArray = positions[likelyPositionsKey];
+                        } else {
+                            console.log('✅ Using first array found:', arrayProps[0]);
+                            positionsArray = positions[arrayProps[0]];
+                        }
+                    } else {
+                        // Deep search for nested arrays
+                        console.log('🔍 Deep searching for nested arrays...');
+                        const deepArrays = findNestedArrays(positions);
+                        if (deepArrays.length > 0) {
+                            console.log('✅ Found nested arrays:', deepArrays);
+                            positionsArray = deepArrays[0];
+                        } else {
+                            console.warn('❌ No array found in positions object:', positions);
+                            positionsArray = [];
+                        }
+                    }
+                }
+            } else {
+                console.warn('❌ Unexpected positions data type:', typeof positions);
+                positionsArray = [];
             }
             
-            // Convert to array if it's not already
-            if (!Array.isArray(positions)) {
-                console.warn('Positions is not an array, converting:', positions);
-                positions = Array.isArray(positions.data) ? positions.data : [];
-            }
+            console.log('🔍 Final positions array:', positionsArray);
+            console.log('🔍 Array length:', positionsArray.length);
             
-            if (positions.length === 0) {
-                                        tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted"><i class="fas fa-inbox me-2"></i>No active positions</td></tr>';
+            if (positionsArray.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted"><i class="fas fa-inbox me-2"></i>No active positions</td></tr>';
                 return;
             }
             
             // Validate position data structure
-            const validPositions = positions.filter(pos => {
+            const validPositions = positionsArray.filter(pos => {
                 const isValid = pos && pos.symbol && pos.side && pos.size !== undefined;
                 if (!isValid) {
                     console.warn('Invalid position data:', pos);
                 }
                 return isValid;
             });
+            
+            console.log('🔍 Valid positions after filtering:', validPositions);
             
             if (validPositions.length === 0) {
                 tbody.innerHTML = `
@@ -3780,6 +4332,7 @@
                                 <i class="fas fa-exclamation-triangle me-2"></i>
                                 <strong>Data Validation Error</strong>
                                 <br><small class="text-muted">Position data format is invalid. Check API response.</small>
+                                <br><small class="text-muted">Raw data: ${JSON.stringify(positionsArray).substring(0, 200)}...</small>
                             </div>
                         </td>
                     </tr>
@@ -4325,16 +4878,33 @@
                     modal.hide();
                     }
                     
-                    // Refresh data immediately
-                    loadPositions();
-                    loadAccountBalance();
+                    // Close modal
+                    const modalInstance = bootstrap.Modal.getInstance(document.getElementById('positionModal'));
+                    if (modalInstance) {
+                        modalInstance.hide();
+                    }
                     
-                    // Show success notification
+                    // Show success notification first
                     showNotification(
                         'Position Opened', 
-                        `Successfully opened ${side} position for ${symbol}`, 
+                        `Successfully opened ${side} position for ${symbol}. Refreshing data...`, 
                         'success'
                     );
+                    
+                    // Wait a moment for the order to be processed, then refresh data
+                    console.log('🔄 Waiting 3 seconds before refreshing positions...');
+                    setTimeout(() => {
+                        console.log('🔄 Refreshing positions after order placement...');
+                        loadPositions();
+                        loadAccountBalance();
+                        
+                        // Show refresh notification
+                        showNotification(
+                            'Data Refreshed', 
+                            `Positions and balance updated after opening ${side} position for ${symbol}`, 
+                            'info'
+                        );
+                    }, 3000);
                 } else {
                     throw new Error(`Failed to open position: ${data.error}`);
                 }
@@ -4711,26 +5281,35 @@
             
             // Simulate loading Bot 2025 status
             setTimeout(() => {
-                updateSessionStatus();
+                checkSessionStatus(); // Use the correct session status function
                 updateStatusBadges();
             }, 1000);
         }
         
         function updateSessionStatus() {
+            console.log('🔄 updateSessionStatus() called - updating session display...');
             // Update US session status
             const usStatus = document.getElementById('us-session-status');
             const usBadge = document.getElementById('us-status-badge');
             
-            // Simulate session check (in real implementation, this would call the Bot 2025 API)
+            // Use proper Cancun timezone calculation
             const now = new Date();
-            const hour = now.getHours();
-            const minute = now.getMinutes();
+            const cancunTime = new Date(now.toLocaleString("en-US", {timeZone: "America/Cancun"}));
+            const hour = cancunTime.getHours();
+            const minute = cancunTime.getMinutes();
             const currentTime = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
             
-            // Check if US session is active (simplified logic)
+            // Check if US session is active (proper logic with daylight saving time)
             let usActive = false;
-            if (hour >= 8 && hour < 16) {
-                usActive = true;
+            const month = cancunTime.getMonth() + 1; // 0-indexed
+            const isDaylight = (month >= 3 && month <= 11);
+            
+            if (isDaylight) {
+                // EDT: 8:30 - 15:00
+                usActive = (hour === 8 && minute >= 30) || (hour > 8 && hour < 15) || (hour === 15 && minute === 0);
+            } else {
+                // EST: 9:30 - 16:00
+                usActive = (hour === 9 && minute >= 30) || (hour > 9 && hour < 16) || (hour === 16 && minute === 0);
             }
             
             if (usActive) {
@@ -4749,9 +5328,9 @@
             const asianStatus = document.getElementById('asian-session-status');
             const asianBadge = document.getElementById('asian-status-badge');
             
-            // Check if Asian session is active (19:30 - 01:30)
+            // Check if Asian session is active (19:30 - 01:30 next day)
             let asianActive = false;
-            if ((hour >= 19 && hour <= 23) || (hour >= 0 && hour <= 1)) {
+            if ((hour === 19 && minute >= 30) || (hour > 19 && hour <= 23) || (hour >= 0 && hour < 1) || (hour === 1 && minute <= 30)) {
                 asianActive = true;
             }
             
@@ -4883,11 +5462,83 @@
                 }
             };
             
-            // Simulate update (in real implementation, this would call the API)
-            setTimeout(() => {
-                alert('Session configuration updated successfully!');
-                loadSystemStatus();
-            }, 1000);
+            // Update session toggles and refresh status
+            console.log('Session configuration updated:', sessionData);
+            
+            // Immediately check session status after update
+            checkSessionStatus();
+            
+            // Show success message
+            showNotification(
+                'Sessions Updated', 
+                'Trading session configuration has been updated successfully!', 
+                'success'
+            );
+        }
+        
+        // Manual session status refresh
+        function refreshSessionStatus() {
+            console.log('🔄 Manually refreshing session status...');
+            
+            // Update current time first
+            updateCurrentTime();
+            
+            // Check session status
+            checkSessionStatus();
+            
+            // Show refresh notification
+            showNotification(
+                'Session Status Refreshed', 
+                'Session status has been manually refreshed!', 
+                'info'
+            );
+        }
+        
+        // Display detailed session information
+        function showSessionInfo() {
+            const now = new Date();
+            const cancunTime = new Date(now.toLocaleString("en-US", {timeZone: "America/Cancun"}));
+            const hour = cancunTime.getHours();
+            const minute = cancunTime.getMinutes();
+            const currentTime = hour * 60 + minute;
+            
+            // Check daylight saving time
+            const month = cancunTime.getMonth() + 1;
+            const isDaylight = (month >= 3 && month <= 11);
+            
+            // Calculate session times
+            const usStartTime = isDaylight ? 8 * 60 + 30 : 9 * 60 + 30;
+            const usEndTime = isDaylight ? 15 * 60 : 16 * 60;
+            const asianStartTime = 19 * 60 + 30;
+            const asianEndTime = 1 * 60 + 30;
+            
+            // Check current session status
+            const usActive = currentTime >= usStartTime && currentTime <= usEndTime;
+            const asianActive = currentTime >= asianStartTime || currentTime <= asianEndTime;
+            
+            // Safe access to rangeBoxes with fallback
+            const usRangeStatus = (rangeBoxes && rangeBoxes.us_session && rangeBoxes.us_session.calculated) ? '✅ Ready' : '⏳ Calculating...';
+            const asianRangeStatus = (rangeBoxes && rangeBoxes.asian_session && rangeBoxes.asian_session.calculated) ? '✅ Ready' : '⏳ Calculating...';
+            
+            const info = `
+🕐 Current Cancun Time: ${hour}:${minute.toString().padStart(2, '0')}
+
+🇺🇸 US Session (${isDaylight ? 'EDT' : 'EST'}):
+   • Time: ${Math.floor(usStartTime/60)}:${(usStartTime%60).toString().padStart(2, '0')} - ${Math.floor(usEndTime/60)}:${(usEndTime%60).toString().padStart(2, '0')}
+   • Status: ${usActive ? '🟢 ACTIVE' : '🔴 INACTIVE'}
+   • Toggle: ${document.getElementById('us-session-toggle').checked ? '✅ Enabled' : '❌ Disabled'}
+
+🌏 Asian Session:
+   • Time: ${Math.floor(asianStartTime/60)}:${(asianStartTime%60).toString().padStart(2, '0')} - ${Math.floor(asianEndTime/60)}:${(asianEndTime%60).toString().padStart(2, '0')}
+   • Status: ${asianActive ? '🟢 ACTIVE' : '🔴 INACTIVE'}
+   • Toggle: ${document.getElementById('asian-session-toggle').checked ? '✅ Enabled' : '❌ Disabled'}
+
+📊 Range Box Status:
+   • US Session: ${usRangeStatus}
+   • Asian Session: ${asianRangeStatus}
+            `;
+            
+            alert(info);
         }
         
         function updateBreakoutStrategy() {
@@ -5047,6 +5698,11 @@
             calculateAllRangeBoxes: typeof calculateAllRangeBoxes,
             resetSessionTrades: typeof resetSessionTrades,
             updateTradingSessions: typeof updateTradingSessions,
+            refreshSessionStatus: typeof refreshSessionStatus,
+            showSessionInfo: typeof showSessionInfo,
+            debugPositions: typeof debugPositions,
+            showRawPositionsData: typeof showRawPositionsData,
+            showDataStructure: typeof showDataStructure,
             updateBreakoutStrategy: typeof updateBreakoutStrategy,
             updateRiskManagement: typeof updateRiskManagement,
             updateTechnicalFilters: typeof updateTechnicalFilters,
@@ -5113,7 +5769,7 @@
             
             // Simulate loading system status
             setTimeout(() => {
-                updateSessionStatus();
+                checkSessionStatus(); // Use the correct session status function
                 updateStatusBadges();
             }, 1000);
         }
@@ -5205,8 +5861,8 @@
             setInterval(updateCurrentTime, 1000);
             
             // Start session monitoring
-            checkSessionStatus();
-            setInterval(checkSessionStatus, 30000); // Check every 30 seconds
+            checkSessionStatus(); // Check immediately
+            setInterval(checkSessionStatus, 10000); // Check every 10 seconds for more responsive updates
             
             addSystemLog('New features initialized successfully', 'success');
             console.log('New features initialized successfully');
@@ -5215,10 +5871,10 @@
         // Update current time display
         function updateCurrentTime() {
             const now = new Date();
-            const cancunTime = new Date(now.getTime() - (5 * 60 * 60 * 1000)); // UTC-5
-            const timeString = cancunTime.toLocaleTimeString('en-US', { 
+            // Use proper timezone conversion for Cancun (UTC-5)
+            const timeString = now.toLocaleTimeString('en-US', { 
                 hour12: false, 
-                timeZone: 'America/Cancun' 
+                timeZone: 'America/Cancun'
             });
             document.getElementById('current-time').textContent = timeString;
         }
