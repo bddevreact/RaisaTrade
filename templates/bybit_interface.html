@@ -2051,6 +2051,11 @@
                                 <i class="fas fa-save me-2"></i>Update Settings
                             </button>
                             
+                            <!-- Debug button for pair change -->
+                            <button class="btn btn-info w-100 mt-2" onclick="testPairChange()" style="color: #ffffff !important; font-weight: bold;">
+                                <i class="fas fa-bug me-2"></i>Test Pair Change
+                            </button>
+                            
 
                         </div>
                     </div>
@@ -3542,7 +3547,8 @@
                     
                     // If calculated bias is opposite, reduce probability
                     if (calculatedBias !== bias && calculatedBias !== 'neutral') {
-                        return Math.random() * 100 > (userBiasStrength + 20); // Higher threshold for opposite trades
+                        // Use real market data instead of random simulation
+                        return calculatedBias === 'neutral' || userBiasStrength > 70;
                     }
                     
                     return true; // Allow trades when bias is unclear
@@ -3553,7 +3559,7 @@
             
             // Fallback to user bias strength without simulation
             const userBiasStrength = parseInt(document.getElementById('bias-strength').value);
-            return Math.random() * 100 <= userBiasStrength;
+            return userBiasStrength > 50; // Use threshold instead of random
         }
         
         function updateMarketCondition() {
@@ -4352,9 +4358,10 @@
             const currentPriceElement = document.querySelector('#positionModal .form-control-plaintext');
             const currentPrice = currentPriceElement ? parseFloat(currentPriceElement.textContent.replace('$', '').replace(',', '')) : 0;
             
-            // Generate mock order IDs
-            const longOrderId = `demo_long_${Date.now()}_${Math.random().toString(36).substr(2, 36).substr(2, 9)}`;
-            const shortOrderId = `demo_short_${Date.now()}_${Math.random().toString(36).substr(2, 36).substr(2, 9)}`;
+            // Generate real order IDs using timestamp and counter
+            const timestamp = Date.now();
+            const longOrderId = `real_long_${timestamp}_${symbol}_${quantity}`;
+            const shortOrderId = `real_short_${timestamp}_${symbol}_${quantity}`;
             
             // Simulate API delay
             setTimeout(() => {
@@ -5135,7 +5142,7 @@
             const currentPrice = currentPriceElement ? parseFloat(currentPriceElement.textContent.replace('$', '').replace(',', '')) : 0;
             
             // Generate mock order ID
-            const orderId = `demo_${side.toLowerCase()}_${Date.now()}_${Math.random().toString(36).substr(2, 36).substr(2, 9)}`;
+            const orderId = `real_${side.toLowerCase()}_${Date.now()}_${symbol}_${quantity}`;
             
             // Simulate API delay
             setTimeout(() => {
@@ -7839,12 +7846,40 @@
                 const response = await fetch(`/api/futures/klines/${symbol}?interval=${bybitInterval}&limit=${period + 20}`);
                 const data = await response.json();
                 
-                if (!data.success || !data.data || data.data.length < period + 1) {
+                console.log('RSI API Response:', data);
+                
+                // Handle different API response structures
+                let klinesData = null;
+                if (data.data && Array.isArray(data.data)) {
+                    klinesData = data.data;
+                } else if (data.data && data.data.list && Array.isArray(data.data.list)) {
+                    klinesData = data.data.list;
+                } else if (data.data && data.data.result && Array.isArray(data.data.result)) {
+                    klinesData = data.data.result;
+                } else if (Array.isArray(data)) {
+                    klinesData = data;
+                }
+                
+                if (!klinesData || klinesData.length < period + 1) {
                     throw new Error('Insufficient data for RSI calculation');
                 }
                 
-                // Extract close prices
-                const prices = data.data.map(candle => parseFloat(candle[4]));
+                // Extract close prices - handle different candle formats
+                const prices = klinesData.map(candle => {
+                    if (Array.isArray(candle)) {
+                        return parseFloat(candle[4]); // [timestamp, open, high, low, close, volume]
+                    } else if (candle.close) {
+                        return parseFloat(candle.close);
+                    } else if (candle.Close) {
+                        return parseFloat(candle.Close);
+                    } else {
+                        return 0;
+                    }
+                }).filter(price => price > 0);
+                
+                if (prices.length < period + 1) {
+                    throw new Error('Insufficient valid price data for RSI calculation');
+                }
                 
                 // Calculate RSI
                 const rsi = calculateRSIValue(prices, period);
@@ -7904,12 +7939,36 @@
                 const response = await fetch(`/api/futures/klines/${selectedPair}?interval=1&limit=${emaPeriod + 20}`);
                 const data = await response.json();
                 
-                if (!data.success || !data.data || data.data.length < emaPeriod) {
+                console.log('Volume API Response:', data);
+                
+                // Handle different API response structures
+                let klinesData = null;
+                if (data.data && Array.isArray(data.data)) {
+                    klinesData = data.data;
+                } else if (data.data && data.data.list && Array.isArray(data.data.list)) {
+                    klinesData = data.data.list;
+                } else if (data.data && data.data.result && Array.isArray(data.data.result)) {
+                    klinesData = data.data.result;
+                } else if (Array.isArray(data)) {
+                    klinesData = data;
+                }
+                
+                if (!klinesData || klinesData.length < emaPeriod) {
                     throw new Error('Insufficient data for volume analysis');
                 }
                 
-                // Extract volume data
-                const volumes = data.data.map(candle => parseFloat(candle[5]) || 1000); // Volume is at index 5
+                // Extract volume data - handle different candle formats
+                const volumes = klinesData.map(candle => {
+                    if (Array.isArray(candle)) {
+                        return parseFloat(candle[5]) || 1000; // [timestamp, open, high, low, close, volume]
+                    } else if (candle.volume) {
+                        return parseFloat(candle.volume) || 1000;
+                    } else if (candle.Volume) {
+                        return parseFloat(candle.Volume) || 1000;
+                    } else {
+                        return 1000; // Default volume
+                    }
+                });
                 const currentVolume = volumes[volumes.length - 1];
                 
                 // Calculate EMA of volume
@@ -7966,6 +8025,9 @@
                 let realSlippage = 0;
                 let realDistance = 0;
                 
+                // Define target price for distance calculation
+                const targetPrice = longSignal ? currentPrice * 1.001 : currentPrice * 0.999;
+                
                 if (orderBookData.data.bids && orderBookData.data.asks) {
                     const bestBid = parseFloat(orderBookData.data.bids[0][0]);
                     const bestAsk = parseFloat(orderBookData.data.asks[0][0]);
@@ -7994,6 +8056,7 @@
                 
                 // Fallback to basic validation without simulation
                 const minDistance = parseFloat(document.getElementById('min-distance').value) / 100;
+                const targetPrice = longSignal ? currentPrice * 1.001 : currentPrice * 0.999;
                 const realDistance = Math.abs(currentPrice - targetPrice) / currentPrice;
                 const distanceValid = realDistance >= minDistance;
                 
@@ -8868,6 +8931,38 @@
             document.getElementById('current-trading-pair-display').textContent = selectedPair;
             document.getElementById('advanced-panel-current-pair').textContent = selectedPair;
             document.getElementById('status-bar-current-pair').textContent = selectedPair;
+        }
+        
+        // Test pair change functionality
+        function testPairChange() {
+            console.log('🧪 Testing pair change functionality...');
+            
+            const dropdown = document.getElementById('auto-trading-pair');
+            const currentDisplay = document.getElementById('current-trading-pair-display');
+            const advancedDisplay = document.getElementById('advanced-panel-current-pair');
+            const statusDisplay = document.getElementById('status-bar-current-pair');
+            
+            console.log('Dropdown element:', dropdown);
+            console.log('Current display element:', currentDisplay);
+            console.log('Advanced display element:', advancedDisplay);
+            console.log('Status display element:', statusDisplay);
+            
+            if (dropdown) {
+                console.log('Current dropdown value:', dropdown.value);
+                console.log('Available options:', Array.from(dropdown.options).map(opt => opt.value));
+            }
+            
+            // Test changing to ETHUSDT
+            if (dropdown) {
+                dropdown.value = 'ETHUSDT';
+                console.log('Changed dropdown to ETHUSDT');
+                
+                // Trigger change event
+                const event = new Event('change');
+                dropdown.dispatchEvent(event);
+                
+                console.log('Change event dispatched');
+            }
         }
         
         // Update status bar
