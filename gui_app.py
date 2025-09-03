@@ -38,8 +38,19 @@ try:
     from bybit_api import BybitAPI as BybitAPIClass
     BYBIT_AVAILABLE = True
     logger.info("Bybit API imported successfully")
+    
+    # Check if pybit is available
+    try:
+        import pybit
+        PYBIT_AVAILABLE = True
+        logger.info("Pybit library available for Bybit API")
+    except ImportError:
+        PYBIT_AVAILABLE = False
+        logger.warning("Pybit library not available, using manual implementation")
+        
 except ImportError as e:
     BYBIT_AVAILABLE = False
+    PYBIT_AVAILABLE = False
     logger.warning(f"Bybit API not available: {e}")
 
 # Try to import database - fallback to simple database if SQLite is not available
@@ -51,15 +62,7 @@ except ImportError as e:
     logger.info("Using simple JSON-based database")
     from simple_database import SimpleDatabase as Database
 
-from auto_trader import get_auto_trader, start_auto_trading, stop_auto_trading, restart_auto_trading, get_auto_trading_status
-from futures_trading import (
-    get_futures_trader, create_futures_grid, create_hedging_grid,
-    get_dynamic_limits, check_liquidation_risk, get_strategy_status,
-    get_performance_metrics
-)
-from backtesting import (
-    run_backtest, enable_paper_trading, disable_paper_trading, get_paper_trading_ledger
-)
+from auto_trader import get_auto_trader, start_auto_trading, stop_auto_trading, get_auto_trading_status
 # Try to import PionexWebSocket, fallback to None if not available
 try:
     from pionex_ws import PionexWebSocket
@@ -1437,17 +1440,49 @@ def api_futures_trade():
         if not all([symbol, side, quantity, order_type]):
             return jsonify({'success': False, 'error': 'Missing required parameters'})
         
-        # Execute futures trade
-        result = trading_bot.execute_futures_trade(
-            symbol=symbol,
-            side=side,
-            qty=quantity,
-            order_type=order_type,
-            price=price,
-            leverage=leverage,
-            stop_loss=stop_loss,
-            take_profit=take_profit
-        )
+        if not BYBIT_AVAILABLE:
+            return jsonify({'success': False, 'error': 'Bybit API not available'})
+        
+        # Get API credentials from config
+        config = get_config()
+        bybit_config = config.get('bybit', {})
+        
+        if not bybit_config.get('enabled'):
+            return jsonify({'success': False, 'error': 'Bybit futures trading not enabled'})
+        
+        api_key = bybit_config.get('api_key') or os.getenv('BYBIT_API_KEY')
+        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET')
+        testnet = bybit_config.get('testnet', False)
+        
+        if not api_key or not api_secret:
+            return jsonify({'success': False, 'error': 'Bybit API credentials not configured'})
+        
+        # Initialize Bybit API
+        bybit_api = BybitAPIClass(api_key, api_secret, testnet)
+        
+        # Set leverage first
+        leverage_result = bybit_api.set_leverage(symbol, leverage)
+        if not leverage_result.get('success'):
+            return jsonify({'success': False, 'error': f'Failed to set leverage: {leverage_result.get("error")}'})
+        
+        # Place the order
+        order_params = {
+            'category': 'linear',
+            'symbol': symbol,
+            'side': side.title(),
+            'orderType': order_type.title(),
+            'qty': str(quantity),
+            'timeInForce': 'GTC'
+        }
+        
+        if price and order_type.upper() == 'LIMIT':
+            order_params['price'] = str(price)
+        
+        # Place the order using pybit
+        if PYBIT_AVAILABLE:
+            result = bybit_api._make_request_with_pybit('place_order', **order_params)
+        else:
+            result = bybit_api.place_futures_order(symbol, side, order_type, quantity, price, leverage)
         
         return jsonify(result)
         
@@ -1481,12 +1516,29 @@ def api_futures_leverage():
         if not all([symbol, leverage]):
             return jsonify({'success': False, 'error': 'Missing symbol or leverage'})
         
-        # Set leverage using Bybit API
-        if trading_bot.bybit_api:
-            result = trading_bot.bybit_api.set_leverage(symbol, leverage)
-            return jsonify(result)
-        else:
-            return jsonify({'success': False, 'error': 'Bybit API not initialized'})
+        if not BYBIT_AVAILABLE:
+            return jsonify({'success': False, 'error': 'Bybit API not available'})
+        
+        # Get API credentials from config
+        config = get_config()
+        bybit_config = config.get('bybit', {})
+        
+        if not bybit_config.get('enabled'):
+            return jsonify({'success': False, 'error': 'Bybit futures trading not enabled'})
+        
+        api_key = bybit_config.get('api_key') or os.getenv('BYBIT_API_KEY')
+        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET')
+        testnet = bybit_config.get('testnet', False)
+        
+        if not api_key or not api_secret:
+            return jsonify({'success': False, 'error': 'Bybit API credentials not configured'})
+        
+        # Initialize Bybit API
+        bybit_api = BybitAPIClass(api_key, api_secret, testnet)
+        
+        # Set leverage
+        result = bybit_api.set_leverage(symbol, leverage)
+        return jsonify(result)
         
     except Exception as e:
         logger.error(f"Error setting futures leverage: {e}")
@@ -1504,12 +1556,29 @@ def api_futures_close_position():
         if not all([symbol, side, size]):
             return jsonify({'success': False, 'error': 'Missing required parameters'})
         
-        # Close position using Bybit API
-        if trading_bot.bybit_api:
-            result = trading_bot.bybit_api.close_futures_position(symbol, side, size)
-            return jsonify(result)
-        else:
-            return jsonify({'success': False, 'error': 'Bybit API not initialized'})
+        if not BYBIT_AVAILABLE:
+            return jsonify({'success': False, 'error': 'Bybit API not available'})
+        
+        # Get API credentials from config
+        config = get_config()
+        bybit_config = config.get('bybit', {})
+        
+        if not bybit_config.get('enabled'):
+            return jsonify({'success': False, 'error': 'Bybit futures trading not enabled'})
+        
+        api_key = bybit_config.get('api_key') or os.getenv('BYBIT_API_KEY')
+        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET')
+        testnet = bybit_config.get('testnet', False)
+        
+        if not api_key or not api_secret:
+            return jsonify({'success': False, 'error': 'Bybit API credentials not configured'})
+        
+        # Initialize Bybit API
+        bybit_api = BybitAPIClass(api_key, api_secret, testnet)
+        
+        # Close position
+        result = bybit_api.close_futures_position(symbol, side, size)
+        return jsonify(result)
         
     except Exception as e:
         logger.error(f"Error closing futures position: {e}")
@@ -1534,11 +1603,30 @@ def api_futures_positions():
 def api_futures_market_data(symbol):
     """API endpoint for futures market data"""
     try:
-        if trading_bot.bybit_api:
-            result = trading_bot.bybit_api.get_market_price(symbol)
-            return jsonify(result)
-        else:
-            return jsonify({'success': False, 'error': 'Bybit API not initialized'})
+        if not BYBIT_AVAILABLE:
+            return jsonify({'success': False, 'error': 'Bybit API not available'})
+        
+        # Get API credentials from config
+        config = get_config()
+        bybit_config = config.get('bybit', {})
+        
+        if not bybit_config.get('enabled'):
+            return jsonify({'success': False, 'error': 'Bybit futures trading not enabled'})
+        
+        api_key = bybit_config.get('api_key') or os.getenv('BYBIT_API_KEY')
+        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET')
+        testnet = bybit_config.get('testnet', False)
+        
+        if not api_key or not api_secret:
+            return jsonify({'success': False, 'error': 'Bybit API credentials not configured'})
+        
+        # Initialize Bybit API
+        bybit_api = BybitAPIClass(api_key, api_secret, testnet)
+        
+        # Get market data
+        result = bybit_api.get_futures_ticker(symbol)
+        return jsonify(result)
+        
     except Exception as e:
         logger.error(f"Error loading futures market data: {e}")
         return jsonify({'success': False, 'error': str(e)})
@@ -1550,11 +1638,30 @@ def api_futures_klines(symbol):
         interval = request.args.get('interval', '5')
         limit = request.args.get('limit', 100)
         
-        if trading_bot.bybit_api:
-            result = trading_bot.bybit_api.get_klines(symbol, interval, int(limit))
-            return jsonify(result)
-        else:
-            return jsonify({'success': False, 'error': 'Bybit API not initialized'})
+        if not BYBIT_AVAILABLE:
+            return jsonify({'success': False, 'error': 'Bybit API not available'})
+        
+        # Get API credentials from config
+        config = get_config()
+        bybit_config = config.get('bybit', {})
+        
+        if not bybit_config.get('enabled'):
+            return jsonify({'success': False, 'error': 'Bybit futures trading not enabled'})
+        
+        api_key = bybit_config.get('api_key') or os.getenv('BYBIT_API_KEY')
+        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET')
+        testnet = bybit_config.get('testnet', False)
+        
+        if not api_key or not api_secret:
+            return jsonify({'success': False, 'error': 'Bybit API credentials not configured'})
+        
+        # Initialize Bybit API
+        bybit_api = BybitAPIClass(api_key, api_secret, testnet)
+        
+        # Get klines data
+        result = bybit_api.get_futures_klines(symbol, interval, int(limit))
+        return jsonify(result)
+        
     except Exception as e:
         logger.error(f"Error loading futures klines: {e}")
         return jsonify({'success': False, 'error': str(e)})
@@ -1565,11 +1672,30 @@ def api_futures_orderbook(symbol):
     try:
         limit = request.args.get('limit', 25)
         
-        if trading_bot.bybit_api:
-            result = trading_bot.bybit_api.get_orderbook(symbol, int(limit))
-            return jsonify(result)
-        else:
-            return jsonify({'success': False, 'error': 'Bybit API not initialized'})
+        if not BYBIT_AVAILABLE:
+            return jsonify({'success': False, 'error': 'Bybit API not available'})
+        
+        # Get API credentials from config
+        config = get_config()
+        bybit_config = config.get('bybit', {})
+        
+        if not bybit_config.get('enabled'):
+            return jsonify({'success': False, 'error': 'Bybit futures trading not enabled'})
+        
+        api_key = bybit_config.get('api_key') or os.getenv('BYBIT_API_KEY')
+        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET')
+        testnet = bybit_config.get('testnet', False)
+        
+        if not api_key or not api_secret:
+            return jsonify({'success': False, 'error': 'Bybit API credentials not configured'})
+        
+        # Initialize Bybit API
+        bybit_api = BybitAPIClass(api_key, api_secret, testnet)
+        
+        # Get orderbook data
+        result = bybit_api.get_futures_orderbook(symbol, int(limit))
+        return jsonify(result)
+        
     except Exception as e:
         logger.error(f"Error loading futures orderbook: {e}")
         return jsonify({'success': False, 'error': str(e)})
@@ -1580,13 +1706,66 @@ def api_futures_trades(symbol):
     try:
         limit = request.args.get('limit', 100)
         
-        if trading_bot.bybit_api:
-            result = trading_bot.bybit_api.get_recent_trades(symbol, int(limit))
-            return jsonify(result)
-        else:
-            return jsonify({'success': False, 'error': 'Bybit API not initialized'})
+        if not BYBIT_AVAILABLE:
+            return jsonify({'success': False, 'error': 'Bybit API not available'})
+        
+        # Get API credentials from config
+        config = get_config()
+        bybit_config = config.get('bybit', {})
+        
+        if not bybit_config.get('enabled'):
+            return jsonify({'success': False, 'error': 'Bybit futures trading not enabled'})
+        
+        api_key = bybit_config.get('api_key') or os.getenv('BYBIT_API_KEY')
+        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET')
+        testnet = bybit_config.get('testnet', False)
+        
+        if not api_key or not api_secret:
+            return jsonify({'success': False, 'error': 'Bybit API credentials not configured'})
+        
+        # Initialize Bybit API
+        bybit_api = BybitAPIClass(api_key, api_secret, testnet)
+        
+        # Get recent trades data
+        result = bybit_api.get_futures_recent_trades(symbol, int(limit))
+        return jsonify(result)
+        
     except Exception as e:
         logger.error(f"Error loading futures trades: {e}")
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/api/futures/performance', methods=['GET'])
+def api_futures_performance():
+    """API endpoint for futures performance metrics"""
+    try:
+        timeframe = request.args.get('timeframe', '24h')
+        
+        if not BYBIT_AVAILABLE:
+            return jsonify({'success': False, 'error': 'Bybit API not available'})
+        
+        # Get API credentials from config
+        config = get_config()
+        bybit_config = config.get('bybit', {})
+        
+        if not bybit_config.get('enabled'):
+            return jsonify({'success': False, 'error': 'Bybit futures trading not enabled'})
+        
+        api_key = bybit_config.get('api_key') or os.getenv('BYBIT_API_KEY')
+        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET')
+        testnet = bybit_config.get('testnet', False)
+        
+        if not api_key or not api_secret:
+            return jsonify({'success': False, 'error': 'Bybit API credentials not configured'})
+        
+        # Initialize Bybit API
+        bybit_api = BybitAPIClass(api_key, api_secret, testnet)
+        
+        # Get performance metrics
+        result = bybit_api.get_performance_metrics(timeframe)
+        return jsonify(result)
+        
+    except Exception as e:
+        logger.error(f"Error loading futures performance: {e}")
         return jsonify({'success': False, 'error': str(e)})
 
 # ===== BYBIT API ENDPOINTS FOR REAL-TIME FUTURES DATA =====
