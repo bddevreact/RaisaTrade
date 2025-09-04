@@ -1163,6 +1163,9 @@
                                     <button class="btn btn-outline-secondary btn-sm me-2" onclick="testAllFeatures()" title="Test All Features">
                                         <i class="fas fa-vial me-1"></i>Test Features
                                     </button>
+                                    <button class="btn btn-outline-info btn-sm me-2" onclick="testPositionsAPI()" title="Test Positions API">
+                                        <i class="fas fa-bug me-1"></i>Test API
+                                    </button>
                             </div>
                         </div>
                     </div>
@@ -3078,6 +3081,29 @@
 
         
         // Initialize when DOM is loaded
+        // Test API response function
+        function testPositionsAPI() {
+            console.log('🧪 Testing Positions API...');
+            
+            // Simulate the exact API response you're getting
+            const testResponse = {
+                "data": {
+                    "category": "linear",
+                    "list": [],
+                    "nextPageCursor": ""
+                },
+                "success": true
+            };
+            
+            console.log('🧪 Test Response:', testResponse);
+            console.log('🧪 Calling displayRealPositions with test data...');
+            
+            // Test the display function
+            displayRealPositions(testResponse);
+            
+            console.log('🧪 Test completed. Check the positions table above.');
+        }
+        
         // Global error handlers
         window.addEventListener('error', function(event) {
             console.error('Global error caught:', event.error);
@@ -4288,13 +4314,24 @@
                         // It will handle the data structure parsing
                         displayRealPositions(data);
                         
-                        // Show success notification
+                        // Show success notification with detailed info
                         const positionsCount = data.data && data.data.list ? data.data.list.length : 0;
+                        const responseInfo = `API Response: ${JSON.stringify(data.data).substring(0, 100)}...`;
+                        
                         showNotification(
                             'Positions Loaded', 
-                            `Successfully processed API response from Bybit. Found ${positionsCount} positions.`, 
+                            `Successfully processed API response from Bybit. Found ${positionsCount} positions. ${responseInfo}`, 
                             'success'
                         );
+                        
+                        // Log detailed response for debugging
+                        console.log('🔍 Complete API Response Structure:', {
+                            success: data.success,
+                            category: data.data?.category,
+                            listLength: data.data?.list?.length || 0,
+                            nextPageCursor: data.data?.nextPageCursor,
+                            fullResponse: data
+                        });
                     } else {
                         console.error('Failed to load positions:', data.error || 'Unknown error');
                         console.error('Full error response:', data);
@@ -4655,21 +4692,31 @@
             
             if (positionsArray.length === 0) {
                 console.log('📭 No positions found in array');
+                console.log('📭 Original positions object:', positions);
                 
                 // Check if this is a valid "no positions" response from Bybit
                 if (positions.data && positions.data.list && Array.isArray(positions.data.list)) {
                     console.log('✅ Valid Bybit API response - no active positions');
+                    console.log('✅ Category:', positions.data.category);
+                    console.log('✅ List length:', positions.data.list.length);
+                    console.log('✅ Next page cursor:', positions.data.nextPageCursor);
+                    
                     tbody.innerHTML = `
                         <tr>
                             <td colspan="9" class="text-center text-muted">
                                 <i class="fas fa-inbox me-2"></i>No active positions
                                 <br><small class="text-muted">Account has no open positions</small>
                                 <br><small class="text-muted">Last updated: ${new Date().toLocaleTimeString()}</small>
+                                <br><small class="text-muted">Category: ${positions.data.category || 'N/A'}</small>
+                                <br><small class="text-muted">API Response: ${JSON.stringify(positions.data).substring(0, 100)}...</small>
                             </td>
                         </tr>
                     `;
                 } else {
                     console.log('⚠️ Unexpected empty response structure');
+                    console.log('⚠️ Available keys:', Object.keys(positions));
+                    console.log('⚠️ Data property:', positions.data);
+                    
                     tbody.innerHTML = `
                         <tr>
                             <td colspan="9" class="text-center">
@@ -4678,6 +4725,7 @@
                                     <strong>Unexpected Response</strong>
                                     <br><small class="text-muted">API returned unexpected data structure</small>
                                     <br><small class="text-muted">Check console for details</small>
+                                    <br><small class="text-muted">Raw Response: ${JSON.stringify(positions).substring(0, 200)}...</small>
                                 </div>
                             </td>
                         </tr>
