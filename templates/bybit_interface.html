@@ -4524,14 +4524,13 @@
                 // Update balance display for hedge positions (both long and short)
                 updateDemoBalance(quantity * 2, currentPrice); // Double quantity for hedge mode
                 
-                // Force refresh positions display
-                setTimeout(() => {
-                    if (demoMode) {
-                        displayRealPositions(demoPositions);
-                    } else {
-                        loadPositions();
-                    }
-                }, 500);
+                // Force refresh positions display immediately
+                if (demoMode) {
+                    displayRealPositions(demoPositions);
+                    console.log('Demo positions refreshed after hedge creation');
+                } else {
+                    loadPositions();
+                }
                 
                 // Show notification
                 showNotification(
@@ -5281,14 +5280,24 @@
                     console.log('🔄 Waiting 3 seconds before refreshing positions...');
                     setTimeout(() => {
                         console.log('🔄 Refreshing positions after order placement...');
-                        loadPositions();
+                        
+                        // Force refresh positions immediately
+                        if (demoMode) {
+                            // In demo mode, refresh demo positions
+                            displayRealPositions(demoPositions);
+                            console.log('Demo positions refreshed after single position creation');
+                        } else {
+                            // In real mode, refresh from API
+                            loadPositions();
+                        }
+                        
                         loadAccountBalance();
                         
                         // Show refresh notification
                         showNotification(
                             'Data Refreshed', 
                             `Positions and balance updated after opening ${side} position for ${symbol}`, 
-                            'info'
+                            'success'
                         );
                     }, 3000);
                 } else {
@@ -5334,6 +5343,10 @@
                 
                 // Update balance display for demo mode
                 updateDemoBalance(quantity, currentPrice);
+                
+                // Force refresh positions display
+                displayRealPositions(demoPositions);
+                console.log('Demo positions refreshed after single position creation');
                 
                 // Show notification
                 showNotification(
@@ -5450,7 +5463,17 @@
                     
                     setTimeout(() => {
                         console.log('Refreshing data after hedge positions creation...');
-                        loadPositions();
+                        
+                        // Force refresh positions immediately
+                        if (demoMode) {
+                            // In demo mode, refresh demo positions
+                            displayRealPositions(demoPositions);
+                            console.log('Demo positions refreshed after hedge creation');
+                        } else {
+                            // In real mode, refresh from API
+                            loadPositions();
+                        }
+                        
                         loadAccountBalance();
                         
                         showNotification(
