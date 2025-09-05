@@ -53,14 +53,14 @@ except ImportError as e:
     PYBIT_AVAILABLE = False
     logger.warning(f"Bybit API not available: {e}")
 
-# Try to import database - fallback to simple database if SQLite is not available
+# Import SQLite database
 try:
-    from database import Database
-    logger.info("Using SQLite database")
+    from database import db, save_setting, get_setting, save_position, get_open_positions, save_trade, get_trade_history, save_rsi_settings, get_rsi_settings, save_range_box, get_range_box, save_breakout_signal, get_active_signals, save_performance_metrics, get_performance_metrics, log_system, get_system_logs
+    logger.info("SQLite database imported successfully")
+    DATABASE_AVAILABLE = True
 except ImportError as e:
-    logger.warning(f"SQLite database not available: {e}")
-    logger.info("Using simple JSON-based database")
-    from simple_database import SimpleDatabase as Database
+    logger.warning(f"❌ SQLite database not available: {e}")
+    DATABASE_AVAILABLE = False
 
 from auto_trader import get_auto_trader, start_auto_trading, stop_auto_trading, get_auto_trading_status
 # Try to import PionexWebSocket, fallback to None if not available
@@ -85,6 +85,206 @@ app.config['TESTING'] = False
 
 # Configure SocketIO
 socketio = SocketIO(app, cors_allowed_origins="*", logger=True, engineio_logger=True)
+
+# Database API endpoints
+@app.route('/api/database/settings', methods=['GET', 'POST'])
+def database_settings():
+    """Get or save database settings."""
+    if not DATABASE_AVAILABLE:
+        return jsonify({'error': 'Database not available'}), 503
+    
+    try:
+        if request.method == 'POST':
+            data = request.get_json()
+            category = data.get('category', 'general')
+            key = data.get('key')
+            value = data.get('value')
+            description = data.get('description', '')
+            
+            if not key or value is None:
+                return jsonify({'error': 'Missing key or value'}), 400
+            
+            success = save_setting(category, key, str(value), description)
+            if success:
+                log_system('INFO', 'DATABASE', f'Setting saved: {category}.{key} = {value}')
+                return jsonify({'success': True, 'message': 'Setting saved successfully'})
+            else:
+                return jsonify({'error': 'Failed to save setting'}), 500
+        else:
+            category = request.args.get('category', 'general')
+            settings = db.get_settings_by_category(category)
+            return jsonify({'success': True, 'data': settings})
+            
+    except Exception as e:
+        logger.error(f"Database settings error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/database/positions', methods=['GET', 'POST'])
+def database_positions():
+    """Get or save positions in database."""
+    if not DATABASE_AVAILABLE:
+        return jsonify({'error': 'Database not available'}), 503
+    
+    try:
+        if request.method == 'POST':
+            data = request.get_json()
+            success = save_position(data)
+            if success:
+                log_system('INFO', 'DATABASE', f'Position saved: {data.get("symbol")} {data.get("side")}')
+                return jsonify({'success': True, 'message': 'Position saved successfully'})
+            else:
+                return jsonify({'error': 'Failed to save position'}), 500
+        else:
+            symbol = request.args.get('symbol')
+            positions = get_open_positions(symbol)
+            return jsonify({'success': True, 'data': positions})
+            
+    except Exception as e:
+        logger.error(f"Database positions error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/database/trades', methods=['GET', 'POST'])
+def database_trades():
+    """Get or save trades in database."""
+    if not DATABASE_AVAILABLE:
+        return jsonify({'error': 'Database not available'}), 503
+    
+    try:
+        if request.method == 'POST':
+            data = request.get_json()
+            success = save_trade(data)
+            if success:
+                log_system('INFO', 'DATABASE', f'Trade saved: {data.get("symbol")} {data.get("side")}')
+                return jsonify({'success': True, 'message': 'Trade saved successfully'})
+            else:
+                return jsonify({'error': 'Failed to save trade'}), 500
+        else:
+            symbol = request.args.get('symbol')
+            limit = int(request.args.get('limit', 100))
+            trades = get_trade_history(symbol, limit)
+            return jsonify({'success': True, 'data': trades})
+            
+    except Exception as e:
+        logger.error(f"Database trades error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/database/rsi-settings', methods=['GET', 'POST'])
+def database_rsi_settings():
+    """Get or save RSI settings in database."""
+    if not DATABASE_AVAILABLE:
+        return jsonify({'error': 'Database not available'}), 503
+    
+    try:
+        if request.method == 'POST':
+            data = request.get_json()
+            version = data.get('version', 'Normal')
+            settings = {
+                '5m_long': data.get('5m_long'),
+                '5m_short': data.get('5m_short'),
+                '1h_long': data.get('1h_long'),
+                '1h_short': data.get('1h_short')
+            }
+            
+            success = save_rsi_settings(version, settings)
+            if success:
+                log_system('INFO', 'DATABASE', f'RSI settings saved: {version}')
+                return jsonify({'success': True, 'message': 'RSI settings saved successfully'})
+            else:
+                return jsonify({'error': 'Failed to save RSI settings'}), 500
+        else:
+            version = request.args.get('version', 'Normal')
+            settings = get_rsi_settings(version)
+            return jsonify({'success': True, 'data': settings})
+            
+    except Exception as e:
+        logger.error(f"Database RSI settings error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/database/range-boxes', methods=['GET', 'POST'])
+def database_range_boxes():
+    """Get or save range boxes in database."""
+    if not DATABASE_AVAILABLE:
+        return jsonify({'error': 'Database not available'}), 503
+    
+    try:
+        if request.method == 'POST':
+            data = request.get_json()
+            success = save_range_box(data)
+            if success:
+                log_system('INFO', 'DATABASE', f'Range box saved: {data.get("symbol")} {data.get("session")}')
+                return jsonify({'success': True, 'message': 'Range box saved successfully'})
+            else:
+                return jsonify({'error': 'Failed to save range box'}), 500
+        else:
+            symbol = request.args.get('symbol')
+            session = request.args.get('session')
+            date = request.args.get('date')
+            range_box = get_range_box(symbol, session, date)
+            return jsonify({'success': True, 'data': range_box})
+            
+    except Exception as e:
+        logger.error(f"Database range boxes error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/database/performance', methods=['GET', 'POST'])
+def database_performance():
+    """Get or save performance metrics in database."""
+    if not DATABASE_AVAILABLE:
+        return jsonify({'error': 'Database not available'}), 503
+    
+    try:
+        if request.method == 'POST':
+            data = request.get_json()
+            success = save_performance_metrics(data)
+            if success:
+                log_system('INFO', 'DATABASE', f'Performance metrics saved: {data.get("date")}')
+                return jsonify({'success': True, 'message': 'Performance metrics saved successfully'})
+            else:
+                return jsonify({'error': 'Failed to save performance metrics'}), 500
+        else:
+            days = int(request.args.get('days', 30))
+            metrics = get_performance_metrics(days)
+            return jsonify({'success': True, 'data': metrics})
+            
+    except Exception as e:
+        logger.error(f"Database performance error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/database/logs', methods=['GET'])
+def database_logs():
+    """Get system logs from database."""
+    if not DATABASE_AVAILABLE:
+        return jsonify({'error': 'Database not available'}), 503
+    
+    try:
+        level = request.args.get('level')
+        category = request.args.get('category')
+        limit = int(request.args.get('limit', 100))
+        
+        logs = get_system_logs(level, category, limit)
+        return jsonify({'success': True, 'data': logs})
+        
+    except Exception as e:
+        logger.error(f"Database logs error: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/database/backup', methods=['POST'])
+def database_backup():
+    """Create database backup."""
+    if not DATABASE_AVAILABLE:
+        return jsonify({'error': 'Database not available'}), 503
+    
+    try:
+        success = db.backup_database()
+        if success:
+            log_system('INFO', 'DATABASE', 'Database backup created successfully')
+            return jsonify({'success': True, 'message': 'Database backup created successfully'})
+        else:
+            return jsonify({'error': 'Failed to create backup'}), 500
+            
+    except Exception as e:
+        logger.error(f"Database backup error: {e}")
+        return jsonify({'error': str(e)}), 500
 
 # Error handling middleware
 @app.errorhandler(500)
@@ -118,7 +318,14 @@ class TradingBotGUI:
     def __init__(self):
         self.api = PionexAPI()
         self.strategies = TradingStrategies(self.api)
-        self.db = Database()
+        
+        # Initialize database if available
+        if DATABASE_AVAILABLE:
+            self.db = db
+        else:
+            self.db = None
+            logger.warning("Database not available, some features may be limited")
+            
         self.config = get_config()
         
         # Initialize WebSocket for real-time data
@@ -1451,7 +1658,7 @@ def api_futures_trade():
             return jsonify({'success': False, 'error': 'Bybit futures trading not enabled'})
         
         api_key = bybit_config.get('api_key') or os.getenv('BYBIT_API_KEY')
-        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET')
+        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET') or os.getenv('BYBIT_SECRET_KEY')
         testnet = bybit_config.get('testnet', False)
         
         if not api_key or not api_secret:
@@ -1527,7 +1734,7 @@ def api_futures_leverage():
             return jsonify({'success': False, 'error': 'Bybit futures trading not enabled'})
         
         api_key = bybit_config.get('api_key') or os.getenv('BYBIT_API_KEY')
-        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET')
+        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET') or os.getenv('BYBIT_SECRET_KEY')
         testnet = bybit_config.get('testnet', False)
         
         if not api_key or not api_secret:
@@ -1567,7 +1774,7 @@ def api_futures_close_position():
             return jsonify({'success': False, 'error': 'Bybit futures trading not enabled'})
         
         api_key = bybit_config.get('api_key') or os.getenv('BYBIT_API_KEY')
-        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET')
+        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET') or os.getenv('BYBIT_SECRET_KEY')
         testnet = bybit_config.get('testnet', False)
         
         if not api_key or not api_secret:
@@ -1614,7 +1821,7 @@ def api_futures_market_data(symbol):
             return jsonify({'success': False, 'error': 'Bybit futures trading not enabled'})
         
         api_key = bybit_config.get('api_key') or os.getenv('BYBIT_API_KEY')
-        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET')
+        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET') or os.getenv('BYBIT_SECRET_KEY')
         testnet = bybit_config.get('testnet', False)
         
         if not api_key or not api_secret:
@@ -1649,7 +1856,7 @@ def api_futures_klines(symbol):
             return jsonify({'success': False, 'error': 'Bybit futures trading not enabled'})
         
         api_key = bybit_config.get('api_key') or os.getenv('BYBIT_API_KEY')
-        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET')
+        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET') or os.getenv('BYBIT_SECRET_KEY')
         testnet = bybit_config.get('testnet', False)
         
         if not api_key or not api_secret:
@@ -1683,7 +1890,7 @@ def api_futures_orderbook(symbol):
             return jsonify({'success': False, 'error': 'Bybit futures trading not enabled'})
         
         api_key = bybit_config.get('api_key') or os.getenv('BYBIT_API_KEY')
-        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET')
+        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET') or os.getenv('BYBIT_SECRET_KEY')
         testnet = bybit_config.get('testnet', False)
         
         if not api_key or not api_secret:
@@ -1717,7 +1924,7 @@ def api_futures_trades(symbol):
             return jsonify({'success': False, 'error': 'Bybit futures trading not enabled'})
         
         api_key = bybit_config.get('api_key') or os.getenv('BYBIT_API_KEY')
-        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET')
+        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET') or os.getenv('BYBIT_SECRET_KEY')
         testnet = bybit_config.get('testnet', False)
         
         if not api_key or not api_secret:
@@ -1751,7 +1958,7 @@ def api_futures_performance():
             return jsonify({'success': False, 'error': 'Bybit futures trading not enabled'})
         
         api_key = bybit_config.get('api_key') or os.getenv('BYBIT_API_KEY')
-        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET')
+        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET') or os.getenv('BYBIT_SECRET_KEY')
         testnet = bybit_config.get('testnet', False)
         
         if not api_key or not api_secret:
@@ -1785,7 +1992,7 @@ def api_bybit_market_data():
             return jsonify({'success': False, 'error': 'Bybit futures trading not enabled'})
         
         api_key = bybit_config.get('api_key') or os.getenv('BYBIT_API_KEY')
-        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET')
+        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET') or os.getenv('BYBIT_SECRET_KEY')
         testnet = bybit_config.get('testnet', False)
         
         if not api_key or not api_secret:
@@ -1817,7 +2024,7 @@ def api_bybit_market_summary():
             return jsonify({'success': False, 'error': 'Bybit futures trading not enabled'})
         
         api_key = bybit_config.get('api_key') or os.getenv('BYBIT_API_KEY')
-        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET')
+        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET') or os.getenv('BYBIT_SECRET_KEY')
         testnet = bybit_config.get('testnet', False)
         
         if not api_key or not api_secret:
@@ -1849,7 +2056,7 @@ def api_bybit_ticker(symbol):
             return jsonify({'success': False, 'error': 'Bybit futures trading not enabled'})
         
         api_key = bybit_config.get('api_key') or os.getenv('BYBIT_API_KEY')
-        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET')
+        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET') or os.getenv('BYBIT_SECRET_KEY')
         testnet = bybit_config.get('testnet', False)
         
         if not api_key or not api_secret:
@@ -1881,7 +2088,7 @@ def api_bybit_funding_rate(symbol):
             return jsonify({'success': False, 'error': 'Bybit futures trading not enabled'})
         
         api_key = bybit_config.get('api_key') or os.getenv('BYBIT_API_KEY')
-        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET')
+        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET') or os.getenv('BYBIT_SECRET_KEY')
         testnet = bybit_config.get('testnet', False)
         
         if not api_key or not api_secret:
@@ -1913,7 +2120,7 @@ def api_bybit_open_interest(symbol):
             return jsonify({'success': False, 'error': 'Bybit futures trading not enabled'})
         
         api_key = bybit_config.get('api_key') or os.getenv('BYBIT_API_KEY')
-        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET')
+        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET') or os.getenv('BYBIT_SECRET_KEY')
         testnet = bybit_config.get('testnet', False)
         
         if not api_key or not api_secret:
@@ -1945,7 +2152,7 @@ def api_bybit_market_status():
             return jsonify({'success': False, 'error': 'Bybit futures trading not enabled'})
         
         api_key = bybit_config.get('api_key') or os.getenv('BYBIT_API_KEY')
-        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET')
+        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET') or os.getenv('BYBIT_SECRET_KEY')
         testnet = bybit_config.get('testnet', False)
         
         if not api_key or not api_secret:
@@ -1977,7 +2184,7 @@ def api_bybit_health():
             return jsonify({'success': False, 'error': 'Bybit futures trading not enabled'})
         
         api_key = bybit_config.get('api_key') or os.getenv('BYBIT_API_KEY')
-        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET')
+        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET') or os.getenv('BYBIT_SECRET_KEY')
         testnet = bybit_config.get('testnet', False)
         
         if not api_key or not api_secret:
@@ -2027,7 +2234,7 @@ def api_bybit_balance():
             return jsonify({'success': False, 'error': 'Bybit futures trading not enabled'})
         
         api_key = bybit_config.get('api_key') or os.getenv('BYBIT_API_KEY')
-        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET')
+        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET') or os.getenv('BYBIT_SECRET_KEY')
         testnet = bybit_config.get('testnet', False)
         
         if not api_key or not api_secret:
@@ -2130,7 +2337,7 @@ def api_bybit_atr(symbol):
         bybit_config = config.get('bybit', {})
         
         api_key = bybit_config.get('api_key') or os.getenv('BYBIT_API_KEY')
-        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET')
+        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET') or os.getenv('BYBIT_SECRET_KEY')
         testnet = bybit_config.get('testnet', False)
         
         if not api_key or not api_secret:
@@ -2189,7 +2396,7 @@ def api_bybit_market_condition(symbol):
         bybit_config = config.get('bybit', {})
         
         api_key = bybit_config.get('api_key') or os.getenv('BYBIT_API_KEY')
-        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET')
+        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET') or os.getenv('BYBIT_SECRET_KEY')
         testnet = bybit_config.get('testnet', False)
         
         if not api_key or not api_secret:
@@ -2249,7 +2456,7 @@ def api_bybit_positions():
             return jsonify({'success': False, 'error': 'Bybit futures trading not enabled'})
         
         api_key = bybit_config.get('api_key') or os.getenv('BYBIT_API_KEY')
-        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET')
+        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET') or os.getenv('BYBIT_SECRET_KEY')
         testnet = bybit_config.get('testnet', False)
         
         if not api_key or not api_secret:
@@ -2289,7 +2496,7 @@ def api_bybit_place_order():
         bybit_config = config.get('bybit', {})
         
         api_key = bybit_config.get('api_key') or os.getenv('BYBIT_API_KEY')
-        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET')
+        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET') or os.getenv('BYBIT_SECRET_KEY')
         testnet = bybit_config.get('testnet', False)
         
         if not api_key or not api_secret:
@@ -2310,12 +2517,21 @@ def api_bybit_place_order():
         
         # Place the order
         logger.info(f"Placing order: symbol={symbol}, side={side}, orderType={orderType}, qty={qty}")
-        result = bybit_api.place_order(
-            symbol=symbol,
-            side=side,
-            orderType=orderType,
-            qty=qty
-        )
+        
+        # Prepare order parameters
+        order_params = {
+            'symbol': symbol,
+            'side': side,
+            'orderType': orderType,
+            'qty': qty
+        }
+        
+        # Add positionIdx if provided (for hedge mode)
+        if 'positionIdx' in data:
+            order_params['positionIdx'] = data['positionIdx']
+            logger.info(f"Using positionIdx: {data['positionIdx']} for hedge mode")
+        
+        result = bybit_api.place_order(**order_params)
         
         logger.info(f"Order result: {result}")
         
@@ -2342,6 +2558,7 @@ def api_bybit_close_position():
         symbol = data.get('symbol')
         side = data.get('side')
         qty = data.get('qty')
+        positionIdx = data.get('positionIdx')
         
         if not all([symbol, side, qty]):
             return jsonify({'success': False, 'error': 'Missing required parameters'})
@@ -2350,13 +2567,17 @@ def api_bybit_close_position():
         bybit_config = config.get('bybit', {})
         
         api_key = bybit_config.get('api_key') or os.getenv('BYBIT_API_KEY')
-        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET')
+        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET') or os.getenv('BYBIT_SECRET_KEY')
         testnet = bybit_config.get('testnet', False)
         
         if not api_key or not api_secret:
             return jsonify({'success': False, 'error': 'Bybit API credentials not configured'})
         
         bybit_api = BybitAPIClass(api_key, api_secret, testnet)
+        
+        # Log the close position request
+        logger.info(f"Closing position: symbol={symbol}, side={side}, qty={qty}, positionIdx={positionIdx}")
+        
         result = bybit_api.close_position(symbol, side, qty)
         return jsonify(result)
         
@@ -2375,7 +2596,7 @@ def api_bybit_test():
         bybit_config = config.get('bybit', {})
         
         api_key = bybit_config.get('api_key') or os.getenv('BYBIT_API_KEY')
-        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET')
+        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET') or os.getenv('BYBIT_SECRET_KEY')
         testnet = bybit_config.get('testnet', False)
         
         if not api_key or not api_secret:
@@ -2409,7 +2630,7 @@ def api_bybit_close_all_positions():
         bybit_config = config.get('bybit', {})
         
         api_key = bybit_config.get('api_key') or os.getenv('BYBIT_API_KEY')
-        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET')
+        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET') or os.getenv('BYBIT_SECRET_KEY')
         testnet = bybit_config.get('testnet', False)
         
         if not api_key or not api_secret:
@@ -2440,7 +2661,7 @@ def api_bybit_set_leverage():
         bybit_config = config.get('bybit', {})
         
         api_key = bybit_config.get('api_key') or os.getenv('BYBIT_API_KEY')
-        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET')
+        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET') or os.getenv('BYBIT_SECRET_KEY')
         testnet = bybit_config.get('testnet', False)
         
         if not api_key or not api_secret:
@@ -2486,7 +2707,7 @@ def api_bybit_set_global_stop_loss():
         bybit_config = config.get('bybit', {})
         
         api_key = bybit_config.get('api_key') or os.getenv('BYBIT_API_KEY')
-        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET')
+        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET') or os.getenv('BYBIT_SECRET_KEY')
         testnet = bybit_config.get('testnet', False)
         
         if not api_key or not api_secret:
@@ -2845,16 +3066,35 @@ def save_telegram_settings():
     """Save Telegram notification settings"""
     try:
         data = request.get_json()
+        if not data:
+            return jsonify({
+                'success': False,
+                'error': 'No data provided'
+            }), 400
         
         # Load current config
-        config = load_config()
+        try:
+            config = get_config()
+        except Exception as config_error:
+            logger.error(f"Failed to load config: {config_error}")
+            return jsonify({
+                'success': False,
+                'error': f'Failed to load configuration: {str(config_error)}'
+            }), 500
         
         # Update telegram settings
         config['telegram'] = data
         
         # Save to config file
-        with open('config.yaml', 'w') as file:
-            yaml.dump(config, file, default_flow_style=False)
+        try:
+            with open('config.yaml', 'w', encoding='utf-8') as file:
+                yaml.dump(config, file, default_flow_style=False, allow_unicode=True)
+        except Exception as file_error:
+            logger.error(f"Failed to save config file: {file_error}")
+            return jsonify({
+                'success': False,
+                'error': f'Failed to save configuration: {str(file_error)}'
+            }), 500
         
         return jsonify({
             'success': True,
@@ -2862,16 +3102,17 @@ def save_telegram_settings():
         })
         
     except Exception as e:
+        logger.error(f"Error in save_telegram_settings: {e}")
         return jsonify({
             'success': False,
             'error': str(e)
-        })
+        }), 500
 
 @app.route('/api/telegram/get-settings', methods=['GET'])
 def get_telegram_settings():
     """Get Telegram notification settings"""
     try:
-        config = load_config()
+        config = get_config()
         telegram_settings = config.get('telegram', {})
         
         return jsonify({
@@ -2880,10 +3121,11 @@ def get_telegram_settings():
         })
         
     except Exception as e:
+        logger.error(f"Error in get_telegram_settings: {e}")
         return jsonify({
             'success': False,
             'error': str(e)
-        })
+        }), 500
 
 @app.route('/api/telegram/send-notification', methods=['POST'])
 def send_telegram_notification():
@@ -2977,7 +3219,7 @@ def api_bybit_unified_place_order():
         bybit_config = config.get('bybit', {})
         
         api_key = bybit_config.get('api_key') or os.getenv('BYBIT_API_KEY')
-        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET')
+        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET') or os.getenv('BYBIT_SECRET_KEY')
         testnet = bybit_config.get('testnet', False)
         
         if not api_key or not api_secret:
@@ -3028,7 +3270,7 @@ def api_bybit_unified_spot_order():
         bybit_config = config.get('bybit', {})
         
         api_key = bybit_config.get('api_key') or os.getenv('BYBIT_API_KEY')
-        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET')
+        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET') or os.getenv('BYBIT_SECRET_KEY')
         testnet = bybit_config.get('testnet', False)
         
         if not api_key or not api_secret:
@@ -3077,7 +3319,7 @@ def api_bybit_unified_futures_order():
         bybit_config = config.get('bybit', {})
         
         api_key = bybit_config.get('api_key') or os.getenv('BYBIT_API_KEY')
-        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET')
+        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET') or os.getenv('BYBIT_SECRET_KEY')
         testnet = bybit_config.get('testnet', False)
         
         if not api_key or not api_secret:
@@ -3117,7 +3359,7 @@ def api_bybit_unified_positions():
         bybit_config = config.get('bybit', {})
         
         api_key = bybit_config.get('api_key') or os.getenv('BYBIT_API_KEY')
-        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET')
+        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET') or os.getenv('BYBIT_SECRET_KEY')
         testnet = bybit_config.get('testnet', False)
         
         if not api_key or not api_secret:
@@ -3145,7 +3387,7 @@ def api_bybit_unified_balance():
         bybit_config = config.get('bybit', {})
         
         api_key = bybit_config.get('api_key') or os.getenv('BYBIT_API_KEY')
-        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET')
+        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET') or os.getenv('BYBIT_SECRET_KEY')
         testnet = bybit_config.get('testnet', False)
         
         if not api_key or not api_secret:
@@ -3174,7 +3416,7 @@ def api_bybit_unified_ticker():
         bybit_config = config.get('bybit', {})
         
         api_key = bybit_config.get('api_key') or os.getenv('BYBIT_API_KEY')
-        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET')
+        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET') or os.getenv('BYBIT_SECRET_KEY')
         testnet = bybit_config.get('testnet', False)
         
         if not api_key or not api_secret:
@@ -3209,7 +3451,7 @@ def api_bybit_unified_cancel_order():
         bybit_config = config.get('bybit', {})
         
         api_key = bybit_config.get('api_key') or os.getenv('BYBIT_API_KEY')
-        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET')
+        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET') or os.getenv('BYBIT_SECRET_KEY')
         testnet = bybit_config.get('testnet', False)
         
         if not api_key or not api_secret:
@@ -3230,6 +3472,89 @@ def api_bybit_unified_cancel_order():
         logger.error(f"Error cancelling unified order: {e}")
         return jsonify({'success': False, 'error': str(e)})
 
+@app.route('/api/bybit/set-position-mode', methods=['POST'])
+def api_bybit_set_position_mode():
+    """API endpoint for setting Bybit position mode (OneWay or Hedge)"""
+    try:
+        if not BYBIT_AVAILABLE:
+            return jsonify({'success': False, 'error': 'Bybit API not available'})
+        
+        data = request.get_json()
+        if not data:
+            return jsonify({'success': False, 'error': 'No JSON data received'})
+        
+        mode = data.get('mode')  # 'OneWay' or 'Hedge'
+        if not mode or mode not in ['OneWay', 'Hedge']:
+            return jsonify({'success': False, 'error': 'Mode must be OneWay or Hedge'})
+        
+        config = get_config()
+        bybit_config = config.get('bybit', {})
+        
+        api_key = bybit_config.get('api_key') or os.getenv('BYBIT_API_KEY')
+        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET') or os.getenv('BYBIT_SECRET_KEY')
+        testnet = bybit_config.get('testnet', False)
+        
+        if not api_key or not api_secret:
+            return jsonify({'success': False, 'error': 'Bybit API credentials not configured'})
+        
+        bybit_api = BybitAPIClass(api_key, api_secret, testnet)
+        
+        # Set position mode
+        result = bybit_api.set_position_mode(mode)
+        
+        if result.get('success'):
+            return jsonify({
+                'success': True,
+                'message': f'Position mode set to {mode} successfully',
+                'data': result.get('data')
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': result.get('error', 'Failed to set position mode')
+            })
+        
+    except Exception as e:
+        logger.error(f"Error setting position mode: {e}")
+        return jsonify({'success': False, 'error': str(e)})
+
+@app.route('/api/bybit/get-position-mode')
+def api_bybit_get_position_mode():
+    """API endpoint for getting current Bybit position mode"""
+    try:
+        if not BYBIT_AVAILABLE:
+            return jsonify({'success': False, 'error': 'Bybit API not available'})
+        
+        config = get_config()
+        bybit_config = config.get('bybit', {})
+        
+        api_key = bybit_config.get('api_key') or os.getenv('BYBIT_API_KEY')
+        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET') or os.getenv('BYBIT_SECRET_KEY')
+        testnet = bybit_config.get('testnet', False)
+        
+        if not api_key or not api_secret:
+            return jsonify({'success': False, 'error': 'Bybit API credentials not configured'})
+        
+        bybit_api = BybitAPIClass(api_key, api_secret, testnet)
+        
+        # Get position mode
+        result = bybit_api.get_position_mode()
+        
+        if result.get('success'):
+            return jsonify({
+                'success': True,
+                'data': result.get('data')
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': result.get('error', 'Failed to get position mode')
+            })
+        
+    except Exception as e:
+        logger.error(f"Error getting position mode: {e}")
+        return jsonify({'success': False, 'error': str(e)})
+
 @app.route('/api/bybit/close-hedge-positions', methods=['POST'])
 def api_bybit_close_hedge_positions():
     """API endpoint for closing all hedge positions for a symbol"""
@@ -3247,7 +3572,7 @@ def api_bybit_close_hedge_positions():
         bybit_config = config.get('bybit', {})
         
         api_key = bybit_config.get('api_key') or os.getenv('BYBIT_API_KEY')
-        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET')
+        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET') or os.getenv('BYBIT_SECRET_KEY')
         testnet = bybit_config.get('testnet', False)
         
         if not api_key or not api_secret:
@@ -3320,7 +3645,7 @@ def api_bybit_unified_order_history():
         bybit_config = config.get('bybit', {})
         
         api_key = bybit_config.get('api_key') or os.getenv('BYBIT_API_KEY')
-        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET')
+        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET') or os.getenv('BYBIT_SECRET_KEY')
         testnet = bybit_config.get('testnet', False)
         
         if not api_key or not api_secret:
@@ -3363,7 +3688,7 @@ def api_bybit_unified_set_leverage():
         bybit_config = config.get('bybit', {})
         
         api_key = bybit_config.get('api_key') or os.getenv('BYBIT_API_KEY')
-        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET')
+        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET') or os.getenv('BYBIT_SECRET_KEY')
         testnet = bybit_config.get('testnet', False)
         
         if not api_key or not api_secret:
