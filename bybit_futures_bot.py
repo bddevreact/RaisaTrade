@@ -363,10 +363,14 @@ class BybitFuturesBot:
                 logger.info(f"Signal confidence too low: {signal.confidence}")
                 return False
             
-            # Check if we already have a position in this symbol
-            if signal.symbol in self.positions:
-                logger.info(f"Already have position in {signal.symbol}, skipping signal")
+            # Check if we already have a position in this symbol with the same side
+            # Allow hedge mode (both long and short positions for same symbol)
+            position_key = f"{signal.symbol}_{signal.side}"
+            if position_key in self.positions:
+                logger.info(f"Already have {signal.side} position in {signal.symbol}, skipping signal")
                 return False
+            else:
+                logger.info(f"Allowing new position: {signal.side} position in {signal.symbol}")
             
             # Check if we have enough balance
             if not self._check_balance_for_trade(signal):
@@ -444,12 +448,16 @@ class BybitFuturesBot:
             for position in positions_data:
                 symbol = position.get('symbol')
                 size = float(position.get('size', 0))
+                side = position.get('side', 'Unknown')
                 
                 if size > 0:  # Open position
+                    # Create position key that includes both symbol and side for hedge mode support
+                    position_key = f"{symbol}_{side}"
+                    
                     # Update position info
-                    self.positions[symbol] = PositionInfo(
+                    self.positions[position_key] = PositionInfo(
                         symbol=symbol,
-                        side=position.get('side', 'Unknown'),
+                        side=side,
                         size=size,
                         entry_price=float(position.get('entryPrice', 0)),
                         mark_price=float(position.get('markPrice', 0)),
@@ -462,26 +470,26 @@ class BybitFuturesBot:
                     )
                     
                     # Check if position needs management
-                    self._check_position_exit_conditions(symbol)
+                    self._check_position_exit_conditions(position_key)
                     
         except Exception as e:
             logger.error(f"Error managing positions: {e}")
     
-    def _check_position_exit_conditions(self, symbol: str):
+    def _check_position_exit_conditions(self, position_key: str):
         """Check if position should be closed"""
         try:
-            if symbol not in self.positions:
+            if position_key not in self.positions:
                 return
             
-            position = self.positions[symbol]
+            position = self.positions[position_key]
             
             # Check stop loss
             if position.unrealized_pnl < 0:
                 loss_percentage = abs(position.unrealized_pnl) / position.position_value * 100
                 
                 if loss_percentage >= self.stop_loss_percentage:
-                    logger.info(f"Stop loss triggered for {symbol}, closing position")
-                    self._close_position(symbol, position.side, position.size)
+                    logger.info(f"Stop loss triggered for {position.symbol}, closing position")
+                    self._close_position(position.symbol, position.side, position.size)
                     return
             
             # Check take profit
@@ -489,8 +497,8 @@ class BybitFuturesBot:
                 profit_percentage = position.unrealized_pnl / position.position_value * 100
                 
                 if profit_percentage >= self.take_profit_percentage:
-                    logger.info(f"Take profit triggered for {symbol}, closing position")
-                    self._close_position(symbol, position.side, position.size)
+                    logger.info(f"Take profit triggered for {position.symbol}, closing position")
+                    self._close_position(position.symbol, position.side, position.size)
                     return
                     
         except Exception as e:
@@ -507,14 +515,12 @@ class BybitFuturesBot:
             if close_result.get('success'):
                 logger.info(f"Position closed successfully: {close_result}")
                 
-                # Remove from positions
-                if symbol in self.positions:
-                    del self.positions[symbol]
-                
-                # Update daily PnL
-                if symbol in self.positions:
-                    position = self.positions[symbol]
+                # Remove from positions using position key
+                position_key = f"{symbol}_{side}"
+                if position_key in self.positions:
+                    position = self.positions[position_key]
                     self.daily_pnl += position.realized_pnl
+                    del self.positions[position_key]
             else:
                 logger.error(f"Failed to close position: {close_result}")
                 
