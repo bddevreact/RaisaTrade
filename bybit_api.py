@@ -7,6 +7,9 @@ import logging
 from typing import Dict, List, Optional
 from urllib.parse import urlencode
 
+# Constants
+RECV_WINDOW = "5000"
+
 # Try to import pybit, fallback to manual implementation if not available
 try:
     import pybit
@@ -44,6 +47,9 @@ class BybitAPI:
     def _make_request_with_pybit(self, method_name: str, **kwargs) -> Dict:
         """Make request using official pybit library"""
         try:
+            # Log the request parameters for debugging
+            logger.info(f"Pybit API Request: {method_name} with params: {kwargs}")
+            
             method = getattr(self.session, method_name)
             response = method(**kwargs)
             
@@ -67,7 +73,7 @@ class BybitAPI:
     def place_unified_order(self, category: str, symbol: str, side: str, orderType: str, 
                            qty: str, price: str = None, timeInForce: str = "GTC", 
                            orderLinkId: str = None, isLeverage: int = 0, 
-                           orderFilter: str = "Order") -> Dict:
+                           orderFilter: str = "Order", reduceOnly: bool = False, **kwargs) -> Dict:
         """Place order using unified trading API"""
         try:
             if not PYBIT_AVAILABLE:
@@ -90,6 +96,13 @@ class BybitAPI:
                 order_params["price"] = price
             if orderLinkId:
                 order_params["orderLinkId"] = orderLinkId
+            if reduceOnly:
+                order_params["reduceOnly"] = reduceOnly
+            
+            # Add any additional parameters from kwargs
+            for key, value in kwargs.items():
+                if key not in order_params and value is not None:
+                    order_params[key] = value
             
             logger.info(f"Placing unified order: {order_params}")
             
@@ -145,7 +158,7 @@ class BybitAPI:
     
     def place_futures_order(self, symbol: str, side: str, orderType: str, qty: str,
                            price: str = None, timeInForce: str = "GTC",
-                           orderLinkId: str = None, leverage: int = 10) -> Dict:
+                           orderLinkId: str = None, leverage: int = 10, **kwargs) -> Dict:
         """Place futures order using unified trading API"""
         try:
             # Generate order link ID if not provided
@@ -168,7 +181,8 @@ class BybitAPI:
                 timeInForce=timeInForce,
                 orderLinkId=orderLinkId,
                 isLeverage=1,
-                orderFilter="Order"
+                orderFilter="Order",
+                **kwargs  # Pass through any additional parameters like reduceOnly, positionIdx
             )
             
         except Exception as e:
@@ -392,30 +406,36 @@ class BybitAPI:
             url = f"{self.base_url}{endpoint}"
             headers = {'Content-Type': 'application/json'}
             
+            logger.info(f"Manual API request: {method} {endpoint}")
+            logger.info(f"Request params: {params}")
+            
             if signed:
-                # Add authentication headers
+                # Add authentication headers for Bybit V5 API
                 timestamp = str(int(time.time() * 1000))
                 params = params or {}
-                params['timestamp'] = timestamp
-                params['api_key'] = self.api_key
                 
-                # Create signature
-                query_string = '&'.join([f"{k}={v}" for k, v in sorted(params.items())])
+                # Create signature for Bybit V5 API
+                import json
+                request_body = json.dumps(params) if params else ""
+                raw_signature = f"{timestamp}{self.api_key}{RECV_WINDOW}{request_body}"
                 signature = hmac.new(
                     self.api_secret.encode('utf-8'),
-                    query_string.encode('utf-8'),
+                    raw_signature.encode('utf-8'),
                     hashlib.sha256
                 ).hexdigest()
                 
-                params['sign'] = signature
-                headers['X-BAPI-SIGN'] = signature
                 headers['X-BAPI-API-KEY'] = self.api_key
                 headers['X-BAPI-TIMESTAMP'] = timestamp
+                headers['X-BAPI-RECV-WINDOW'] = RECV_WINDOW
+                headers['X-BAPI-SIGN'] = signature
+            
+            # Use requests library for manual API calls
+            import requests
             
             if method.upper() == 'GET':
-                response = self.session.get(url, params=params, headers=headers)
+                response = requests.get(url, params=params, headers=headers, timeout=15)
             else:
-                response = self.session.post(url, json=params, headers=headers)
+                response = requests.post(url, json=params, headers=headers, timeout=15)
             
             if response.status_code == 200:
                 data = response.json()
@@ -480,33 +500,63 @@ class BybitAPI:
             if kwargs.get('takeProfit'):
                 order_params['takeProfit'] = str(kwargs['takeProfit'])
             
-            return self._make_request_with_pybit('place_order', **order_params)
+            # Always add positionIdx for hedge mode
+            # In hedge mode, we need to specify which position (long=1, short=2)
+            if kwargs.get('positionIdx'):
+                order_params['positionIdx'] = kwargs['positionIdx']
+                logger.info(f"Using provided positionIdx: {kwargs['positionIdx']}")
+            else:
+                # Auto-detect position index based on side
+                if side.title() == 'Buy':
+                    order_params['positionIdx'] = 1  # Long position
+                elif side.title() == 'Sell':
+                    order_params['positionIdx'] = 2  # Short position
+                logger.info(f"Auto-detected positionIdx: {order_params['positionIdx']} for side: {side}")
+            
+            logger.info(f"Final order_params: {order_params}")
+            
+            # Always use manual API call for better control
+            logger.info("Using manual API call for order placement")
+            logger.info(f"Manual API call params: {order_params}")
+            result = self._make_request('POST', '/v5/order/create', order_params, signed=True)
+            logger.info(f"Manual API call result: {result}")
+            return result
         else:
             # Fallback to manual implementation
             return self.place_futures_order(symbol, side, orderType, qty, price, leverage, **kwargs)
     
     def close_position(self, symbol: str, side: str, qty: float) -> Dict:
         """Close a specific position"""
-        if PYBIT_AVAILABLE:
+        try:
             # To close a position, place an opposite order with reduceOnly=True
             opposite_side = 'Sell' if side == 'Buy' else 'Buy'
-            return self.place_order(
-                symbol=symbol,
-                side=opposite_side,
-                orderType='Market',
-                qty=qty,
-                reduceOnly=True
-            )
-        else:
-            # Fallback to manual implementation
-            opposite_side = 'Sell' if side == 'Buy' else 'Buy'
-            return self.place_futures_order(
-                symbol=symbol,
-                side=opposite_side,
-                orderType='Market',
-                qty=qty,
-                reduceOnly=True
-            )
+            
+            # Determine positionIdx for hedge mode
+            positionIdx = 1 if side == 'Buy' else 2  # Same position index as the original position
+            
+            logger.info(f"Closing position: symbol={symbol}, side={side}, opposite_side={opposite_side}, positionIdx={positionIdx}")
+            
+            # Use manual API call directly for closing positions
+            order_params = {
+                'category': 'linear',
+                'symbol': symbol,
+                'side': opposite_side,
+                'orderType': 'Market',
+                'qty': str(qty),
+                'timeInForce': 'IOC',
+                'reduceOnly': True,
+                'positionIdx': positionIdx
+            }
+            
+            logger.info(f"Direct close position params: {order_params}")
+            result = self._make_request('POST', '/v5/order/create', order_params, signed=True)
+            logger.info(f"Direct close position result: {result}")
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"Error closing position: {e}")
+            return {'success': False, 'error': str(e)}
     
     def get_futures_ticker(self, symbol: str) -> Dict:
         """Get futures ticker data for a specific symbol"""
@@ -598,6 +648,136 @@ class BybitAPI:
             # Fallback to manual implementation
             return self.place_order(symbol, side, 'Market', qty)
     
+    def set_position_mode(self, mode: str) -> Dict:
+        """Set position mode (OneWay or Hedge)"""
+        try:
+            logger.info(f"Setting position mode to: {mode}")
+            
+            # Convert mode string to integer as per Bybit API
+            # 0: Merged Single (OneWay), 3: Both Sides (Hedge)
+            mode_int = 0 if mode == "OneWay" else 3
+            
+            # Try using pybit's switch_position_mode method first
+            try:
+                if hasattr(self.session, 'switch_position_mode'):
+                    result = self.session.switch_position_mode(
+                        category="linear",
+                        mode=mode_int,
+                        coin="USDT"
+                    )
+                    logger.info(f"Pybit switch_position_mode result: {result}")
+                    
+                    if result.get('retCode') == 0:
+                        return {'success': True, 'data': result.get('result', result)}
+                    else:
+                        logger.warning(f"Pybit method failed: {result.get('retMsg')}")
+                        # Fall back to manual implementation
+                else:
+                    logger.info("Pybit switch_position_mode method not available, using manual implementation")
+            except Exception as e:
+                logger.warning(f"Pybit method failed: {e}, using manual implementation")
+            
+            # Manual implementation as fallback
+            timestamp = str(int(time.time() * 1000))
+            params = {
+                "category": "linear",
+                "mode": mode_int,
+                "coin": "USDT"
+            }
+            
+            # Create signature - Bybit V5 API format
+            import json
+            request_body = json.dumps(params)
+            raw_signature = f"{timestamp}{self.api_key}{RECV_WINDOW}{request_body}"
+            signature = hmac.new(
+                self.api_secret.encode('utf-8'),
+                raw_signature.encode('utf-8'),
+                hashlib.sha256
+            ).hexdigest()
+            
+            logger.info(f"Manual signature - timestamp: {timestamp}")
+            logger.info(f"Manual signature - raw_signature: {raw_signature}")
+            logger.info(f"Manual signature - signature: {signature}")
+            
+            # Prepare headers
+            headers = {
+                "X-BAPI-API-KEY": self.api_key,
+                "X-BAPI-TIMESTAMP": timestamp,
+                "X-BAPI-RECV-WINDOW": RECV_WINDOW,
+                "X-BAPI-SIGN": signature,
+                "Content-Type": "application/json"
+            }
+            
+            # Make the request
+            url = f"{self.base_url}/v5/position/switch-mode"
+            response = requests.post(url, json=params, headers=headers, timeout=15)
+            response.raise_for_status()
+            
+            result = response.json()
+            logger.info(f"Manual set position mode response: {result}")
+            
+            if result.get('retCode') == 0:
+                return {'success': True, 'data': result.get('result', result)}
+            else:
+                return {
+                    'success': False,
+                    'error': result.get('retMsg', 'Unknown error'),
+                    'code': result.get('retCode')
+                }
+                
+        except Exception as e:
+            logger.error(f"Error setting position mode: {e}")
+            return {'success': False, 'error': str(e)}
+    
+    def get_position_mode(self) -> Dict:
+        """Get current position mode by checking positions"""
+        try:
+            # Since Bybit doesn't have a direct get position mode endpoint,
+            # we'll check the positions to determine the mode
+            logger.info("Getting current position mode by checking positions")
+            
+            # Get positions to determine mode
+            positions_result = self.get_positions()
+            
+            if not positions_result.get('success'):
+                return {
+                    'success': False,
+                    'error': 'Failed to get positions to determine mode'
+                }
+            
+            positions = positions_result.get('data', {}).get('list', [])
+            
+            # Check if we have hedge positions (same symbol with both Buy and Sell)
+            symbol_sides = {}
+            for position in positions:
+                if float(position.get('size', 0)) > 0:
+                    symbol = position.get('symbol')
+                    side = position.get('side')
+                    if symbol not in symbol_sides:
+                        symbol_sides[symbol] = set()
+                    symbol_sides[symbol].add(side)
+            
+            # Determine mode based on positions
+            has_hedge = any(len(sides) > 1 for sides in symbol_sides.values())
+            mode = "Hedge" if has_hedge else "OneWay"
+            
+            logger.info(f"Detected position mode: {mode}")
+            
+            return {
+                'success': True,
+                'data': {
+                    'list': [{
+                        'mode': mode,
+                        'category': 'linear',
+                        'coin': 'USDT'
+                    }]
+                }
+            }
+                
+        except Exception as e:
+            logger.error(f"Error getting position mode: {e}")
+            return {'success': False, 'error': str(e)}
+    
     def close_all_positions(self) -> Dict:
         """Close all futures positions"""
         try:
@@ -618,11 +798,15 @@ class BybitAPI:
                     size = float(position.get('size', 0))
                     
                     if symbol and side and size > 0:
-                        close_result = self.close_futures_position(symbol, side, size)
+                        # Determine positionIdx for hedge mode
+                        positionIdx = 1 if side == 'Buy' else 2
+                        
+                        close_result = self.close_position(symbol, side, size)
                         results.append({
-            'symbol': symbol,
+                            'symbol': symbol,
                             'side': side,
                             'size': size,
+                            'positionIdx': positionIdx,
                             'result': close_result
                         })
             
@@ -750,6 +934,16 @@ class BybitAPI:
             
             if kwargs.get('reduce_only'):
                 order_params['reduceOnly'] = True
+            
+            # Add positionIdx for hedge mode
+            if kwargs.get('positionIdx'):
+                order_params['positionIdx'] = kwargs['positionIdx']
+            else:
+                # Auto-detect position index based on side
+                if side.title() == 'Buy':
+                    order_params['positionIdx'] = 1  # Long position
+                elif side.title() == 'Sell':
+                    order_params['positionIdx'] = 2  # Short position
             
             return self._make_request('POST', '/v5/order/create', order_params, signed=True)
         except Exception as e:
