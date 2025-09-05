@@ -171,10 +171,14 @@ class PaperTradingBot:
             price = signal['price']
             strength = signal['strength']
             
-            # Check if we already have a position
-            if symbol in self.positions:
-                logger.info(f"Already have position in {symbol}, skipping signal")
+            # Check if we already have a position with the same side
+            # Allow hedge mode (both long and short positions for same symbol)
+            position_key = f"{symbol}_{side}"
+            if position_key in self.positions:
+                logger.info(f"Already have {side} position in {symbol}, skipping signal")
                 return
+            else:
+                logger.info(f"Allowing new position: {side} position in {symbol}")
             
             # Calculate position size
             position_value = self.paper_balance * self.max_position_size * strength
@@ -193,7 +197,7 @@ class PaperTradingBot:
                 'leverage': self.default_leverage
             }
             
-            self.positions[symbol] = position
+            self.positions[position_key] = position
             
             # Record trade
             trade = {
@@ -217,7 +221,8 @@ class PaperTradingBot:
         try:
             current_time = datetime.now()
             
-            for symbol, position in list(self.positions.items()):
+            for position_key, position in list(self.positions.items()):
+                symbol = position['symbol']
                 # Get current price
                 ticker = self.api.get_futures_ticker(symbol)
                 if ticker.get('success') and ticker['data'].get('list'):
@@ -227,22 +232,22 @@ class PaperTradingBot:
                         # Check stop loss
                         if position['side'] == 'Buy':
                             if current_price <= position['stop_loss']:
-                                self._close_paper_position(symbol, current_price, 'Stop Loss')
+                                self._close_paper_position(position_key, current_price, 'Stop Loss')
                             elif current_price >= position['take_profit']:
-                                self._close_paper_position(symbol, current_price, 'Take Profit')
+                                self._close_paper_position(position_key, current_price, 'Take Profit')
                         else:  # Sell position
                             if current_price >= position['stop_loss']:
-                                self._close_paper_position(symbol, current_price, 'Stop Loss')
+                                self._close_paper_position(position_key, current_price, 'Stop Loss')
                             elif current_price <= position['take_profit']:
-                                self._close_paper_position(symbol, current_price, 'Take Profit')
+                                self._close_paper_position(position_key, current_price, 'Take Profit')
         
         except Exception as e:
             logger.error(f"Error managing positions: {e}")
     
-    def _close_paper_position(self, symbol, price, reason):
+    def _close_paper_position(self, position_key, price, reason):
         """Close a paper position"""
         try:
-            position = self.positions[symbol]
+            position = self.positions[position_key]
             
             # Calculate P&L
             if position['side'] == 'Buy':
@@ -268,9 +273,9 @@ class PaperTradingBot:
             self.trade_history.append(trade)
             
             # Remove position
-            del self.positions[symbol]
+            del self.positions[position_key]
             
-            logger.info(f"PAPER POSITION CLOSED: {symbol} @ ${price:.2f} - {reason} - PnL: ${pnl:.2f}")
+            logger.info(f"PAPER POSITION CLOSED: {position['symbol']} @ ${price:.2f} - {reason} - PnL: ${pnl:.2f}")
             
         except Exception as e:
             logger.error(f"Error closing paper position: {e}")
