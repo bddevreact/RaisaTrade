@@ -17,6 +17,76 @@
             --bybit-info: #3498db;
         }
         
+        /* Active Positions Styling */
+        .active-position-row {
+            background-color: #1a237e !important;
+            color: white !important;
+        }
+        
+        .active-position-row td {
+            color: white !important;
+            border-color: #283593 !important;
+        }
+        
+        .active-position-row .btn {
+            color: white !important;
+        }
+        
+        .active-position-row .btn-outline-danger {
+            border-color: #dc3545 !important;
+            color: #dc3545 !important;
+        }
+        
+        .active-position-row .btn-outline-danger:hover {
+            background-color: #dc3545 !important;
+            color: white !important;
+        }
+        
+        .active-position-row .btn-outline-info {
+            border-color: #17a2b8 !important;
+            color: #17a2b8 !important;
+        }
+        
+        .active-position-row .btn-outline-info:hover {
+            background-color: #17a2b8 !important;
+            color: white !important;
+        }
+        
+        /* Hedge Position Styling */
+        .hedge-position-row {
+            background-color: #0d47a1 !important;
+            color: white !important;
+        }
+        
+        .hedge-position-row td {
+            color: white !important;
+            border-color: #1565c0 !important;
+        }
+        
+        .hedge-position-row .btn {
+            color: white !important;
+        }
+        
+        .hedge-position-row .btn-outline-danger {
+            border-color: #ff5722 !important;
+            color: #ff5722 !important;
+        }
+        
+        .hedge-position-row .btn-outline-danger:hover {
+            background-color: #ff5722 !important;
+            color: white !important;
+        }
+        
+        .hedge-position-row .btn-outline-info {
+            border-color: #00bcd4 !important;
+            color: #00bcd4 !important;
+        }
+        
+        .hedge-position-row .btn-outline-info:hover {
+            background-color: #00bcd4 !important;
+            color: white !important;
+        }
+        
         body {
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             color: #ffffff;
@@ -1145,26 +1215,14 @@
                                     <button class="btn btn-outline-success btn-sm me-2" onclick="checkBalance()">
                                         <i class="fas fa-wallet me-1"></i>Check Balance
                                     </button>
-                                    <button class="btn btn-outline-info btn-sm" onclick="toggleDemoMode()" id="demo-toggle">
-                                        <i class="fas fa-eye me-1"></i>Demo Mode
-                                    </button>
-                                    <button class="btn btn-outline-success btn-sm" onclick="forceRefreshRealData()" title="Force Refresh Real Data">
-                                        <i class="fas fa-sync-alt me-1"></i>Refresh Data
+                                    <button class="btn btn-outline-primary btn-sm me-2" onclick="showPositionModeSettings()" title="Position Mode Settings">
+                                        <i class="fas fa-cog me-1"></i>Position Mode
                                     </button>
                                     <button class="btn btn-outline-info btn-sm me-2" onclick="openAdvancedFeatures()" title="Advanced Features">
                                         <i class="fas fa-rocket me-1"></i>🚀 Features
                                     </button>
                                     <button class="btn btn-outline-warning btn-sm me-2" onclick="showAdvancedTradingPanel()" title="Advanced Trading">
                                         <i class="fas fa-chart-line me-1"></i>Advanced
-                                    </button>
-                                    <button class="btn btn-outline-primary btn-sm me-2" onclick="checkLiquidationRisk()" title="Check Liquidation Risk">
-                                        <i class="fas fa-shield-alt me-1"></i>Risk Check
-                                    </button>
-                                    <button class="btn btn-outline-secondary btn-sm me-2" onclick="testAllFeatures()" title="Test All Features">
-                                        <i class="fas fa-vial me-1"></i>Test Features
-                                    </button>
-                                    <button class="btn btn-outline-info btn-sm me-2" onclick="testPositionsAPI()" title="Test Positions API">
-                                        <i class="fas fa-bug me-1"></i>Test API
                                     </button>
                             </div>
                         </div>
@@ -2318,78 +2376,10 @@
         }
         
         // Function to update balance for demo mode
-        function updateDemoBalance(quantity, currentPrice) {
-            console.log('Updating demo balance:', { quantity, currentPrice });
-            
-            // Get current balance elements
-            const totalBalanceElement = document.getElementById('total-balance');
-            const availableBalanceElement = document.getElementById('available-balance');
-            const usedBalanceElement = document.getElementById('used-balance');
-            
-            if (!totalBalanceElement || !availableBalanceElement || !usedBalanceElement) {
-                console.error('Balance elements not found');
-                return;
-            }
-            
-            // Get current balance values
-            const currentTotal = parseFloat(totalBalanceElement.textContent.replace('$', '').replace(',', '')) || 0;
-            const currentAvailable = parseFloat(availableBalanceElement.textContent.replace('$', '').replace(',', '')) || 0;
-            
-            // Calculate position value (this is the margin used)
-            const positionValue = quantity * currentPrice;
-            
-            // Update available balance (reduce by position value)
-            const newAvailable = Math.max(0, currentAvailable - positionValue);
-            
-            // Update used balance (increase by position value)
-            const newUsed = currentTotal - newAvailable;
-            
-            // Update display
-            availableBalanceElement.textContent = `$${newAvailable.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-            usedBalanceElement.textContent = `$${newUsed.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-            
-            console.log('Demo balance updated:', {
-                oldAvailable: currentAvailable,
-                newAvailable: newAvailable,
-                positionValue: positionValue,
-                oldUsed: currentTotal - currentAvailable,
-                newUsed: newUsed
-            });
-            
-            // Show notification
-            showNotification(
-                'Balance Updated', 
-                `Position opened: -${positionValue.toFixed(2)} USDT\nAvailable: ${newAvailable.toFixed(2)} USDT`, 
-                'info'
-            );
-        }
+        // Demo balance function removed - only real mode available
         
         // Function to add new demo position
-        function addDemoPosition(symbol, side, quantity, leverage, currentPrice) {
-            console.log('Adding demo position:', { symbol, side, quantity, leverage, currentPrice });
-            
-            // Create new position object
-            const newPosition = {
-                symbol: symbol,
-                side: side,
-                size: quantity.toString(),
-                avgPrice: currentPrice.toFixed(2),
-                markPrice: currentPrice.toFixed(2),
-                leverage: leverage.toString(),
-                unrealisedPnl: '0.00', // Start with 0 P&L
-                roe: '0.00'
-            };
-            
-            // Add to demo positions array
-            demoPositions.push(newPosition);
-            
-            console.log('Demo positions updated:', demoPositions);
-            
-            // Refresh positions display
-            displayRealPositions(demoPositions);
-            
-            return newPosition;
-        }
+        // Demo position function removed - only real mode available
         
 
         <!--Real time market data JavaScript - Enhanced -->
@@ -2600,10 +2590,7 @@
                 return;
             }
             
-            if (demoMode) {
-                alert('❌ Demo mode is active!\n\nPlease switch to real mode first.');
-                return;
-            }
+            // Real mode only
             
             // Force refresh all real data
             showNotification('Refreshing Data', 'Loading real positions and balance...', 'info');
@@ -2628,10 +2615,7 @@
                 return;
             }
             
-            if (demoMode) {
-                alert('❌ Demo mode is active!\n\nPlease switch to real mode first.');
-                return;
-            }
+            // Real mode only
             
             // Test positions API directly
             showNotification('Testing API', 'Testing positions API endpoint...', 'info');
@@ -2665,7 +2649,6 @@
             
             const diagnosis = {
                 timestamp: new Date().toISOString(),
-                demoMode: demoMode,
                 apiAvailable: window.bybitApiAvailable,
                 endpoints: {},
                 errors: []
@@ -2736,7 +2719,7 @@
             
             let report = `🔍 API Diagnosis Report\n`;
             report += `⏰ Time: ${new Date(diagnosis.timestamp).toLocaleString()}\n`;
-            report += `🎭 Mode: ${diagnosis.demoMode ? 'DEMO' : 'REAL'}\n`;
+            report += `🎭 Mode: REAL\n`;
             report += `🔌 API Available: ${diagnosis.apiAvailable ? '✅ YES' : '❌ NO'}\n\n`;
             
             report += `📡 Endpoint Tests:\n`;
@@ -2784,9 +2767,7 @@
             
             // Recommendations
             report += `\n💡 Recommendations:\n`;
-            if (diagnosis.demoMode) {
-                report += `• Switch to REAL mode to test API\n`;
-            }
+            // Real mode recommendations
             if (!diagnosis.apiAvailable) {
                 report += `• Check API credentials in config.yaml\n`;
                 report += `• Verify Bybit API key and secret\n`;
@@ -2808,9 +2789,8 @@
             
             const debugInfo = {
                 timestamp: new Date().toISOString(),
-                demoMode: demoMode,
                 apiAvailable: window.bybitApiAvailable,
-                currentPositions: demoMode ? demoPositions : 'Real mode - positions loaded from API',
+                currentPositions: 'Real mode - positions loaded from API',
                 tableElement: document.getElementById('positions-table'),
                 modeIndicator: document.getElementById('mode-indicator')
             };
@@ -2818,7 +2798,7 @@
             console.log('📊 Debug Info:', debugInfo);
             
             // Test positions API directly
-            if (!demoMode && window.bybitApiAvailable) {
+            if (window.bybitApiAvailable) {
                 console.log('🧪 Testing positions API for debugging...');
                 fetch('/api/bybit/positions')
                     .then(response => {
@@ -2834,7 +2814,7 @@
                         
                         let debugReport = `🔍 Positions Debug Report\n`;
                         debugReport += `⏰ Time: ${new Date(debugInfo.timestamp).toLocaleString()}\n`;
-                        debugReport += `🎭 Mode: ${demoMode ? 'DEMO' : 'REAL'}\n`;
+                        debugReport += `🎭 Mode: REAL\n`;
                         debugReport += `🔌 API Available: ${window.bybitApiAvailable ? '✅ YES' : '❌ NO'}\n\n`;
                         
                         debugReport += `📡 API Response:\n`;
@@ -2873,22 +2853,14 @@
                         alert(`❌ Debug API Error:\n\n${error.message}\n\nCheck console for details.`);
                     });
             } else {
-                // Show demo mode debug info
-                let debugReport = `🔍 Demo Mode Debug Report\n`;
+                // Show real mode debug info
+                let debugReport = `🔍 Real Mode Debug Report\n`;
                 debugReport += `⏰ Time: ${new Date(debugInfo.timestamp).toLocaleString()}\n`;
-                debugReport += `🎭 Mode: DEMO\n`;
-                debugReport += `📋 Demo Positions: ${demoPositions ? demoPositions.length : 0}\n`;
+                debugReport += `🎭 Mode: REAL\n`;
                 debugReport += `📊 Table Element: ${debugInfo.tableElement ? 'Found' : 'Not found'}\n`;
                 debugReport += `🎯 Mode Indicator: ${debugInfo.modeIndicator ? 'Found' : 'Not found'}\n\n`;
                 
-                if (demoPositions && demoPositions.length > 0) {
-                    debugReport += `📋 Demo Positions:\n`;
-                    demoPositions.forEach((pos, index) => {
-                        debugReport += `${index + 1}. ${pos.symbol} - ${pos.side} - Size: ${pos.size}\n`;
-                    });
-                }
-                
-                console.log('📋 Demo Debug Report:', debugReport);
+                console.log('📋 Real Debug Report:', debugReport);
                 alert(debugReport);
             }
         }
@@ -2897,10 +2869,7 @@
         function showRawPositionsData() {
             console.log('📊 Fetching raw positions data...');
             
-            if (demoMode) {
-                alert('📊 Demo Mode Raw Data:\n\n' + JSON.stringify(demoPositions, null, 2));
-                return;
-            }
+            // Real mode only
             
             if (!window.bybitApiAvailable) {
                 alert('❌ API not available. Please test API connection first.');
@@ -2973,10 +2942,7 @@
         function showDataStructure() {
             console.log('🔍 Analyzing data structure...');
             
-            if (demoMode) {
-                alert('🔍 Demo Mode Structure:\n\n' + analyzeObjectStructure(demoPositions));
-                return;
-            }
+            // Real mode only
             
             if (!window.bybitApiAvailable) {
                 alert('❌ API not available. Please test API connection first.');
@@ -3104,6 +3070,49 @@
             console.log('🧪 Test completed. Check the positions table above.');
         }
         
+        // Enhanced positions refresh function with retry logic
+        function refreshPositionsWithRetry(symbol, maxAttempts = 5, baseDelay = 2000) {
+            console.log(`🔄 Starting enhanced positions refresh for ${symbol} with ${maxAttempts} attempts...`);
+            
+            let attemptCount = 0;
+            
+            const attemptRefresh = () => {
+                attemptCount++;
+                const delay = baseDelay * attemptCount;
+                
+                setTimeout(() => {
+                    console.log(`🔄 Refresh attempt ${attemptCount}/${maxAttempts} for ${symbol} after ${delay}ms...`);
+                    
+                    loadPositions();
+                    console.log('Real positions refreshed from API');
+                    
+                    loadAccountBalance();
+                    
+                    // Show progress notification
+                    showNotification(
+                        `Refresh Attempt ${attemptCount}`, 
+                        `Attempting to load positions for ${symbol}... (${attemptCount}/${maxAttempts})`, 
+                        'info'
+                    );
+                    
+                    // If this is not the last attempt, schedule the next one
+                    if (attemptCount < maxAttempts) {
+                        attemptRefresh();
+                    } else {
+                        console.log(`✅ Completed all ${maxAttempts} refresh attempts for ${symbol}`);
+                        showNotification(
+                            'Refresh Complete', 
+                            `Completed ${maxAttempts} refresh attempts for ${symbol}. Check positions table.`, 
+                            'success'
+                        );
+                    }
+                }, delay);
+            };
+            
+            // Start the first attempt
+            attemptRefresh();
+        }
+        
         // Global error handlers
         window.addEventListener('error', function(event) {
             console.error('Global error caught:', event.error);
@@ -3147,9 +3156,8 @@
                 // Show initial mode status
                 setTimeout(() => {
                     console.log('Initial mode status:', {
-                        demoMode: demoMode,
                         apiAvailable: window.bybitApiAvailable,
-                        currentMode: demoMode ? 'Demo Mode' : 'Real Mode'
+                        currentMode: 'Real Mode'
                     });
                 }, 1000);
                 
@@ -3180,10 +3188,7 @@
                         // Update mode indicator immediately
                         updateModeIndicator();
                         
-                        // Enable real mode if API is available
-                        if (demoMode) {
-                            toggleDemoMode();
-                        }
+                        // API is available - ready for real trading
                         
                         // Load real data immediately
                         setTimeout(() => {
@@ -3198,20 +3203,14 @@
                         // Update mode indicator immediately
                         updateModeIndicator();
                         
-                        // Enable demo mode if API is not available
-                        if (!demoMode) {
-                            toggleDemoMode();
-                        }
+                        // API not available - show error
                     }
                 })
                 .catch(error => {
                     console.error('API test error:', error);
                     showNotification('API Test Error', `Connection failed: ${error.message}`, 'error');
                     window.bybitApiAvailable = false;
-                    // Enable demo mode if API is not available
-                    if (!demoMode) {
-                        toggleDemoMode();
-                    }
+                    // API not available - show error
                 });
         }
         
@@ -3862,17 +3861,13 @@
                     } else {
                         window.bybitApiAvailable = false;
                         console.log('Bybit API test failed:', data.error);
-                        if (!demoMode) {
-                            toggleDemoMode();
-                        }
+                        // API not available - show error
                     }
                 })
                 .catch(error => {
                     console.error('Error checking API availability:', error);
                     window.bybitApiAvailable = false;
-                    if (!demoMode) {
-                        toggleDemoMode();
-                    }
+                    // API not available - show error
                 });
         }
         
@@ -3883,7 +3878,7 @@
             
             // Set up positions auto-refresh for real mode
             setInterval(() => {
-                if (!demoMode && window.bybitApiAvailable) {
+                if (window.bybitApiAvailable) {
                     console.log('Auto-refreshing real positions...');
                     loadPositions();
                 }
@@ -4217,22 +4212,13 @@
         
         function loadPositions() {
             console.log('🔄 Loading positions...');
-            console.log('Current mode:', demoMode ? 'DEMO' : 'REAL');
+            console.log('Current mode: REAL');
             console.log('API available:', window.bybitApiAvailable);
-            
-            // Check if we're in demo mode
-            if (demoMode) {
-                console.log('Demo mode active - showing demo positions');
-                displayRealPositions(demoPositions);
-                return;
-            }
             
             // Check if API is available
             if (!window.bybitApiAvailable) {
-                console.log('❌ API not available - switching to demo mode');
-                demoMode = true;
+                console.log('❌ API not available - cannot load positions');
                 updateModeIndicator();
-                displayRealPositions(demoPositions);
                 return;
             }
             
@@ -4384,120 +4370,26 @@
                 });
         }
         
-        function getInitialMockPositions() {
-            // Return initial mock positions data for demonstration
-            return [
-                {
-                    symbol: 'BTCUSDT',
-                    side: 'Buy',
-                    size: '0.001',
-                    avgPrice: '45000.00',
-                    markPrice: '45200.00',
-                    leverage: '10',
-                    unrealisedPnl: '2.00',
-                    roe: '0.44'
-                },
-                {
-                    symbol: 'BTCUSDT',
-                    side: 'Sell',
-                    size: '0.001',
-                    avgPrice: '45000.00',
-                    markPrice: '45200.00',
-                    leverage: '10',
-                    unrealisedPnl: '-2.00',
-                    roe: '-0.44'
-                },
-                {
-                    symbol: 'ETHUSDT',
-                    side: 'Buy',
-                    size: '0.01',
-                    avgPrice: '2800.00',
-                    markPrice: '2850.00',
-                    leverage: '5',
-                    unrealisedPnl: '5.00',
-                    roe: '0.89'
-                },
-                {
-                    symbol: 'DOTUSDT',
-                    side: 'Buy',
-                    size: '0.1',
-                    avgPrice: '3.80',
-                    markPrice: '3.85',
-                    leverage: '10',
-                    unrealisedPnl: '0.50',
-                    roe: '1.32'
-                },
-                {
-                    symbol: 'ADAUSDT',
-                    side: 'Sell',
-                    size: '1.0',
-                    avgPrice: '0.86',
-                    markPrice: '0.84',
-                    leverage: '5',
-                    unrealisedPnl: '2.00',
-                    roe: '4.65'
-                }
-            ];
-        }
+        // Initial mock positions function removed - only real mode available
         
-        function getMockPositions() {
-            // Return current demo positions (dynamic)
-            if (demoMode) {
-                return demoPositions;
-            }
-            // Return initial mock positions for non-demo mode
-            return getInitialMockPositions();
-        }
+        // Mock positions function removed - only real mode available
         
-        let demoMode = false;
-        let demoPositions = []; // Track demo positions dynamically
+        // Demo mode removed - only real mode available
         
-        function toggleDemoMode() {
-            demoMode = !demoMode;
-            const demoButton = document.getElementById('demo-toggle');
-            
-            if (demoMode) {
-                demoButton.innerHTML = '<i class="fas fa-eye-slash me-1"></i>Live Mode';
-                // Initialize demo positions when entering demo mode
-                demoPositions = getInitialMockPositions();
-                displayRealPositions(demoPositions);
-                demoButton.className = 'btn btn-outline-warning btn-sm';
-                console.log('Demo mode enabled - showing mock data');
-                displayRealPositions(getMockPositions());
-                
-
-            } else {
-                demoButton.innerHTML = '<i class="fas fa-eye me-1"></i>Demo Mode';
-                demoButton.className = 'btn btn-outline-info btn-sm';
-                console.log('Demo mode disabled - loading real data');
-                loadPositions();
-                
-                // Show live mode notification
-                showNotification('Live Mode Enabled', 'Now showing real positions data from Bybit API.', 'success');
-            }
-            
-            // Update mode indicator
-            updateModeIndicator();
-        }
+        // Demo mode function removed - only real mode available
         
         function updateModeIndicator() {
             const modeIndicator = document.getElementById('mode-indicator');
             if (modeIndicator) {
-                if (demoMode) {
-                    modeIndicator.innerHTML = '<i class="fas fa-eye me-1"></i>DEMO MODE';
-                    modeIndicator.className = 'badge bg-warning text-dark';
-                    modeIndicator.title = 'Demo Mode: Simulated data, no real money';
+                // Check if API is available and working
+                if (window.bybitApiAvailable) {
+                    modeIndicator.innerHTML = '<i class="fas fa-rocket me-1"></i>REAL MODE API: ✅';
+                    modeIndicator.className = 'badge bg-success';
+                    modeIndicator.title = 'Real Mode: Live trading with real money - API working';
                 } else {
-                    // Check if API is available and working
-                    if (window.bybitApiAvailable) {
-                        modeIndicator.innerHTML = '<i class="fas fa-rocket me-1"></i>REAL MODE API: ✅';
-                        modeIndicator.className = 'badge bg-success';
-                        modeIndicator.title = 'Real Mode: Live trading with real money - API working';
-                    } else {
-                        modeIndicator.innerHTML = '<i class="fas fa-rocket me-1"></i>REAL MODE API: ❌';
-                        modeIndicator.className = 'badge bg-danger';
-                        modeIndicator.title = 'Real Mode: API not available - check credentials';
-                    }
+                    modeIndicator.innerHTML = '<i class="fas fa-rocket me-1"></i>REAL MODE API: ❌';
+                    modeIndicator.className = 'badge bg-danger';
+                    modeIndicator.title = 'Real Mode: API not available - check credentials';
                 }
             }
         }
@@ -4524,59 +4416,7 @@
             }, 5000);
         }
         
-        function simulateHedgePositions(symbol, quantity, leverage) {
-            // Simulate hedge position creation for demo mode
-            console.log('Simulating hedge positions for demo:', { symbol, quantity, leverage });
-            
-            // Get current price for balance calculation
-            const currentPriceElement = document.querySelector('#positionModal .form-control-plaintext');
-            const currentPrice = currentPriceElement ? parseFloat(currentPriceElement.textContent.replace('$', '').replace(',', '')) : 0;
-            
-            // Generate real order IDs using timestamp and counter
-            const timestamp = Date.now();
-            const longOrderId = `real_long_${timestamp}_${symbol}_${quantity}`;
-            const shortOrderId = `real_short_${timestamp}_${symbol}_${quantity}`;
-            
-            // Simulate API delay
-            setTimeout(() => {
-                // Show success message
-                alert(`✅ Demo Hedge Positions Created Successfully!\n\n` +
-                      `LONG Position: ${longOrderId}\n` +
-                      `SHORT Position: ${shortOrderId}\n\n` +
-                      `Both positions are now active for ${symbol}\n` +
-                      `Quantity: ${quantity} ${symbol.replace('USDT', '')}\n` +
-                      `Leverage: ${leverage}x\n\n` +
-                      `Demo positions created successfully.`);
-                
-                // Close modal
-                const modal = bootstrap.Modal.getInstance(document.getElementById('positionModal'));
-                if (modal) {
-                    modal.hide();
-                }
-                
-                // Add both long and short positions to demo positions
-                addDemoPosition(symbol, 'Buy', quantity, leverage, currentPrice);
-                addDemoPosition(symbol, 'Sell', quantity, leverage, currentPrice);
-                
-                // Update balance display for hedge positions (both long and short)
-                updateDemoBalance(quantity * 2, currentPrice); // Double quantity for hedge mode
-                
-                // Force refresh positions display immediately
-                if (demoMode) {
-                    displayRealPositions(demoPositions);
-                    console.log('Demo positions refreshed after hedge creation');
-                } else {
-                    loadPositions();
-                }
-                
-                // Show notification
-                showNotification(
-                    'Demo Hedge Positions Created', 
-                    `Successfully created hedge positions for ${symbol}.`, 
-                    'success'
-                );
-            }, 1500);
-        }
+        // Demo hedge simulation function removed - only real mode available
         
         // Helper function to find nested arrays in objects
         function findNestedArrays(obj, maxDepth = 3, currentDepth = 0) {
@@ -4780,7 +4620,7 @@
                 const roe = parseFloat(pos.roe) || 0;
                 
                 return `
-                    <tr class="${isHedge ? 'table-warning' : ''}">
+                    <tr class="active-position-row ${isHedge ? 'hedge-position-row' : ''}">
                         <td>
                             <span class="badge bg-primary">${pos.symbol}</span>
                             ${hedgeBadge}
@@ -4876,32 +4716,74 @@
         function closeHedgePositions(symbol) {
             console.log('Closing all hedge positions for:', symbol);
             
-            if (confirm(`Are you sure you want to close ALL hedge positions for ${symbol}?\n\nThis will close both LONG and SHORT positions.`)) {
-                // Close all positions for this symbol via Bybit API
-                fetch('/api/bybit/close-hedge-positions', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        symbol: symbol
-                    })
-                })
+            // First check positions for this symbol
+            fetch('/api/bybit/positions')
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        alert(`✅ All hedge positions for ${symbol} closed successfully!`);
-                        loadPositions();
-                        loadAccountBalance();
+                        const positions = data.data?.list || [];
+                        const symbolPositions = positions.filter(pos => 
+                            pos.symbol === symbol && parseFloat(pos.size || 0) > 0
+                        );
+                        
+                        if (symbolPositions.length === 0) {
+                            showNotification('No Positions', `No active positions found for ${symbol}`, 'info');
+                            return;
+                        }
+                        
+                        const confirmMsg = `⚠️ Close ALL hedge positions for ${symbol}?\n\n` +
+                            `This will close:\n` +
+                            symbolPositions.map(pos => `• ${pos.side} ${pos.size}`).join('\n') +
+                            `\n\nThis action cannot be undone!`;
+                        
+                        if (confirm(confirmMsg)) {
+                            // Show loading state
+                            showNotification('Closing Hedge Positions', `Closing all ${symbol} positions...`, 'info');
+                            
+                            // Close all positions for this symbol via Bybit API
+                            fetch('/api/bybit/close-hedge-positions', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    symbol: symbol
+                                })
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    const results = data.results || [];
+                                    const successful = results.filter(r => r.result?.success).length;
+                                    const failed = results.filter(r => !r.result?.success).length;
+                                    
+                                    if (failed === 0) {
+                                        showNotification('Success', `All ${symbol} hedge positions closed successfully!`, 'success');
+                                    } else {
+                                        showNotification('Partial Success', 
+                                            `Closed ${successful} ${symbol} positions, ${failed} failed.`, 
+                                            'warning');
+                                    }
+                                    
+                                    loadPositions();
+                                    loadAccountBalance();
+                                } else {
+                                    showNotification('Error', `Failed to close hedge positions: ${data.error}`, 'error');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error closing hedge positions:', error);
+                                showNotification('Error', `Error closing hedge positions: ${error.message}`, 'error');
+                            });
+                        }
                     } else {
-                        alert(`❌ Failed to close hedge positions: ${data.error}`);
+                        showNotification('Error', 'Failed to check positions', 'error');
                     }
                 })
                 .catch(error => {
-                    console.error('Error closing hedge positions:', error);
-                    alert('❌ Error closing hedge positions. Please try again.');
+                    console.error('Error checking positions:', error);
+                    showNotification('Error', 'Error checking positions', 'error');
                 });
-            }
         }
         
         function loadAccountBalance() {
@@ -5259,10 +5141,9 @@
         }
         
         function executeSinglePosition(symbol, side, quantity, leverage) {
-            // Check if we're in demo mode or if API is not available
-            if (demoMode || !window.bybitApiAvailable) {
-                // Simulate single position creation for demo
-                simulateSinglePosition(symbol, side, quantity, leverage);
+            // Check if API is not available
+            if (!window.bybitApiAvailable) {
+                alert('❌ API not available!\n\nPlease check your API credentials and try again.');
                 return;
             }
             
@@ -5277,7 +5158,8 @@
                     side: side,
                     orderType: 'Market',
                     qty: quantity,
-                    leverage: leverage
+                    leverage: leverage,
+                    positionIdx: side === 'Buy' ? 1 : 2  // Add positionIdx for hedge mode
                 })
             })
             .then(response => {
@@ -5326,86 +5208,37 @@
                     
                     // Wait a moment for the order to be processed, then refresh data
                     console.log('🔄 Waiting 3 seconds before refreshing positions...');
-                    setTimeout(() => {
-                        console.log('🔄 Refreshing positions after order placement...');
-                        
-                        // Force refresh positions immediately
-                        if (demoMode) {
-                            // In demo mode, refresh demo positions
-                            displayRealPositions(demoPositions);
-                            console.log('Demo positions refreshed after single position creation');
-                        } else {
-                            // In real mode, refresh from API
-                            loadPositions();
-                        }
-                        
-                        loadAccountBalance();
-                        
-                        // Show refresh notification
-                        showNotification(
-                            'Data Refreshed', 
-                            `Positions and balance updated after opening ${side} position for ${symbol}`, 
-                            'success'
-                        );
-                    }, 3000);
+                    // Use enhanced refresh function with retry logic
+                    console.log('🔄 Using enhanced refresh function for Bybit API delay...');
+                    refreshPositionsWithRetry(symbol, 6, 2500); // 6 attempts with 2.5s base delay
                 } else {
                     throw new Error(`Failed to open position: ${data.error}`);
                 }
             })
             .catch(error => {
                 console.error('Error executing single position:', error);
-                alert(`❌ Error opening position: ${error.message}\n\n` +
-                      `Please check your settings and try again.`);
+                console.error('Error details:', {
+                    message: error.message,
+                    stack: error.stack,
+                    name: error.name
+                });
+                
+                // Show detailed error message
+                const errorMsg = `❌ Error opening position: ${error.message}\n\n` +
+                                `Please check:\n` +
+                                `1. Position mode is set to Hedge\n` +
+                                `2. API credentials are correct\n` +
+                                `3. Account has sufficient balance\n` +
+                                `4. Symbol is available for trading\n\n` +
+                                `Try again or contact support if the issue persists.`;
+                
+                alert(errorMsg);
             });
         }
         
-        function simulateSinglePosition(symbol, side, quantity, leverage) {
-            // Simulate single position creation for demo mode
-            console.log('Simulating single position for demo:', { symbol, side, quantity, leverage });
-            
-            // Get current price for balance calculation
-            const currentPriceElement = document.querySelector('#positionModal .form-control-plaintext');
-            const currentPrice = currentPriceElement ? parseFloat(currentPriceElement.textContent.replace('$', '').replace(',', '')) : 0;
-            
-            // Generate mock order ID
-            const orderId = `real_${side.toLowerCase()}_${Date.now()}_${symbol}_${quantity}`;
-            
-            // Simulate API delay
-            setTimeout(() => {
-                // Show success message
-                alert(`✅ Demo Position Created Successfully!\n\n` +
-                      `${side.toUpperCase()} Position: ${orderId}\n` +
-                      `Symbol: ${symbol}\n` +
-                      `Quantity: ${quantity} ${symbol.replace('USDT', '')}\n` +
-                      `Leverage: ${leverage}x\n\n` +
-                      `Demo position created successfully.`);
-                
-                // Close modal
-                const modal = bootstrap.Modal.getInstance(document.getElementById('positionModal'));
-                if (modal) {
-                    modal.hide();
-                }
-                
-                // Add new position to demo positions
-                addDemoPosition(symbol, side, quantity, leverage, currentPrice);
-                
-                // Update balance display for demo mode
-                updateDemoBalance(quantity, currentPrice);
-                
-                // Force refresh positions display
-                displayRealPositions(demoPositions);
-                console.log('Demo positions refreshed after single position creation');
-                
-                // Show notification
-                showNotification(
-                    'Demo Position Created', 
-                    `Successfully created ${side} position for ${symbol}.`, 
-                    'success'
-                );
-            }, 1000);
-        }
+        // Demo simulation function removed - only real mode available
         
-        function executeHedgePositions(symbol, quantity, leverage) {
+        async function executeHedgePositions(symbol, quantity, leverage) {
             // Execute both long and short positions for hedge mode
             console.log('Executing hedge positions:', { symbol, quantity, leverage });
             
@@ -5415,10 +5248,42 @@
                 return;
             }
             
-            // Check if we're in demo mode or if API is not available
-            if (demoMode || !window.bybitApiAvailable) {
-                // Simulate hedge position creation for demo
-                simulateHedgePositions(symbol, quantity, leverage);
+            // Check if API is not available
+            if (!window.bybitApiAvailable) {
+                alert('❌ API not available!\n\nPlease check your API credentials and try again.');
+                return;
+            }
+            
+            // Force set position mode to Hedge before creating hedge positions
+            try {
+                console.log('🔍 Force setting position mode to Hedge for hedge positions...');
+                
+                const setModeResponse = await fetch('/api/bybit/set-position-mode', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ mode: 'Hedge' })
+                });
+                
+                const setModeData = await setModeResponse.json();
+                
+                if (setModeData.success) {
+                    console.log('✅ Position mode set to Hedge successfully');
+                    showNotification('Position Mode Updated', 'Position mode set to Hedge mode for hedge trading', 'success');
+                    
+                    // Wait a moment for the mode to take effect
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                } else {
+                    console.error('❌ Failed to set position mode:', setModeData.error);
+                    alert(`❌ Failed to set position mode to Hedge: ${setModeData.error}\n\n` +
+                          `Please manually set your Bybit account to Hedge mode in the Bybit app/website, then try again.`);
+                    return;
+                }
+            } catch (error) {
+                console.error('Error setting position mode:', error);
+                alert(`❌ Error setting position mode: ${error.message}\n\n` +
+                      `Please manually set your Bybit account to Hedge mode in the Bybit app/website, then try again.`);
                 return;
             }
             
@@ -5433,7 +5298,8 @@
                     side: 'Buy',
                     orderType: 'Market',
                     qty: quantity,
-                    leverage: leverage
+                    leverage: leverage,
+                    positionIdx: 1  // Long position in hedge mode
                 })
             })
             .then(response => {
@@ -5466,7 +5332,8 @@
                             side: 'Sell',
                             orderType: 'Market',
                             qty: quantity,
-                            leverage: leverage
+                            leverage: leverage,
+                            positionIdx: 2  // Short position in hedge mode
                         })
                     });
                 } else {
@@ -5509,35 +5376,31 @@
                         'success'
                     );
                     
-                    setTimeout(() => {
-                        console.log('Refreshing data after hedge positions creation...');
-                        
-                        // Force refresh positions immediately
-                        if (demoMode) {
-                            // In demo mode, refresh demo positions
-                            displayRealPositions(demoPositions);
-                            console.log('Demo positions refreshed after hedge creation');
-                        } else {
-                            // In real mode, refresh from API
-                            loadPositions();
-                        }
-                        
-                        loadAccountBalance();
-                        
-                        showNotification(
-                            'Data Refreshed', 
-                            `Positions and balance updated for ${symbol}`, 
-                            'info'
-                        );
-                    }, 2000); // Wait 2 seconds for positions to settle
+                    // Use enhanced refresh function with retry logic
+                    console.log('🔄 Using enhanced refresh function for hedge positions...');
+                    refreshPositionsWithRetry(symbol, 7, 2000); // 7 attempts with 2s base delay
                 } else {
                     throw new Error(`Failed to create short position: ${shortData.error}`);
                 }
             })
             .catch(error => {
                 console.error('Error executing hedge positions:', error);
-                alert(`❌ Error creating hedge positions: ${error.message}\n\n` +
-                      `Please check your positions and try again.`);
+                console.error('Error details:', {
+                    message: error.message,
+                    stack: error.stack,
+                    name: error.name
+                });
+                
+                // Show detailed error message
+                const errorMsg = `❌ Error creating hedge positions: ${error.message}\n\n` +
+                                `Please check:\n` +
+                                `1. Position mode is set to Hedge\n` +
+                                `2. API credentials are correct\n` +
+                                `3. Account has sufficient balance\n` +
+                                `4. Symbol is available for trading\n\n` +
+                                `Try again or contact support if the issue persists.`;
+                
+                alert(errorMsg);
             });
         }
         
@@ -5549,7 +5412,14 @@
         function closePosition(symbol, side, size) {
             console.log('Closing position:', { symbol, side, size });
             
-            if (confirm(`Are you sure you want to close the ${symbol} ${side} position?`)) {
+            const confirmMsg = `⚠️ Close ${symbol} ${side} position?\n\n` +
+                `Size: ${size}\n` +
+                `This action cannot be undone!`;
+            
+            if (confirm(confirmMsg)) {
+                // Show loading state
+                showNotification('Closing Position', `Closing ${symbol} ${side} position...`, 'info');
+                
                 // Close position via Bybit API
                 fetch('/api/bybit/close-position', {
                     method: 'POST',
@@ -5559,22 +5429,23 @@
                     body: JSON.stringify({
                         symbol: symbol,
                         side: side === 'Buy' ? 'Sell' : 'Buy', // Reverse side to close
-                        qty: size
+                        qty: size,
+                        positionIdx: side === 'Buy' ? 1 : 2  // Same position index as original position
                     })
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        alert(`${symbol} position closed successfully!`);
+                        showNotification('Success', `${symbol} ${side} position closed successfully!`, 'success');
                         loadPositions();
                         loadAccountBalance();
                     } else {
-                        alert(`Failed to close position: ${data.error}`);
+                        showNotification('Error', `Failed to close position: ${data.error}`, 'error');
                     }
                 })
                 .catch(error => {
                     console.error('Error closing position:', error);
-                    alert('Error closing position. Please try again.');
+                    showNotification('Error', 'Error closing position. Please try again.', 'error');
                 });
             }
         }
@@ -5582,26 +5453,68 @@
         function closeAllPositions() {
             console.log('Closing all positions');
             
-            if (confirm('Are you sure you want to close ALL positions?')) {
-                // Close all positions via Bybit API
-                fetch('/api/bybit/close-all-positions', {
-                    method: 'POST'
-                })
+            // First check if there are any positions to close
+            fetch('/api/bybit/positions')
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        alert('All positions closed successfully!');
-                        loadPositions();
-                        loadAccountBalance();
+                        const positions = data.data?.list || [];
+                        const activePositions = positions.filter(pos => parseFloat(pos.size || 0) > 0);
+                        
+                        if (activePositions.length === 0) {
+                            showNotification('No Positions', 'No active positions to close', 'info');
+                            return;
+                        }
+                        
+                        // Show detailed confirmation with position count
+                        const confirmMsg = `⚠️ Close ALL ${activePositions.length} positions?\n\n` +
+                            `This will close:\n` +
+                            activePositions.map(pos => `• ${pos.symbol} ${pos.side} ${pos.size}`).join('\n') +
+                            `\n\nThis action cannot be undone!`;
+                        
+                        if (confirm(confirmMsg)) {
+                            // Show loading state
+                            showNotification('Closing Positions', 'Closing all positions...', 'info');
+                            
+                            // Close all positions via Bybit API
+                            fetch('/api/bybit/close-all-positions', {
+                                method: 'POST'
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    const results = data.results || [];
+                                    const successful = results.filter(r => r.result?.success).length;
+                                    const failed = results.filter(r => !r.result?.success).length;
+                                    
+                                    if (failed === 0) {
+                                        showNotification('Success', `All ${successful} positions closed successfully!`, 'success');
+                                    } else {
+                                        showNotification('Partial Success', 
+                                            `Closed ${successful} positions, ${failed} failed. Check console for details.`, 
+                                            'warning');
+                                    }
+                                    
+                                    // Refresh data
+                                    loadPositions();
+                                    loadAccountBalance();
+                                } else {
+                                    showNotification('Error', `Failed to close positions: ${data.error}`, 'error');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error closing all positions:', error);
+                                showNotification('Error', 'Error closing all positions. Please try again.', 'error');
+                            });
+                        }
                     } else {
-                        alert(`Failed to close all positions: ${data.error}`);
+                        showNotification('Error', 'Failed to check positions', 'error');
                     }
                 })
                 .catch(error => {
-                    console.error('Error closing all positions:', error);
-                    alert('Error closing all positions. Please try again.');
+                    console.error('Error checking positions:', error);
+                    showNotification('Error', 'Error checking positions', 'error');
                 });
-            }
         }
         
         function setGlobalStopLoss() {
@@ -10128,6 +10041,290 @@
             }
         }
 
+        function showPositionModeSettings() {
+            console.log('Showing position mode settings...');
+            
+            // Check if API is available
+            if (!window.bybitApiAvailable) {
+                alert('⚠️ Position Mode Settings\n\nThis feature requires valid Bybit API credentials.\n\nPlease ensure your API credentials are configured.');
+                return;
+            }
+            
+            // Get current position mode first
+            fetch('/api/bybit/get-position-mode')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const currentMode = data.data?.list?.[0]?.mode || 'Unknown';
+                        showPositionModeModal(currentMode);
+                    } else {
+                        showPositionModeModal('Unknown');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error getting position mode:', error);
+                    showPositionModeModal('Unknown');
+                });
+        }
+
+        function showPositionModeModal(currentMode) {
+            const modalHtml = `
+                <div class="modal fade" id="positionModeModal" tabindex="-1" aria-labelledby="positionModeModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="positionModeModalLabel">
+                                    <i class="fas fa-cog me-2"></i>Position Mode Settings
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <strong>Current Mode:</strong> <span id="current-mode-display">${currentMode}</span>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Select Position Mode:</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="positionMode" id="oneWay" value="OneWay" ${currentMode === 'OneWay' ? 'checked' : ''}>
+                                        <label class="form-check-label" for="oneWay">
+                                            <i class="fas fa-arrow-right me-1"></i>One-Way Mode
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="positionMode" id="hedge" value="Hedge" ${currentMode === 'Hedge' ? 'checked' : ''}>
+                                        <label class="form-check-label" for="hedge">
+                                            <i class="fas fa-arrows-alt-h me-1"></i>Hedge Mode
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    <strong>Important:</strong> Changing position mode requires closing all open positions and orders first.
+                                </div>
+                                
+                                <div class="alert alert-info">
+                                    <i class="fas fa-shield-alt me-2"></i>
+                                    <strong>Hedge Mode:</strong> Allows both long and short positions on the same symbol simultaneously.
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="button" class="btn btn-primary" onclick="setPositionMode()">
+                                    <i class="fas fa-save me-1"></i>Set Position Mode
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Remove existing modal if any
+            const existingModal = document.getElementById('positionModeModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            // Add modal to body
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('positionModeModal'));
+            modal.show();
+        }
+
+        function setPositionMode() {
+            const selectedMode = document.querySelector('input[name="positionMode"]:checked');
+            if (!selectedMode) {
+                alert('Please select a position mode.');
+                return;
+            }
+            
+            const mode = selectedMode.value;
+            const currentMode = document.getElementById('current-mode-display').textContent;
+            
+            if (mode === currentMode) {
+                alert('Selected mode is already active.');
+                return;
+            }
+            
+            const confirmMessage = `Are you sure you want to change position mode to ${mode}?\n\n` +
+                `This will require closing all open positions and orders first.\n\n` +
+                `Current Mode: ${currentMode}\n` +
+                `New Mode: ${mode}`;
+            
+            if (!confirm(confirmMessage)) {
+                return;
+            }
+            
+            // Show loading
+            const setButton = document.querySelector('#positionModeModal .btn-primary');
+            const originalText = setButton.innerHTML;
+            setButton.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Setting...';
+            setButton.disabled = true;
+            
+            // Set position mode
+            fetch('/api/bybit/set-position-mode', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    mode: mode
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(`✅ Position mode set to ${mode} successfully!`);
+                    showNotification('Position Mode Updated', `Position mode changed to ${mode}`, 'success');
+                    
+                    // Close modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('positionModeModal'));
+                    modal.hide();
+                } else {
+                    alert(`❌ Failed to set position mode: ${data.error}`);
+                }
+            })
+            .catch(error => {
+                console.error('Error setting position mode:', error);
+                alert(`❌ Error setting position mode: ${error.message}`);
+            })
+            .finally(() => {
+                // Restore button
+                setButton.innerHTML = originalText;
+                setButton.disabled = false;
+            });
+        }
+
+        function diagnoseRealModeHedgeIssue() {
+            console.log('🔍 Diagnosing real mode hedge issue...');
+            
+            let diagnosis = {
+                apiAvailable: window.bybitApiAvailable,
+                timestamp: new Date().toISOString()
+            };
+            
+            // Real mode diagnosis
+            if (!window.bybitApiAvailable) {
+                alert('🔍 DIAGNOSIS: API Not Available\n\n' +
+                      'Bybit API is not available. To enable real trading:\n' +
+                      '1. Ensure your Bybit API credentials are configured\n' +
+                      '2. Check your API key and secret in config.yaml\n' +
+                      '3. Verify network connectivity\n' +
+                      '4. Try again after fixing API connection');
+                return;
+            }
+            
+            // Check API availability
+            if (!window.bybitApiAvailable) {
+                alert('🔍 DIAGNOSIS: API Not Available\n\n' +
+                      'Bybit API is not available. This could be due to:\n\n' +
+                      '1. Invalid API credentials\n' +
+                      '2. Network connectivity issues\n' +
+                      '3. API key permissions\n' +
+                      '4. Server configuration issues\n\n' +
+                      'Please check your API credentials and try again.');
+                return;
+            }
+            
+            // Check position mode
+            fetch('/api/bybit/get-position-mode')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const currentMode = data.data?.list?.[0]?.mode || 'Unknown';
+                        diagnosis.positionMode = currentMode;
+                        
+                        if (currentMode !== 'Hedge') {
+                            alert('🔍 DIAGNOSIS: Position Mode Issue\n\n' +
+                                  `Current Position Mode: ${currentMode}\n\n` +
+                                  'Hedge trading requires position mode to be set to "Hedge".\n\n' +
+                                  'SOLUTION:\n' +
+                                  '1. Click the "Position Mode" button\n' +
+                                  '2. Select "Hedge Mode"\n' +
+                                  '3. Confirm the change (this will close existing positions)\n' +
+                                  '4. Try creating hedge positions again');
+                        } else {
+                            // Position mode is correct, check other issues
+                            alert('🔍 DIAGNOSIS: Position Mode OK\n\n' +
+                                  `Position Mode: ${currentMode} ✅\n` +
+                                  'API Available: ✅\n\n' +
+                                  'If hedge positions still don\'t work, the issue might be:\n\n' +
+                                  '1. Insufficient balance\n' +
+                                  '2. Minimum order size requirements\n' +
+                                  '3. Market conditions\n' +
+                                  '4. API rate limits\n\n' +
+                                  'Try creating a small test position first.');
+                        }
+                    } else {
+                        alert('🔍 DIAGNOSIS: Cannot Check Position Mode\n\n' +
+                              `Error: ${data.error}\n\n` +
+                              'This suggests an API connectivity issue. Please check:\n\n' +
+                              '1. API credentials are correct\n' +
+                              '2. API key has trading permissions\n' +
+                              '3. Network connection is stable');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking position mode:', error);
+                    alert('🔍 DIAGNOSIS: API Error\n\n' +
+                          `Error: ${error.message}\n\n` +
+                          'Cannot connect to Bybit API. Please check your configuration.');
+                });
+        }
+        
+        function forceSetHedgeMode() {
+            // Force set position mode to Hedge
+            console.log('🔧 Force setting position mode to Hedge...');
+            
+            // Real mode only
+            
+            if (!window.bybitApiAvailable) {
+                alert('❌ API Not Available\n\n' +
+                      'Cannot set position mode without API access.');
+                return;
+            }
+            
+            if (!confirm('⚠️ Force Set Hedge Mode\n\n' +
+                         'This will attempt to set your Bybit account to Hedge mode.\n\n' +
+                         'Continue?')) {
+                return;
+            }
+            
+            fetch('/api/bybit/set-position-mode', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ mode: 'Hedge' })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('✅ Position Mode Set Successfully\n\n' +
+                          'Your Bybit account is now set to Hedge mode.\n\n' +
+                          'You can now create hedge positions!');
+                    showNotification('Hedge Mode Enabled', 'Position mode successfully set to Hedge mode', 'success');
+                } else {
+                    alert(`❌ Failed to Set Hedge Mode\n\n` +
+                          `Error: ${data.error}\n\n` +
+                          `Please try the following:\n` +
+                          `1. Check your API permissions\n` +
+                          `2. Set position mode manually in Bybit app\n` +
+                          `3. Contact support if issue persists`);
+                }
+            })
+            .catch(error => {
+                console.error('Error setting position mode:', error);
+                alert(`❌ Error Setting Position Mode\n\n` +
+                      `Error: ${error.message}\n\n` +
+                      `Please check your network connection and try again.`);
+            });
+        }
+        
         function checkLiquidationRisk() {
             console.log('Checking liquidation risk...');
             showNotification('Risk Check', 'Analyzing liquidation risk for current positions...', 'info');
