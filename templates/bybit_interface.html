@@ -896,6 +896,84 @@
         font-size: 1.3rem;
     }
 }
+
+        /* Order History Styling */
+        .order-history-table {
+            font-size: 0.8rem;
+        }
+        
+        .order-history-table th {
+            background-color: #2c3e50;
+            color: white;
+            font-weight: 600;
+            border-color: #34495e;
+        }
+        
+        .order-history-row {
+            transition: background-color 0.2s ease;
+        }
+        
+        .order-history-row:hover {
+            background-color: rgba(52, 152, 219, 0.1);
+        }
+        
+        .order-status-filled {
+            background-color: #27ae60 !important;
+            color: white !important;
+        }
+        
+        .order-status-partially-filled {
+            background-color: #f39c12 !important;
+            color: white !important;
+        }
+        
+        .order-status-cancelled {
+            background-color: #e74c3c !important;
+            color: white !important;
+        }
+        
+        .order-status-rejected {
+            background-color: #8e44ad !important;
+            color: white !important;
+        }
+        
+        .order-status-new {
+            background-color: #3498db !important;
+            color: white !important;
+        }
+        
+        .order-side-buy {
+            color: #27ae60;
+            font-weight: 600;
+        }
+        
+        .order-side-sell {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+        
+        .order-id-cell {
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .order-time-cell {
+            font-size: 0.75rem;
+            color: #bdc3c7;
+        }
+        
+        .order-price-cell {
+            font-weight: 600;
+            color: var(--bybit-primary);
+        }
+        
+        .order-qty-cell {
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
@@ -1224,6 +1302,9 @@
                                     <button class="btn btn-outline-warning btn-sm me-2" onclick="showAdvancedTradingPanel()" title="Advanced Trading">
                                         <i class="fas fa-chart-line me-1"></i>Advanced
                                     </button>
+                                    <button class="btn btn-outline-info btn-sm me-2" onclick="loadOrderHistory()" title="View Order History">
+                                        <i class="fas fa-history me-1"></i>Order History
+                                    </button>
                             </div>
                         </div>
                     </div>
@@ -1262,6 +1343,146 @@
                                 </tbody>
                             </table>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order History -->
+    <div class="row mb-4 order-history-section">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">
+                            <i class="fas fa-history me-2"></i>Order History
+                            <span class="badge bg-info ms-2">
+                                <i class="fas fa-clock me-1"></i>Live Orders
+                            </span>
+                        </h6>
+                        <div class="d-flex align-items-center flex-wrap">
+                            <div class="me-2 mb-1">
+                                <select id="order-history-category" class="form-select form-select-sm" style="width: auto;" required>
+                                    <option value="">Select Category</option>
+                                    <option value="linear">Linear</option>
+                                    <option value="inverse">Inverse</option>
+                                    <option value="spot">Spot</option>
+                                    <option value="option">Option</option>
+                                </select>
+                            </div>
+                            <div class="me-2 mb-1">
+                                <input type="text" id="order-history-symbol" class="form-control form-control-sm" 
+                                       placeholder="Symbol (BTCUSDT)" style="width: 120px;">
+                            </div>
+                            <div class="me-2 mb-1">
+                                <input type="text" id="order-history-base-coin" class="form-control form-control-sm" 
+                                       placeholder="Base Coin (BTC)" style="width: 100px;">
+                            </div>
+                            <div class="me-2 mb-1">
+                                <input type="text" id="order-history-settle-coin" class="form-control form-control-sm" 
+                                       placeholder="Settle Coin (USDT)" style="width: 100px;">
+                            </div>
+                            <div class="me-2 mb-1">
+                                <input type="text" id="order-history-order-id" class="form-control form-control-sm" 
+                                       placeholder="Order ID" style="width: 120px;">
+                            </div>
+                            <div class="me-2 mb-1">
+                                <input type="text" id="order-history-order-link-id" class="form-control form-control-sm" 
+                                       placeholder="Order Link ID" style="width: 120px;">
+                            </div>
+                            <div class="me-2 mb-1">
+                                <select id="order-history-order-filter" class="form-select form-select-sm" style="width: auto;">
+                                    <option value="">All Orders</option>
+                                    <option value="Order">Active Orders</option>
+                                    <option value="StopOrder">Stop Orders</option>
+                                    <option value="tpslOrder">TP/SL Orders</option>
+                                    <option value="OcoOrder">OCO Orders</option>
+                                    <option value="BidirectionalTpslOrder">Bidirectional TP/SL</option>
+                                </select>
+                            </div>
+                            <div class="me-2 mb-1">
+                                <select id="order-history-status" class="form-select form-select-sm" style="width: auto;">
+                                    <option value="">All Status</option>
+                                    <option value="New">New</option>
+                                    <option value="PartiallyFilled">Partially Filled</option>
+                                    <option value="Filled">Filled</option>
+                                    <option value="Cancelled">Cancelled</option>
+                                    <option value="Rejected">Rejected</option>
+                                    <option value="Deactivated">Deactivated</option>
+                                </select>
+                            </div>
+                            <div class="me-2 mb-1">
+                                <input type="datetime-local" id="order-history-start-time" class="form-control form-control-sm" 
+                                       placeholder="Start Time" style="width: 160px;">
+                            </div>
+                            <div class="me-2 mb-1">
+                                <input type="datetime-local" id="order-history-end-time" class="form-control form-control-sm" 
+                                       placeholder="End Time" style="width: 160px;">
+                            </div>
+                            <div class="me-2 mb-1">
+                                <select id="order-history-limit" class="form-select form-select-sm" style="width: auto;">
+                                    <option value="10">10</option>
+                                    <option value="20">20</option>
+                                    <option value="50" selected>50</option>
+                                </select>
+                            </div>
+                            <div class="me-2 mb-1">
+                                <button class="btn btn-outline-primary btn-sm" onclick="loadOrderHistory()" title="Load Order History">
+                                    <i class="fas fa-sync-alt me-1"></i>Load History
+                                </button>
+                            </div>
+                            <div class="me-2 mb-1">
+                                <button class="btn btn-outline-secondary btn-sm" onclick="refreshOrderHistory()" title="Refresh">
+                                    <i class="fas fa-sync me-1"></i>Refresh
+                                </button>
+                            </div>
+                            <div class="me-2 mb-1">
+                                <button class="btn btn-outline-warning btn-sm" onclick="clearOrderHistoryFilters()" title="Clear Filters">
+                                    <i class="fas fa-times me-1"></i>Clear
+                                </button>
+                            </div>
+                            <button class="btn btn-outline-info btn-sm" onclick="clearOrderHistory()" title="Clear Order History">
+                                <i class="fas fa-trash me-1"></i>Clear
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table order-history-table">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Symbol</th>
+                                    <th>Side</th>
+                                    <th>Type</th>
+                                    <th>Price</th>
+                                    <th>Qty</th>
+                                    <th>Status</th>
+                                    <th>Filled Qty</th>
+                                    <th>Avg Price</th>
+                                    <th>Created</th>
+                                    <th>Updated</th>
+                                    <th>Actions</th>
+                                </tr>
+                                <tr class="table-secondary">
+                                    <td colspan="12" class="text-center py-2">
+                                        <small class="text-muted">
+                                            Last updated: <span id="order-history-last-update">Never</span>
+                                        </small>
+                                    </td>
+                                </tr>
+                            </thead>
+                            <tbody id="order-history-table">
+                                <tr>
+                                    <td colspan="12" class="text-center text-muted">
+                                        <i class="fas fa-inbox me-2"></i>No order history loaded
+                                        <br><small class="text-muted">Select a symbol and click "Load History" to view orders</small>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -4378,6 +4599,490 @@
         
         // Demo mode function removed - only real mode available
         
+        // Order History Functions
+        function showOrderHistorySection() {
+            const orderHistorySection = document.querySelector('.order-history-section');
+            if (orderHistorySection) {
+                orderHistorySection.style.display = 'block';
+                orderHistorySection.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+        
+        function loadOrderHistory() {
+            console.log('🔄 Loading order history...');
+            
+            // Show the order history section if it's hidden
+            showOrderHistorySection();
+            
+            // Check if API is available
+            if (!window.bybitApiAvailable) {
+                console.log('❌ API not available - cannot load order history');
+                showNotification('API Error', 'Bybit API not available. Cannot load order history.', 'error');
+                return;
+            }
+            
+            // Get filter values with null checks
+            const categoryElement = document.getElementById('order-history-category');
+            const symbolElement = document.getElementById('order-history-symbol');
+            const baseCoinElement = document.getElementById('order-history-base-coin');
+            const settleCoinElement = document.getElementById('order-history-settle-coin');
+            const orderIdElement = document.getElementById('order-history-order-id');
+            const orderLinkIdElement = document.getElementById('order-history-order-link-id');
+            const orderFilterElement = document.getElementById('order-history-order-filter');
+            const statusElement = document.getElementById('order-history-status');
+            const startTimeElement = document.getElementById('order-history-start-time');
+            const endTimeElement = document.getElementById('order-history-end-time');
+            const limitElement = document.getElementById('order-history-limit');
+            
+            const category = categoryElement ? categoryElement.value : '';
+            const symbol = symbolElement ? symbolElement.value : '';
+            const baseCoin = baseCoinElement ? baseCoinElement.value : '';
+            const settleCoin = settleCoinElement ? settleCoinElement.value : '';
+            const orderId = orderIdElement ? orderIdElement.value : '';
+            const orderLinkId = orderLinkIdElement ? orderLinkIdElement.value : '';
+            const orderFilter = orderFilterElement ? orderFilterElement.value : '';
+            const orderStatus = statusElement ? statusElement.value : '';
+            const startTime = startTimeElement ? startTimeElement.value : '';
+            const endTime = endTimeElement ? endTimeElement.value : '';
+            const limit = limitElement ? limitElement.value : '50';
+            
+            // Validate required category parameter
+            if (!category) {
+                showNotification('Validation Error', 'Please select a category (linear, inverse, spot, or option).', 'warning');
+                return;
+            }
+            
+            // Show info message if no symbol is provided (optional parameter)
+            if (!symbol) {
+                console.log('ℹ️ No symbol specified - will fetch all orders for the selected category');
+            }
+            
+            // Show loading state
+            const tbody = document.getElementById('order-history-table');
+            if (!tbody) {
+                console.error('Order history table not found');
+                showNotification('Error', 'Order history table not found. Please refresh the page.', 'error');
+                return;
+            }
+            
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="10" class="text-center">
+                        <div class="loading-spinner mx-auto"></div>
+                        <p class="mt-2">Loading order history...</p>
+                        <small class="text-muted">Fetching from Bybit API...</small>
+                        <br><small class="text-muted">Time: ${new Date().toLocaleTimeString()}</small>
+                    </td>
+                </tr>
+            `;
+            
+            // Build query parameters
+            const params = new URLSearchParams();
+            params.append('category', category); // Required parameter
+            
+            if (symbol) params.append('symbol', symbol);
+            if (baseCoin) params.append('baseCoin', baseCoin);
+            if (settleCoin) params.append('settleCoin', settleCoin);
+            if (orderId) params.append('orderId', orderId);
+            if (orderLinkId) params.append('orderLinkId', orderLinkId);
+            if (orderFilter) params.append('orderFilter', orderFilter);
+            if (orderStatus) params.append('orderStatus', orderStatus);
+            if (limit) params.append('limit', limit);
+            
+            // Handle datetime conversion for startTime and endTime
+            if (startTime) {
+                const startTimestamp = new Date(startTime).getTime();
+                params.append('startTime', startTimestamp.toString());
+            }
+            if (endTime) {
+                const endTimestamp = new Date(endTime).getTime();
+                params.append('endTime', endTimestamp.toString());
+            }
+            
+            // Set default time range if no dates specified (last 7 days)
+            if (!startTime && !endTime) {
+                const now = new Date();
+                const sevenDaysAgo = new Date();
+                sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+                params.append('startTime', sevenDaysAgo.getTime().toString());
+                params.append('endTime', now.getTime().toString());
+            }
+            
+            const queryString = params.toString();
+            const url = `/api/bybit/unified/order-history${queryString ? '?' + queryString : ''}`;
+            
+            console.log('🌐 Fetching from:', url);
+            
+            // Fetch order history from Bybit API
+            fetch(url)
+                .then(response => {
+                    console.log('📡 Order History API response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Order history received:', data);
+                    
+                    if (data.success) {
+                        console.log('✅ Order history API call successful');
+                        displayOrderHistory(data.data);
+                        
+                        const ordersCount = data.data && data.data.list ? data.data.list.length : 0;
+                        showNotification(
+                            'Order History Loaded', 
+                            `Successfully loaded ${ordersCount} orders from Bybit.`, 
+                            'success'
+                        );
+                    } else {
+                        console.error('Failed to load order history:', data.error || 'Unknown error');
+                        
+                        // Show error message in order history table
+                        const tbody = document.getElementById('order-history-table');
+                        if (tbody) {
+                            tbody.innerHTML = `
+                                <tr>
+                                    <td colspan="10" class="text-center">
+                                        <div class="alert alert-warning mb-0">
+                                            <i class="fas fa-exclamation-triangle me-2"></i>
+                                            <strong>API Error:</strong> ${data.error || 'Failed to load order history'}
+                                            <br><small class="text-muted">Check your API credentials and try again</small>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `;
+                        }
+                        
+                        showNotification(
+                            'Order History Load Failed', 
+                            `Error: ${data.error || 'Unknown error'}. Check API credentials.`, 
+                            'error'
+                        );
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching order history:', error);
+                    
+                    // Show error message in order history table
+                    const tbody = document.getElementById('order-history-table');
+                    if (tbody) {
+                        tbody.innerHTML = `
+                            <tr>
+                                <td colspan="10" class="text-center">
+                                    <div class="alert alert-danger mb-0">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        <strong>Connection Error:</strong> ${error.message}
+                                        <br><small class="text-muted">Network issue or API endpoint not available</small>
+                                    </td>
+                            </tr>
+                        `;
+                    }
+                    
+                    showNotification(
+                        'Connection Failed', 
+                        `Network error: ${error.message}. Check your connection.`, 
+                        'error'
+                    );
+                });
+        }
+        
+        function displayOrderHistory(data) {
+            const tbody = document.getElementById('order-history-table');
+            
+            if (!tbody) {
+                console.error('Order history table not found in displayOrderHistory');
+                return;
+            }
+            
+            if (!data || !data.list || data.list.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="10" class="text-center">
+                            <div class="alert alert-info mb-0">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>No Orders Found</strong>
+                                <br><small class="text-muted">No order history found for the selected criteria. Try adjusting your filters or date range.</small>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            // Clear existing content
+            tbody.innerHTML = '';
+            
+            // Display each order
+            data.list.forEach(order => {
+                const row = createOrderHistoryRow(order);
+                tbody.appendChild(row);
+            });
+            
+            // Update last update time
+            const lastUpdateElement = document.getElementById('order-history-last-update');
+            if (lastUpdateElement) {
+                lastUpdateElement.textContent = new Date().toLocaleTimeString();
+            }
+        }
+        
+        function createOrderHistoryRow(order) {
+            const row = document.createElement('tr');
+            row.className = 'order-history-row';
+            
+            // Format timestamp
+            const timestamp = new Date(parseInt(order.createdTime)).toLocaleString();
+            
+            // Format price
+            const price = order.price ? parseFloat(order.price).toFixed(4) : '-';
+            
+            // Format quantity
+            const quantity = order.qty ? parseFloat(order.qty).toFixed(4) : '-';
+            
+            // Format filled quantity
+            const filledQty = order.cumExecQty ? parseFloat(order.cumExecQty).toFixed(4) : '0';
+            
+            // Format average price
+            const avgPrice = order.avgPrice ? parseFloat(order.avgPrice).toFixed(4) : '-';
+            
+            // Format total value
+            const totalValue = order.cumExecValue ? parseFloat(order.cumExecValue).toFixed(2) : '-';
+            
+            // Get status badge class
+            const statusClass = getOrderStatusClass(order.orderStatus);
+            
+            // Get side badge class
+            const sideClass = order.side === 'Buy' ? 'bg-success' : 'bg-danger';
+            
+            row.innerHTML = `
+                <td class="text-center">
+                    <small class="text-muted">${timestamp}</small>
+                </td>
+                <td class="text-center">
+                    <span class="badge ${sideClass}">${order.side}</span>
+                </td>
+                <td class="text-center">
+                    <strong>${order.symbol}</strong>
+                </td>
+                <td class="text-center">
+                    <span class="badge ${statusClass}">${order.orderStatus}</span>
+                </td>
+                <td class="text-center">
+                    <strong>${order.orderType}</strong>
+                </td>
+                <td class="text-center">
+                    <strong>${price}</strong>
+                </td>
+                <td class="text-center">
+                    <strong>${quantity}</strong>
+                </td>
+                <td class="text-center">
+                    <strong>${filledQty}</strong>
+                </td>
+                <td class="text-center">
+                    <strong>${avgPrice}</strong>
+                </td>
+                <td class="text-center">
+                    <strong>$${totalValue}</strong>
+                </td>
+            `;
+            
+            return row;
+        }
+        
+        function getOrderStatusClass(status) {
+            switch (status) {
+                case 'Filled':
+                    return 'order-status-filled';
+                case 'PartiallyFilled':
+                    return 'order-status-partially-filled';
+                case 'Cancelled':
+                    return 'order-status-cancelled';
+                case 'Rejected':
+                    return 'order-status-rejected';
+                case 'New':
+                    return 'order-status-new';
+                case 'Pending':
+                    return 'order-status-pending';
+                default:
+                    return 'order-status-default';
+            }
+        }
+        
+        function refreshOrderHistory() {
+            console.log('🔄 Refreshing order history...');
+            loadOrderHistory();
+        }
+        
+        function clearOrderHistoryFilters() {
+            const categoryElement = document.getElementById('order-history-category');
+            const symbolElement = document.getElementById('order-history-symbol');
+            const baseCoinElement = document.getElementById('order-history-base-coin');
+            const settleCoinElement = document.getElementById('order-history-settle-coin');
+            const orderIdElement = document.getElementById('order-history-order-id');
+            const orderLinkIdElement = document.getElementById('order-history-order-link-id');
+            const orderFilterElement = document.getElementById('order-history-order-filter');
+            const statusElement = document.getElementById('order-history-status');
+            const startTimeElement = document.getElementById('order-history-start-time');
+            const endTimeElement = document.getElementById('order-history-end-time');
+            const limitElement = document.getElementById('order-history-limit');
+            
+            if (categoryElement) categoryElement.value = '';
+            if (symbolElement) symbolElement.value = '';
+            if (baseCoinElement) baseCoinElement.value = '';
+            if (settleCoinElement) settleCoinElement.value = '';
+            if (orderIdElement) orderIdElement.value = '';
+            if (orderLinkIdElement) orderLinkIdElement.value = '';
+            if (orderFilterElement) orderFilterElement.value = '';
+            if (statusElement) statusElement.value = '';
+            if (startTimeElement) startTimeElement.value = '';
+            if (endTimeElement) endTimeElement.value = '';
+            if (limitElement) limitElement.value = '50';
+            
+            // Clear the table
+            const tbody = document.getElementById('order-history-table');
+            if (tbody) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="10" class="text-center">
+                            <div class="alert alert-info mb-0">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Ready to Load Order History</strong>
+                                <br><small class="text-muted">Select a category (required) and optionally add filters, then click "Load History" to fetch orders</small>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+        
+        function clearOrderHistory() {
+            const tbody = document.getElementById('order-history-table');
+            if (tbody) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="10" class="text-center">
+                            <div class="alert alert-info mb-0">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Order History Cleared</strong>
+                                <br><small class="text-muted">Select a category (required) and optionally add filters, then click "Load History" to fetch orders</small>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }
+            showNotification('Order History Cleared', 'Order history table has been cleared.', 'info');
+        }
+        
+        function setDefaultTimeRange() {
+            const endTimeElement = document.getElementById('order-history-end-time');
+            const startTimeElement = document.getElementById('order-history-start-time');
+            
+            if (endTimeElement && !endTimeElement.value) {
+                // Set end time to now
+                const now = new Date();
+                endTimeElement.value = now.toISOString().slice(0, 16);
+            }
+            
+            if (startTimeElement && !startTimeElement.value) {
+                // Set start time to 7 days ago
+                const sevenDaysAgo = new Date();
+                sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+                startTimeElement.value = sevenDaysAgo.toISOString().slice(0, 16);
+            }
+        }
+        
+        // Auto-refresh order history every 30 seconds
+        function startOrderHistoryAutoRefresh() {
+            if (window.orderHistoryInterval) {
+                clearInterval(window.orderHistoryInterval);
+            }
+            
+            window.orderHistoryInterval = setInterval(() => {
+                if (document.getElementById('order-history-table').children.length > 0) {
+                    console.log('🔄 Auto-refreshing order history...');
+                    loadOrderHistory();
+                }
+            }, 30000); // 30 seconds
+        }
+        
+        function stopOrderHistoryAutoRefresh() {
+            if (window.orderHistoryInterval) {
+                clearInterval(window.orderHistoryInterval);
+                window.orderHistoryInterval = null;
+            }
+        }
+        
+        // Initialize order history when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add event listeners for order history filters
+            const categorySelect = document.getElementById('order-history-category');
+            const symbolInput = document.getElementById('order-history-symbol');
+            const baseCoinInput = document.getElementById('order-history-base-coin');
+            const settleCoinInput = document.getElementById('order-history-settle-coin');
+            const orderIdInput = document.getElementById('order-history-order-id');
+            const orderLinkIdInput = document.getElementById('order-history-order-link-id');
+            const orderFilterSelect = document.getElementById('order-history-order-filter');
+            const statusSelect = document.getElementById('order-history-status');
+            const startTimeInput = document.getElementById('order-history-start-time');
+            const endTimeInput = document.getElementById('order-history-end-time');
+            const limitSelect = document.getElementById('order-history-limit');
+            
+            // Auto-load when category changes (required field)
+            if (categorySelect) {
+                categorySelect.addEventListener('change', loadOrderHistory);
+            }
+            
+            // Debounced inputs for search fields
+            if (symbolInput) {
+                symbolInput.addEventListener('input', debounce(loadOrderHistory, 500));
+            }
+            if (baseCoinInput) {
+                baseCoinInput.addEventListener('input', debounce(loadOrderHistory, 500));
+            }
+            if (settleCoinInput) {
+                settleCoinInput.addEventListener('input', debounce(loadOrderHistory, 500));
+            }
+            if (orderIdInput) {
+                orderIdInput.addEventListener('input', debounce(loadOrderHistory, 500));
+            }
+            if (orderLinkIdInput) {
+                orderLinkIdInput.addEventListener('input', debounce(loadOrderHistory, 500));
+            }
+            
+            // Immediate change for selects
+            if (orderFilterSelect) {
+                orderFilterSelect.addEventListener('change', loadOrderHistory);
+            }
+            if (statusSelect) {
+                statusSelect.addEventListener('change', loadOrderHistory);
+            }
+            if (limitSelect) {
+                limitSelect.addEventListener('change', loadOrderHistory);
+            }
+            
+            // Date inputs
+            if (startTimeInput) {
+                startTimeInput.addEventListener('change', loadOrderHistory);
+            }
+            if (endTimeInput) {
+                endTimeInput.addEventListener('change', loadOrderHistory);
+            }
+        });
+        
+        // Debounce function for search input
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
         function updateModeIndicator() {
             const modeIndicator = document.getElementById('mode-indicator');
             if (modeIndicator) {
@@ -4963,31 +5668,33 @@
                                     <i class="fas fa-arrows-alt-v me-2"></i>Position Side
                                 </label>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="positionSide" id="long" value="Buy" checked>
+                                    <input class="form-check-input" type="radio" name="positionSide" id="long" value="Buy" checked onchange="toggleHedgeWarning()">
                                     <label class="form-check-label text-success" for="long">
                                         <i class="fas fa-arrow-up me-1"></i>LONG (Buy)
                                     </label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="positionSide" id="short" value="Sell">
+                                    <input class="form-check-input" type="radio" name="positionSide" id="short" value="Sell" onchange="toggleHedgeWarning()">
                                     <label class="form-check-label text-danger" for="short">
                                         <i class="fas fa-arrow-down me-1"></i>SHORT (Sell)
                                     </label>
                                 </div>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="positionSide" id="both" value="Both">
+                                    <input class="form-check-input" type="radio" name="positionSide" id="both" value="Both" onchange="toggleHedgeWarning()">
                                     <label class="form-check-label text-warning" for="both">
-                                        <i class="fas fa-arrows-alt-h me-1"></i>BOTH (Hedge Mode)
+                                        <i class="fas fa-arrows-alt-h me-1"></i>BOTH (Hedge Mode) - ⚠️ ADVANCED
                                     </label>
                                 </div>
                                 <small class="form-text text-muted">
                                     <i class="fas fa-info-circle me-1"></i>
                                     "BOTH" creates both long and short positions simultaneously (hedge mode)
                                 </small>
-                                <div class="alert alert-info mt-2" role="alert">
-                                    <i class="fas fa-shield-alt me-2"></i>
-                                    <strong>Hedge Mode:</strong> Allows you to hold both long and short positions on the same symbol simultaneously. 
-                                    This can help reduce directional risk and profit from volatility.
+                                <div class="alert alert-warning mt-2" role="alert" id="hedge-warning" style="display: none;">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    <strong>⚠️ HEDGE MODE WARNING:</strong> This will create BOTH Long and Short positions simultaneously. 
+                                    This is an advanced feature that should only be used by experienced traders who understand hedge strategies.
+                                    <br><br>
+                                    <strong>For breakout trading, use LONG or SHORT only.</strong>
                                 </div>
                             </div>
                             <div class="mb-3">
@@ -5242,9 +5949,30 @@
             // Execute both long and short positions for hedge mode
             console.log('Executing hedge positions:', { symbol, quantity, leverage });
             
-            // Show loading message
-            const loadingMsg = `Creating hedge positions for ${symbol}...\n\nThis will create both LONG and SHORT positions simultaneously.`;
+            // Show enhanced warning message
+            const loadingMsg = `⚠️ HEDGE MODE CONFIRMATION ⚠️\n\n` +
+                `Creating hedge positions for ${symbol}...\n\n` +
+                `This will create BOTH LONG and SHORT positions simultaneously.\n\n` +
+                `⚠️ WARNING: This is an advanced feature that should only be used by experienced traders.\n\n` +
+                `For breakout trading, it's recommended to use LONG or SHORT only.\n\n` +
+                `Are you sure you want to proceed with hedge mode?`;
+            
             if (!confirm(loadingMsg)) {
+                console.log('Hedge mode cancelled by user');
+                return;
+            }
+            
+            // Additional confirmation for hedge mode
+            const finalConfirm = `FINAL CONFIRMATION\n\n` +
+                `You are about to create hedge positions for ${symbol}:\n` +
+                `• LONG position: ${quantity} ${symbol}\n` +
+                `• SHORT position: ${quantity} ${symbol}\n` +
+                `• Leverage: ${leverage}x\n\n` +
+                `This will result in BOTH positions being opened simultaneously.\n\n` +
+                `Click OK to proceed or Cancel to abort.`;
+            
+            if (!confirm(finalConfirm)) {
+                console.log('Hedge mode cancelled at final confirmation');
                 return;
             }
             
@@ -7582,7 +8310,15 @@
                     
                     // Execute real trade if auto-trading is enabled
                     if (autoTradingActive) {
-                        executeRealBreakoutTrade(symbol, currentPrice, longSignal ? 'BUY' : 'SELL', sessionType);
+                        // Determine the strongest signal direction (mutual exclusivity)
+                        const selectedDirection = determineStrongestSignal(symbol, currentPrice, longSignal, shortSignal, sessionType);
+                        if (selectedDirection) {
+                            executeRealBreakoutTrade(symbol, currentPrice, selectedDirection, sessionType);
+                        } else {
+                            console.log('No clear signal direction determined, skipping trade');
+                            showNotification('⚠️ Signal Ambiguous', 
+                                `${symbol} breakout signals are conflicting, skipping trade for safety`, 'warning');
+                        }
                     }
                 } else {
                     // Some filters failed
@@ -7658,6 +8394,96 @@
             updateCandlestickPatternsStatus();
         }
 
+        // Determine the strongest signal direction with mutual exclusivity
+        function determineStrongestSignal(symbol, currentPrice, longSignal, shortSignal, sessionType) {
+            console.log(`🔍 Determining strongest signal for ${symbol}:`);
+            console.log(`   Long Signal: ${longSignal}`);
+            console.log(`   Short Signal: ${shortSignal}`);
+            
+            // If only one signal is true, use that direction
+            if (longSignal && !shortSignal) {
+                console.log('✅ Clear LONG signal detected');
+                return 'BUY';
+            } else if (shortSignal && !longSignal) {
+                console.log('✅ Clear SHORT signal detected');
+                return 'SELL';
+            } else if (longSignal && shortSignal) {
+                // Both signals are true - need to determine which is stronger
+                console.log('⚠️ Both signals detected - analyzing signal strength...');
+                
+                // Get session range data to calculate signal strength
+                const sessionRange = getSessionRange(sessionType);
+                if (!sessionRange) {
+                    console.log('❌ Cannot determine signal strength - no session range data');
+                    return null;
+                }
+                
+                // Calculate how far price has moved beyond breakout levels
+                const buffer = parseFloat(document.getElementById('buffer-percentage').value) / 100;
+                const longBreakoutLevel = sessionRange.high * (1 + buffer);
+                const shortBreakoutLevel = sessionRange.low * (1 - buffer);
+                
+                const longDistance = currentPrice - longBreakoutLevel;
+                const shortDistance = shortBreakoutLevel - currentPrice;
+                
+                console.log(`   Long breakout level: $${longBreakoutLevel.toFixed(2)}`);
+                console.log(`   Short breakout level: $${shortBreakoutLevel.toFixed(2)}`);
+                console.log(`   Long distance: $${longDistance.toFixed(2)}`);
+                console.log(`   Short distance: $${shortDistance.toFixed(2)}`);
+                
+                // Choose the signal with the greater distance (stronger breakout)
+                if (longDistance > shortDistance) {
+                    console.log('✅ LONG signal is stronger (greater distance)');
+                    return 'BUY';
+                } else if (shortDistance > longDistance) {
+                    console.log('✅ SHORT signal is stronger (greater distance)');
+                    return 'SELL';
+                } else {
+                    console.log('❌ Signals are equally strong - skipping trade for safety');
+                    return null;
+                }
+            } else {
+                // Neither signal is true
+                console.log('❌ No signals detected');
+                return null;
+            }
+        }
+        
+        // Toggle hedge mode warning
+        function toggleHedgeWarning() {
+            const hedgeWarning = document.getElementById('hedge-warning');
+            const bothRadio = document.getElementById('both');
+            
+            if (bothRadio && bothRadio.checked) {
+                hedgeWarning.style.display = 'block';
+            } else {
+                hedgeWarning.style.display = 'none';
+            }
+        }
+
+        // Get session range data (simplified implementation)
+        function getSessionRange(sessionType) {
+            // This is a simplified implementation
+            // In a real scenario, you would get actual session range data
+            try {
+                if (sessionType === 'US Session' && rangeBoxes.us_session.calculated) {
+                    return rangeBoxes.us_session;
+                } else if (sessionType === 'Asian Session' && rangeBoxes.asian_session.calculated) {
+                    return rangeBoxes.asian_session;
+                }
+                
+                // Fallback to a default range (this should be replaced with actual data)
+                console.log('⚠️ Using fallback session range data');
+                return {
+                    high: 50000.0,  // Placeholder
+                    low: 48000.0,   // Placeholder
+                    calculated: true
+                };
+            } catch (error) {
+                console.error('Error getting session range:', error);
+                return null;
+            }
+        }
         // Execute real breakout trade for live trading
         function executeRealBreakoutTrade(symbol, currentPrice, side, sessionType) {
             console.log(`🚀 EXECUTING REAL BREAKOUT TRADE: ${symbol} ${side} at $${currentPrice}`);
@@ -7906,8 +8732,11 @@
                 console.log('All filters passed, ready for trade execution');
                 
                 // Execute trade if conditions are met
-                if (canExecuteTrade(symbol, longSignal ? 'long' : 'short')) {
-                    executeBreakoutTrade(symbol, currentPrice, longSignal ? 'Buy' : 'Sell');
+                const selectedDirection = determineStrongestSignal(symbol, currentPrice, longSignal, shortSignal, 'Current Session');
+                if (selectedDirection && canExecuteTrade(symbol, selectedDirection.toLowerCase())) {
+                    executeBreakoutTrade(symbol, currentPrice, selectedDirection === 'BUY' ? 'Buy' : 'Sell');
+                } else if (longSignal && shortSignal) {
+                    console.log('Both signals detected but no clear direction - skipping trade for safety');
                 }
                 
             }, confirmationCandles * 60000); // Convert to milliseconds
