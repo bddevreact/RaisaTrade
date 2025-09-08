@@ -325,17 +325,42 @@ class BybitAPI:
             logger.error(f"Error cancelling unified order: {e}")
             return {'success': False, 'error': str(e)}
     
-    def get_unified_order_history(self, category: str, symbol: str, limit: int = 50) -> Dict:
-        """Get order history using unified trading API"""
+    def get_unified_order_history(self, category: str, symbol: str = None, baseCoin: str = None, 
+                                 settleCoin: str = None, orderId: str = None, orderLinkId: str = None,
+                                 orderFilter: str = None, orderStatus: str = None, startTime: int = None,
+                                 endTime: int = None, limit: int = 50, cursor: str = None) -> Dict:
+        """Get order history using unified trading API with full v5 parameter support"""
         try:
             if not PYBIT_AVAILABLE:
                 return {'success': False, 'error': 'pybit library not available'}
             
+            # Build parameters dict with only non-empty values
             params = {
                 "category": category,
-                "symbol": symbol,
                 "limit": limit
             }
+            
+            # Add optional parameters only if they are provided
+            if symbol:
+                params["symbol"] = symbol
+            if baseCoin:
+                params["baseCoin"] = baseCoin
+            if settleCoin:
+                params["settleCoin"] = settleCoin
+            if orderId:
+                params["orderId"] = orderId
+            if orderLinkId:
+                params["orderLinkId"] = orderLinkId
+            if orderFilter:
+                params["orderFilter"] = orderFilter
+            if orderStatus:
+                params["orderStatus"] = orderStatus
+            if startTime:
+                params["startTime"] = startTime
+            if endTime:
+                params["endTime"] = endTime
+            if cursor:
+                params["cursor"] = cursor
             
             logger.info(f"Getting unified order history: {params}")
             
@@ -1037,4 +1062,4 @@ class BybitAPI:
                 return {'success': False, 'error': 'Failed to get balance data'}
         except Exception as e:
             logger.error(f"Error in manual performance metrics: {e}")
-            return {'success': False, 'error': str(e)} 
+            return {'success': False, 'error': str(e)}
