@@ -36,6 +36,7 @@ from trading_strategies import TradingStrategies, RSIFilter
 # Import Bybit API for futures trading
 try:
     from bybit_api import BybitAPI as BybitAPIClass
+    from bybit_futures_bot import BybitFuturesBot
     BYBIT_AVAILABLE = True
     logger.info("Bybit API imported successfully")
     
@@ -53,6 +54,52 @@ except ImportError as e:
     PYBIT_AVAILABLE = False
     logger.warning(f"Bybit API not available: {e}")
 
+# Global Bybit bot instance
+bybit_bot = None
+
+def initialize_bybit_bot():
+    """Initialize Bybit bot with enhanced configuration"""
+    global bybit_bot
+    try:
+        if not BYBIT_AVAILABLE:
+            logger.warning("Bybit API not available, cannot initialize bot")
+            return False
+        
+        config = get_config()
+        bybit_config = config.get('bybit', {})
+        
+        api_key = bybit_config.get('api_key') or os.getenv('BYBIT_API_KEY')
+        api_secret = bybit_config.get('api_secret') or os.getenv('BYBIT_API_SECRET') or os.getenv('BYBIT_SECRET_KEY')
+        testnet = bybit_config.get('testnet', False)
+        
+        if not api_key or not api_secret:
+            logger.warning("Bybit API credentials not configured")
+            return False
+        
+        # Initialize bot
+        bybit_bot = BybitFuturesBot(api_key, api_secret, testnet)
+        logger.info("Bybit bot initialized successfully")
+        return True
+        
+    except Exception as e:
+        logger.error(f"Error initializing Bybit bot: {e}")
+        return False
+
+def update_bybit_bot_config(config_data: dict):
+    """Update Bybit bot configuration"""
+    global bybit_bot
+    try:
+        if bybit_bot:
+            bybit_bot.update_trading_config(config_data)
+            logger.info("Bybit bot configuration updated")
+            return True
+        else:
+            logger.warning("Bybit bot not initialized")
+            return False
+    except Exception as e:
+        logger.error(f"Error updating Bybit bot configuration: {e}")
+        return False
+
 # Import SQLite database
 try:
     from database import db, save_setting, get_setting, save_position, get_open_positions, save_trade, get_trade_history, save_rsi_settings, get_rsi_settings, save_range_box, get_range_box, save_breakout_signal, get_active_signals, save_performance_metrics, get_performance_metrics, log_system, get_system_logs
@@ -61,7 +108,6 @@ try:
 except ImportError as e:
     logger.warning(f"❌ SQLite database not available: {e}")
     DATABASE_AVAILABLE = False
-
 from auto_trader import get_auto_trader, start_auto_trading, stop_auto_trading, get_auto_trading_status
 # Try to import PionexWebSocket, fallback to None if not available
 try:
@@ -2779,6 +2825,10 @@ def api_bybit_auto_trading_start():
         data = request.json
         logger.info(f"Starting auto trading with settings: {data}")
         
+        # Initialize Bybit bot if not already initialized
+        if not initialize_bybit_bot():
+            return jsonify({'success': False, 'error': 'Failed to initialize Bybit bot'})
+        
         # Update global auto trading status
         auto_trading_status['active'] = True
         auto_trading_status['started_at'] = datetime.now().isoformat()
@@ -2808,6 +2858,13 @@ def api_bybit_auto_trading_start():
             'use_box_opposite': data.get('use_box_opposite', True),
             'auto_breakeven': data.get('auto_breakeven', True),
             
+            # Enhanced Risk Management Features
+            'tp1_percentage': data.get('tp1_percentage', 2.5),
+            'tp2_percentage': data.get('tp2_percentage', 5.0),
+            'trailing_stop_enabled': data.get('trailing_stop_enabled', True),
+            'breakeven_level': data.get('breakeven_level', 1.0),
+            'trailing_step': data.get('trailing_step', 0.3),
+            
             # Technical Filters
             'mtf_rsi_enabled': data.get('mtf_rsi_enabled', True),
             'rsi_5m_long': data.get('rsi_5m_long', 30),
@@ -2825,6 +2882,9 @@ def api_bybit_auto_trading_start():
         # Reset counters
         auto_trading_status['total_trades'] = 0
         auto_trading_status['active_strategies'] = 1  # Breakout strategy
+        
+        # Update Bybit bot configuration with enhanced settings
+        update_bybit_bot_config(auto_trading_status['settings'])
         
         logger.info(f"Auto trading started successfully at {auto_trading_status['started_at']}")
         logger.info(f"Trading pair: {auto_trading_status['settings']['trading_pair']}")
@@ -3634,12 +3694,23 @@ def api_bybit_unified_order_history():
         if not BYBIT_AVAILABLE:
             return jsonify({'success': False, 'error': 'Bybit API not available'})
         
-        category = request.args.get('category', 'linear')
+        # Get all parameters from request
+        category = request.args.get('category')
         symbol = request.args.get('symbol')
+        base_coin = request.args.get('baseCoin')
+        settle_coin = request.args.get('settleCoin')
+        order_id = request.args.get('orderId')
+        order_link_id = request.args.get('orderLinkId')
+        order_filter = request.args.get('orderFilter')
+        order_status = request.args.get('orderStatus')
+        start_time = request.args.get('startTime')
+        end_time = request.args.get('endTime')
         limit = request.args.get('limit', 50, type=int)
+        cursor = request.args.get('cursor')
         
-        if not symbol:
-            return jsonify({'success': False, 'error': 'Symbol is required'})
+        # Validate required category parameter
+        if not category:
+            return jsonify({'success': False, 'error': 'Category is required (linear, inverse, spot, option)'})
         
         config = get_config()
         bybit_config = config.get('bybit', {})
@@ -3653,11 +3724,38 @@ def api_bybit_unified_order_history():
         
         bybit_api = BybitAPIClass(api_key, api_secret, testnet)
         
-        result = bybit_api.get_unified_order_history(
-            category=category,
-            symbol=symbol,
-            limit=limit
-        )
+        # Build parameters dict with only non-empty values
+        params = {
+            'category': category,
+            'limit': limit
+        }
+        
+        if symbol:
+            params['symbol'] = symbol
+        if base_coin:
+            params['baseCoin'] = base_coin
+        if settle_coin:
+            params['settleCoin'] = settle_coin
+        if order_id:
+            params['orderId'] = order_id
+        if order_link_id:
+            params['orderLinkId'] = order_link_id
+        if order_filter:
+            params['orderFilter'] = order_filter
+        if order_status:
+            params['orderStatus'] = order_status
+        if start_time:
+            params['startTime'] = int(start_time)
+        if end_time:
+            params['endTime'] = int(end_time)
+        if cursor:
+            params['cursor'] = cursor
+        
+        result = bybit_api.get_unified_order_history(**params)
+        
+        # Add debug info to identify which file is running
+        if isinstance(result, dict):
+            result['debug_info'] = 'gui_app.py'
         
         return jsonify(result)
         
