@@ -789,8 +789,12 @@ class BybitFuturesBot:
                     # Create position key that includes both symbol and side for hedge mode support
                     position_key = f"{symbol}_{side}"
                     
-                    # Update position info
-                    self.positions[symbol] = PositionInfo(
+                    # Get current price and entry price from position data
+                    entry_price = float(position.get('avgPrice', 0))
+                    current_price = float(position.get('markPrice', 0))
+                    
+                    # Create position info object
+                    position_info = PositionInfo(
                         symbol=symbol,
                         side=side,
                         size=size,
@@ -831,21 +835,55 @@ class BybitFuturesBot:
         except Exception as e:
             logger.error(f"Error managing positions: {e}")
     
-    def _check_position_exit_conditions(self, symbol: str):
+    def _initialize_position_management(self, position_info: PositionInfo):
+        """Initialize enhanced position management fields"""
+        try:
+            # Calculate TP1 and TP2 prices
+            entry_price = position_info.entry_price
+            side = position_info.side
+            
+            if side == 'Buy':
+                position_info.tp1_price = entry_price * (1 + self.tp1_percentage / 100)
+                position_info.tp2_price = entry_price * (1 + self.tp2_percentage / 100)
+                position_info.stop_loss_price = entry_price * (1 - self.stop_loss_percentage / 100)
+                position_info.trailing_stop_price = position_info.stop_loss_price
+            else:  # Sell
+                position_info.tp1_price = entry_price * (1 - self.tp1_percentage / 100)
+                position_info.tp2_price = entry_price * (1 - self.tp2_percentage / 100)
+                position_info.stop_loss_price = entry_price * (1 + self.stop_loss_percentage / 100)
+                position_info.trailing_stop_price = position_info.stop_loss_price
+            
+            # Initialize other fields
+            position_info.last_trailing_price = entry_price
+            position_info.tp1_hit = False
+            position_info.tp2_hit = False
+            position_info.breakeven_moved = False
+            position_info.trailing_enabled = False
+            position_info.exit_triggered = False
+            position_info.exit_reason = ""
+            
+            logger.info(f"Initialized position management for {position_info.symbol} {position_info.side}: "
+                       f"TP1={position_info.tp1_price:.4f}, TP2={position_info.tp2_price:.4f}, "
+                       f"SL={position_info.stop_loss_price:.4f}")
+            
+        except Exception as e:
+            logger.error(f"Error initializing position management: {e}")
+    
+    def _check_position_exit_conditions(self, position_key: str):
         """Check if position should be closed"""
         try:
             if position_key not in self.positions:
                 return
             
-            position = self.positions[symbol]
+            position = self.positions[position_key]
             
             # Check stop loss
             if position.unrealized_pnl < 0:
                 loss_percentage = abs(position.unrealized_pnl) / position.position_value * 100
                 
                 if loss_percentage >= self.stop_loss_percentage:
-                    logger.info(f"Stop loss triggered for {symbol}, closing position")
-                    self._close_position(symbol, position.side, position.size)
+                    logger.info(f"Stop loss triggered for {position.symbol}, closing position")
+                    self._close_position(position.symbol, position.side, position.size)
                     return
             
             # Check take profit
@@ -853,8 +891,8 @@ class BybitFuturesBot:
                 profit_percentage = position.unrealized_pnl / position.position_value * 100
                 
                 if profit_percentage >= self.take_profit_percentage:
-                    logger.info(f"Take profit triggered for {symbol}, closing position")
-                    self._close_position(symbol, position.side, position.size)
+                    logger.info(f"Take profit triggered for {position.symbol}, closing position")
+                    self._close_position(position.symbol, position.side, position.size)
                     return
                     
         except Exception as e:
