@@ -79,13 +79,24 @@ class BybitAPI:
             if not PYBIT_AVAILABLE:
                 return {'success': False, 'error': 'pybit library not available'}
             
+            # Validate and format quantity for linear category
+            if category == "linear":
+                try:
+                    qty_float = float(qty)
+                    formatted_qty = self._validate_and_format_quantity(symbol, qty_float)
+                except ValueError as e:
+                    logger.error(f"Quantity validation failed: {e}")
+                    return {'success': False, 'error': str(e)}
+            else:
+                formatted_qty = qty
+            
             # Prepare order parameters
             order_params = {
                 "category": category,
                 "symbol": symbol,
                 "side": side,
                 "orderType": orderType,
-                "qty": qty,
+                "qty": formatted_qty,
                 "timeInForce": timeInForce,
                 "isLeverage": isLeverage,
                 "orderFilter": orderFilter
@@ -166,6 +177,14 @@ class BybitAPI:
                 import uuid
                 orderLinkId = f"futures-{uuid.uuid4().hex[:8]}"
             
+            # Validate and format quantity
+            try:
+                qty_float = float(qty)
+                formatted_qty = self._validate_and_format_quantity(symbol, qty_float)
+            except ValueError as e:
+                logger.error(f"Quantity validation failed: {e}")
+                return {'success': False, 'error': str(e)}
+            
             # Set leverage first
             leverage_result = self.set_leverage(symbol, leverage)
             if not leverage_result.get('success'):
@@ -176,7 +195,7 @@ class BybitAPI:
                 symbol=symbol,
                 side=side,
                 orderType=orderType,
-                qty=qty,
+                qty=formatted_qty,
                 price=price,
                 timeInForce=timeInForce,
                 orderLinkId=orderLinkId,
@@ -355,9 +374,19 @@ class BybitAPI:
                 params["orderFilter"] = orderFilter
             if orderStatus:
                 params["orderStatus"] = orderStatus
-            if startTime:
+            # Validate and fix time parameters
+            if startTime and endTime:
+                # Fix if startTime is greater than endTime (swap them)
+                if startTime > endTime:
+                    logger.warning(f"startTime ({startTime}) is greater than endTime ({endTime}), swapping values")
+                    params["startTime"] = endTime
+                    params["endTime"] = startTime
+                else:
+                    params["startTime"] = startTime
+                    params["endTime"] = endTime
+            elif startTime:
                 params["startTime"] = startTime
-            if endTime:
+            elif endTime:
                 params["endTime"] = endTime
             if cursor:
                 params["cursor"] = cursor
@@ -498,16 +527,76 @@ class BybitAPI:
             # Fallback to manual implementation
             return self.get_futures_positions()
     
+    def _validate_and_format_quantity(self, symbol: str, qty: float) -> str:
+        """Validate and format quantity according to Bybit requirements"""
+        # Bybit minimum quantity requirements
+        min_quantities = {
+            'BTCUSDT': 0.001,
+            'ETHUSDT': 0.01,
+            'SOLUSDT': 0.1,
+            'BNBUSDT': 0.01,
+            'DOTUSDT': 0.1,
+            'ADAUSDT': 1.0
+        }
+        
+        # Bybit step sizes for quantity precision
+        step_sizes = {
+            'BTCUSDT': 0.001,
+            'ETHUSDT': 0.01,
+            'SOLUSDT': 0.1,
+            'BNBUSDT': 0.01,
+            'DOTUSDT': 0.1,
+            'ADAUSDT': 1.0
+        }
+        
+        min_quantity = min_quantities.get(symbol, 0.001)
+        step_size = step_sizes.get(symbol, 0.001)
+        
+        # Check minimum quantity
+        if qty < min_quantity:
+            raise ValueError(f"Quantity {qty} is below minimum requirement {min_quantity} for {symbol}")
+        
+        # Calculate step-aligned quantity
+        steps = round(qty / step_size)
+        aligned_quantity = steps * step_size
+        
+        # Ensure it's not less than minimum after alignment
+        if aligned_quantity < min_quantity:
+            min_steps = int(min_quantity / step_size) + (1 if min_quantity % step_size > 0 else 0)
+            aligned_quantity = min_steps * step_size
+        
+        # Format to proper decimal places
+        if step_size >= 1:
+            formatted_qty = f"{int(aligned_quantity)}"
+        elif step_size >= 0.1:
+            formatted_qty = f"{aligned_quantity:.1f}"
+        elif step_size >= 0.01:
+            formatted_qty = f"{aligned_quantity:.2f}"
+        elif step_size >= 0.001:
+            formatted_qty = f"{aligned_quantity:.3f}"
+        else:
+            formatted_qty = f"{aligned_quantity:.4f}"
+        
+        logger.info(f"Quantity validation for {symbol}: {qty} -> {formatted_qty} (min: {min_quantity}, step: {step_size})")
+        return formatted_qty
+
     def place_order(self, symbol: str, side: str, orderType: str, qty: float, 
                    price: float = None, leverage: int = 10, **kwargs) -> Dict:
         """Place order using pybit"""
         if PYBIT_AVAILABLE:
+            # Validate and format quantity
+            try:
+                formatted_qty = self._validate_and_format_quantity(symbol, qty)
+            except ValueError as e:
+                logger.error(f"Quantity validation failed: {e}")
+                return {'success': False, 'error': str(e)}
+            
             order_params = {
                 'category': 'linear',
                 'symbol': symbol,
                 'side': side.title(),  # "Buy" or "Sell"
                 'orderType': orderType.title(),  # "Market" or "Limit"
-                'qty': str(qty),
+                'qty': formatted_qty,
                 'timeInForce': kwargs.get('timeInForce', 'GTC'),
             }
             
@@ -944,13 +1033,20 @@ class BybitAPI:
                            price: float = None, leverage: int = 10, **kwargs) -> Dict:
         """Place futures order (fallback method)"""
         try:
+            # Validate and format quantity
+            try:
+                formatted_qty = self._validate_and_format_quantity(symbol, qty)
+            except ValueError as e:
+                logger.error(f"Quantity validation failed: {e}")
+                return {'success': False, 'error': str(e)}
+            
             # Use manual API call as fallback
             order_params = {
                 'category': 'linear',
                 'symbol': symbol,
                 'side': side.title(),
                 'orderType': order_type.title(),
-                'qty': str(qty),
+                'qty': formatted_qty,
                 'timeInForce': kwargs.get('timeInForce', 'GTC')
             }
             
