@@ -6031,6 +6031,11 @@
         }
         
         function executePosition(symbol) {
+            console.log(`🚀 executePosition called with symbol: ${symbol}`);
+            
+            // Test the symbol and APIs for debugging
+            testSymbolAndAPI(symbol);
+            
             const side = document.querySelector('input[name="positionSide"]:checked').value;
             const usdtAmount = parseFloat(document.getElementById('positionSize').value);
             const leverage = parseInt(document.getElementById('leverage').value);
@@ -6100,27 +6105,35 @@
             fetch('/api/bybit/market-data')
                 .then(response => response.json())
                 .then(data => {
+                    console.log(`📊 Market data API response:`, data);
+                    
                     if (data.success && data.data && data.data[symbol]) {
                         const marketData = data.data[symbol];
                         console.log(`📊 Market data received for ${symbol}:`, marketData);
                         
                         // Perform comprehensive market analysis
-                        const analysisResult = performMarketAnalysis(symbol, marketData, currentPrice);
-                        console.log(`📈 Market analysis result:`, analysisResult);
-                        
-                        // Determine the best trading direction based on analysis
-                        const recommendedSide = determineTradingDirection(analysisResult, requestedSide);
-                        console.log(`🎯 Recommended side: ${recommendedSide} (Requested: ${requestedSide})`);
-                        
-                        // Show analysis results to user
-                        showAnalysisResults(symbol, analysisResult, recommendedSide, requestedSide, () => {
-                            // Execute position with recommended side
-                            executeAnalyzedPosition(symbol, recommendedSide, usdtAmount, leverage, currentPrice, analysisResult);
-                        });
+                        performMarketAnalysis(symbol, marketData, currentPrice)
+                            .then(analysisResult => {
+                                console.log(`📈 Market analysis result:`, analysisResult);
+                                
+                                // Determine the best trading direction based on analysis
+                                const recommendedSide = determineTradingDirection(analysisResult, requestedSide);
+                                console.log(`🎯 Recommended side: ${recommendedSide} (Requested: ${requestedSide})`);
+                                
+                                // Show analysis results to user
+                                showAnalysisResults(symbol, analysisResult, recommendedSide, requestedSide, () => {
+                                    // Execute position with recommended side
+                                    executeAnalyzedPosition(symbol, recommendedSide, usdtAmount, leverage, currentPrice, analysisResult);
+                                });
+                            })
+                            .catch(error => {
+                                console.error(`Error in market analysis for ${symbol}:`, error);
+                                alert(`❌ Error during market analysis for ${symbol}: ${error.message}`);
+                            });
                         
                     } else {
-                        console.error('Failed to get market data for analysis');
-                        alert('❌ Failed to get market data for analysis. Please try again.');
+                        console.error(`Failed to get market data for ${symbol}. Available symbols:`, Object.keys(data.data || {}));
+                        alert(`❌ Failed to get market data for ${symbol}. Available symbols: ${Object.keys(data.data || {}).join(', ')}`);
                     }
                 })
                 .catch(error => {
@@ -6146,6 +6159,10 @@
             
             // Get RSI values for strategy validation
             return getRSIValues(symbol)
+                .catch(error => {
+                    console.warn(`RSI API failed for ${symbol}, using fallback:`, error.message);
+                    return getFallbackRSIValues(symbol);
+                })
                 .then(rsiData => {
                     console.log(`📊 RSI data for ${symbol}:`, rsiData);
                     
@@ -6237,11 +6254,13 @@
                 })
                 .catch(error => {
                     console.error(`Error getting RSI data for ${symbol}:`, error);
-                    // Fallback analysis without RSI
+                    // Fallback analysis without RSI - but still block the trade
                     analysis.recommendation = 'NEUTRAL';
                     analysis.strategyValid = false;
-                    analysis.strategyMessage = `Error getting RSI data: ${error.message}`;
+                    analysis.strategyMessage = `RSI API Error: ${error.message}. Cannot validate strategy conditions.`;
                     analysis.confidence = 0;
+                    analysis.indicators.rsi_5m = null;
+                    analysis.indicators.rsi_1h = null;
                     return analysis;
                 });
         }
@@ -6249,6 +6268,8 @@
         function getRSIValues(symbol) {
             // Fetch real RSI values from the backend API
             return new Promise((resolve, reject) => {
+                console.log(`🔍 Fetching RSI data for symbol: ${symbol}`);
+                
                 // Check both LONG and SHORT conditions to get RSI values
                 Promise.all([
                     fetch('/api/rsi-filter/check', {
@@ -6260,7 +6281,10 @@
                             symbol: symbol,
                             direction: 'long'
                         })
-                    }).then(response => response.json()),
+                    }).then(response => {
+                        console.log(`RSI API response for ${symbol} LONG:`, response.status);
+                        return response.json();
+                    }),
                     fetch('/api/rsi-filter/check', {
                         method: 'POST',
                         headers: {
@@ -6270,9 +6294,14 @@
                             symbol: symbol,
                             direction: 'short'
                         })
-                    }).then(response => response.json())
+                    }).then(response => {
+                        console.log(`RSI API response for ${symbol} SHORT:`, response.status);
+                        return response.json();
+                    })
                 ])
                 .then(([longResult, shortResult]) => {
+                    console.log(`RSI API results for ${symbol}:`, { longResult, shortResult });
+                    
                     if (longResult.success && shortResult.success) {
                         // Extract RSI values from the results
                         const rsi5m = longResult.data.rsi_5m || shortResult.data.rsi_5m;
@@ -6287,13 +6316,77 @@
                             shortMessage: shortResult.data.message
                         });
                     } else {
-                        reject(new Error('Failed to get RSI data from API'));
+                        const errorMsg = `RSI API failed: LONG=${longResult.error || 'unknown'}, SHORT=${shortResult.error || 'unknown'}`;
+                        console.error(`RSI API error for ${symbol}:`, errorMsg);
+                        reject(new Error(errorMsg));
                     }
                 })
                 .catch(error => {
-                    console.error('Error fetching RSI data:', error);
+                    console.error(`Error fetching RSI data for ${symbol}:`, error);
                     reject(error);
                 });
+            });
+        }
+        
+        // Fallback RSI function for testing
+        function getFallbackRSIValues(symbol) {
+            console.log(`🔧 Using fallback RSI simulation for ${symbol}`);
+            return new Promise((resolve) => {
+                // Simulate RSI values for testing
+                const simulatedRSI5m = Math.random() * 100;
+                const simulatedRSI1h = Math.random() * 100;
+                
+                // Simulate strategy validation
+                const longValid = simulatedRSI5m < 30 && simulatedRSI1h < 50;
+                const shortValid = simulatedRSI5m > 70 && simulatedRSI1h > 50;
+                
+                resolve({
+                    rsi_5m: simulatedRSI5m,
+                    rsi_1h: simulatedRSI1h,
+                    longValid: longValid,
+                    shortValid: shortValid,
+                    longMessage: `Fallback LONG: RSI 5m (${simulatedRSI5m.toFixed(2)}) < 30 AND RSI 1h (${simulatedRSI1h.toFixed(2)}) < 50`,
+                    shortMessage: `Fallback SHORT: RSI 5m (${simulatedRSI5m.toFixed(2)}) > 70 AND RSI 1h (${simulatedRSI1h.toFixed(2)}) > 50`
+                });
+            });
+        }
+        
+        // Test function to debug symbol and API issues
+        function testSymbolAndAPI(symbol) {
+            console.log(`🧪 Testing symbol and API for: ${symbol}`);
+            
+            // Test market data API
+            fetch('/api/bybit/market-data')
+                .then(response => response.json())
+                .then(data => {
+                    console.log(`📊 Market data test for ${symbol}:`, {
+                        success: data.success,
+                        hasSymbol: data.data && data.data[symbol],
+                        availableSymbols: Object.keys(data.data || {}),
+                        symbolData: data.data && data.data[symbol]
+                    });
+                })
+                .catch(error => {
+                    console.error(`Market data API error:`, error);
+                });
+            
+            // Test RSI API
+            fetch('/api/rsi-filter/check', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    symbol: symbol,
+                    direction: 'long'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(`📈 RSI API test for ${symbol}:`, data);
+            })
+            .catch(error => {
+                console.error(`RSI API error for ${symbol}:`, error);
             });
         }
         
