@@ -6062,45 +6062,242 @@
                 return;
             }
             
+            // If user selected a specific side (Long/Short), analyze market first
+            if (side === 'Buy' || side === 'Sell') {
+                console.log(`🔍 Analyzing market conditions for ${symbol} before executing ${side} position...`);
+                
+                // Show analysis in progress message
+                const analysisMsg = `🔍 MARKET ANALYSIS IN PROGRESS\n\n` +
+                    `Symbol: ${symbol}\n` +
+                    `Requested Side: ${side}\n` +
+                    `Current Price: $${currentPrice}\n\n` +
+                    `Analyzing market conditions and indicators...\n` +
+                    `This may take a few seconds.`;
+                
+                if (!confirm(analysisMsg + '\n\nDo you want to proceed with market analysis?')) {
+                    return;
+                }
+                
+                // Perform market analysis
+                analyzeMarketAndExecutePosition(symbol, side, usdtAmount, leverage, currentPrice);
+            } else if (side === 'Both') {
+                // For hedge mode, execute both positions without analysis
+                try {
+                    const quantityData = calculateQuantityFromUSDT(symbol, usdtAmount, currentPrice);
+                    executeHedgePositions(symbol, quantityData.quantity, leverage);
+                } catch (error) {
+                    alert(`❌ Quantity Calculation Error:\n\n${error.message}\n\nPlease increase your USDT amount to meet the minimum quantity requirements.`);
+                    console.error('Quantity calculation error:', error);
+                    return;
+                }
+            }
+        }
+        
+        function analyzeMarketAndExecutePosition(symbol, requestedSide, usdtAmount, leverage, currentPrice) {
+            console.log(`🔍 Starting market analysis for ${symbol}...`);
+            
+            // Get market data for analysis
+            fetch('/api/bybit/market-data')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.data && data.data[symbol]) {
+                        const marketData = data.data[symbol];
+                        console.log(`📊 Market data received for ${symbol}:`, marketData);
+                        
+                        // Perform comprehensive market analysis
+                        const analysisResult = performMarketAnalysis(symbol, marketData, currentPrice);
+                        console.log(`📈 Market analysis result:`, analysisResult);
+                        
+                        // Determine the best trading direction based on analysis
+                        const recommendedSide = determineTradingDirection(analysisResult, requestedSide);
+                        console.log(`🎯 Recommended side: ${recommendedSide} (Requested: ${requestedSide})`);
+                        
+                        // Show analysis results to user
+                        showAnalysisResults(symbol, analysisResult, recommendedSide, requestedSide, () => {
+                            // Execute position with recommended side
+                            executeAnalyzedPosition(symbol, recommendedSide, usdtAmount, leverage, currentPrice, analysisResult);
+                        });
+                        
+                    } else {
+                        console.error('Failed to get market data for analysis');
+                        alert('❌ Failed to get market data for analysis. Please try again.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error during market analysis:', error);
+                    alert('❌ Error during market analysis. Please try again.');
+                });
+        }
+        
+        function performMarketAnalysis(symbol, marketData, currentPrice) {
+            console.log(`🔍 Performing comprehensive market analysis for ${symbol}...`);
+            
+            const analysis = {
+                symbol: symbol,
+                currentPrice: currentPrice,
+                timestamp: new Date().toISOString(),
+                indicators: {},
+                signals: {},
+                recommendation: null,
+                confidence: 0
+            };
+            
+            // Price analysis
+            const price24h = parseFloat(marketData.prev_price || 0);
+            const priceChange = price24h > 0 ? ((currentPrice - price24h) / price24h) * 100 : 0;
+            analysis.priceChange24h = priceChange;
+            
+            // Volume analysis
+            const volume24h = parseFloat(marketData.volume_24h || 0);
+            analysis.volume24h = volume24h;
+            
+            // Basic trend analysis
+            if (priceChange > 2) {
+                analysis.trend = 'STRONG_BULLISH';
+                analysis.signals.price = 'BUY';
+            } else if (priceChange > 0.5) {
+                analysis.trend = 'BULLISH';
+                analysis.signals.price = 'BUY';
+            } else if (priceChange < -2) {
+                analysis.trend = 'STRONG_BEARISH';
+                analysis.signals.price = 'SELL';
+            } else if (priceChange < -0.5) {
+                analysis.trend = 'BEARISH';
+                analysis.signals.price = 'SELL';
+            } else {
+                analysis.trend = 'SIDEWAYS';
+                analysis.signals.price = 'NEUTRAL';
+            }
+            
+            // Volume confirmation
+            if (volume24h > 1000000) { // High volume threshold
+                analysis.signals.volume = 'CONFIRMED';
+                analysis.confidence += 20;
+            } else {
+                analysis.signals.volume = 'WEAK';
+                analysis.confidence -= 10;
+            }
+            
+            // Price momentum
+            if (Math.abs(priceChange) > 1) {
+                analysis.signals.momentum = priceChange > 0 ? 'BULLISH' : 'BEARISH';
+                analysis.confidence += 15;
+            } else {
+                analysis.signals.momentum = 'NEUTRAL';
+            }
+            
+            // Market volatility
+            const volatility = Math.abs(priceChange);
+            if (volatility > 5) {
+                analysis.volatility = 'HIGH';
+                analysis.confidence -= 5; // High volatility reduces confidence
+            } else if (volatility > 2) {
+                analysis.volatility = 'MEDIUM';
+            } else {
+                analysis.volatility = 'LOW';
+                analysis.confidence += 5; // Low volatility increases confidence
+            }
+            
+            // Overall recommendation
+            const buySignals = Object.values(analysis.signals).filter(s => s === 'BUY' || s === 'BULLISH').length;
+            const sellSignals = Object.values(analysis.signals).filter(s => s === 'SELL' || s === 'BEARISH').length;
+            
+            if (buySignals > sellSignals) {
+                analysis.recommendation = 'Buy';
+                analysis.confidence += 25;
+            } else if (sellSignals > buySignals) {
+                analysis.recommendation = 'Sell';
+                analysis.confidence += 25;
+            } else {
+                analysis.recommendation = 'NEUTRAL';
+                analysis.confidence -= 10;
+            }
+            
+            // Ensure confidence is between 0 and 100
+            analysis.confidence = Math.max(0, Math.min(100, analysis.confidence));
+            
+            console.log(`📊 Analysis complete for ${symbol}:`, analysis);
+            return analysis;
+        }
+        
+        function determineTradingDirection(analysis, requestedSide) {
+            console.log(`🎯 Determining trading direction based on analysis...`);
+            
+            // If analysis recommends the same as requested, use it
+            if (analysis.recommendation === requestedSide) {
+                console.log(`✅ Analysis confirms requested direction: ${requestedSide}`);
+                return requestedSide;
+            }
+            
+            // If analysis is neutral, use requested side with warning
+            if (analysis.recommendation === 'NEUTRAL') {
+                console.log(`⚠️ Analysis is neutral, using requested direction: ${requestedSide}`);
+                return requestedSide;
+            }
+            
+            // If analysis contradicts request, use analysis recommendation
+            console.log(`🔄 Analysis contradicts request. Analysis: ${analysis.recommendation}, Requested: ${requestedSide}`);
+            return analysis.recommendation;
+        }
+        
+        function showAnalysisResults(symbol, analysis, recommendedSide, requestedSide, onConfirm) {
+            const analysisText = `📊 MARKET ANALYSIS RESULTS\n\n` +
+                `Symbol: ${symbol}\n` +
+                `Current Price: $${analysis.currentPrice.toFixed(2)}\n` +
+                `24h Change: ${analysis.priceChange24h.toFixed(2)}%\n` +
+                `Volume 24h: ${analysis.volume24h.toLocaleString()}\n` +
+                `Trend: ${analysis.trend}\n` +
+                `Volatility: ${analysis.volatility}\n` +
+                `Confidence: ${analysis.confidence.toFixed(0)}%\n\n` +
+                `SIGNALS:\n` +
+                `• Price: ${analysis.signals.price}\n` +
+                `• Volume: ${analysis.signals.volume}\n` +
+                `• Momentum: ${analysis.signals.momentum}\n\n` +
+                `RECOMMENDATION:\n` +
+                `Analysis suggests: ${analysis.recommendation}\n` +
+                `You requested: ${requestedSide}\n` +
+                `Recommended: ${recommendedSide}\n\n` +
+                `Confidence Level: ${analysis.confidence >= 70 ? 'HIGH' : analysis.confidence >= 50 ? 'MEDIUM' : 'LOW'}`;
+            
+            const confirmMsg = analysisText + `\n\nDo you want to proceed with the recommended direction (${recommendedSide})?`;
+            
+            if (confirm(confirmMsg)) {
+                onConfirm();
+            } else {
+                console.log('User cancelled trade after analysis');
+            }
+        }
+        
+        function executeAnalyzedPosition(symbol, side, usdtAmount, leverage, currentPrice, analysis) {
+            console.log(`🚀 Executing analyzed position: ${symbol} ${side}`);
+            
             try {
                 // Calculate quantity based on USDT amount and validate minimum requirements
                 const quantityData = calculateQuantityFromUSDT(symbol, usdtAmount, currentPrice);
                 
                 console.log('Quantity calculation:', quantityData);
                 
-                // Show quantity information to user
-                const quantityInfo = `📊 Quantity Calculation:\n\n` +
+                // Show final confirmation with analysis details
+                const finalInfo = `🎯 FINAL CONFIRMATION\n\n` +
                     `Symbol: ${symbol}\n` +
-                    `USDT Amount: ${usdtAmount} USDT\n` +
-                    `Current Price: $${currentPrice}\n` +
-                    `Calculated Quantity: ${quantityData.quantity}\n` +
-                    `Minimum Required: ${quantityData.minQuantity}\n` +
-                    `Step Size: ${quantityData.stepSize}\n` +
-                    `Actual USDT Used: ${quantityData.actualUSDT.toFixed(2)} USDT`;
+                    `Direction: ${side} (Based on market analysis)\n` +
+                    `Quantity: ${quantityData.quantity}\n` +
+                    `USDT Amount: ${quantityData.actualUSDT.toFixed(2)} USDT\n` +
+                    `Leverage: ${leverage}x\n` +
+                    `Analysis Confidence: ${analysis.confidence.toFixed(0)}%\n\n` +
+                    `Proceed with this trade?`;
                 
-                if (Math.abs(quantityData.actualUSDT - usdtAmount) > 0.01) {
-                    const adjustedMsg = quantityInfo + `\n\n⚠️ Note: Quantity adjusted to meet step size requirements.`;
-                    if (!confirm(adjustedMsg + '\n\nDo you want to proceed with this adjusted quantity?')) {
-                        return;
-                    }
-                } else {
-                    alert(quantityInfo);
+                if (!confirm(finalInfo)) {
+                    console.log('User cancelled final confirmation');
+                    return;
                 }
                 
-                console.log('Executing position:', { symbol, side, usdtAmount, calculatedQuantity: quantityData.quantity, leverage });
-                
-                if (side === 'Both') {
-                    // Execute both long and short positions for hedge mode
-                    executeHedgePositions(symbol, quantityData.quantity, leverage);
-                } else {
-                    // Execute single position
-                    executeSinglePosition(symbol, side, quantityData.quantity, leverage);
-                }
+                // Execute the position
+                executeSinglePosition(symbol, side, quantityData.quantity, leverage);
                 
             } catch (error) {
-                alert(`❌ Quantity Calculation Error:\n\n${error.message}\n\nPlease increase your USDT amount to meet the minimum quantity requirements.`);
-                console.error('Quantity calculation error:', error);
-                return;
+                console.error('Error executing analyzed position:', error);
+                alert('❌ Error executing position. Please try again.');
             }
         }
         
@@ -10029,43 +10226,68 @@
             Object.keys(marketData).forEach(symbol => {
                 const data = marketData[symbol];
                 
-                // Check breakout conditions
-                if (checkBreakoutConditions(symbol, data)) {
-                    console.log(`Breakout detected for ${symbol}, executing trade...`);
+                // Check breakout conditions with comprehensive analysis
+                const breakoutResult = checkBreakoutConditions(symbol, data);
+                if (breakoutResult.shouldTrade) {
+                    console.log(`Strong signal detected for ${symbol}, executing trade...`);
                     executeAutoTrade(symbol, data);
                 }
             });
         }
         
         function checkBreakoutConditions(symbol, data) {
-            // This is a simplified example - in real implementation, this would be more sophisticated
+            console.log(`🔍 Checking breakout conditions for ${symbol}...`);
+            
             const currentPrice = parseFloat(data.price);
             const prevPrice = parseFloat(data.prev_price);
             const changePercent = ((currentPrice - prevPrice) / prevPrice) * 100;
             
-            // Check if price change exceeds threshold (simplified breakout detection)
-            const breakoutThreshold = 0.5; // 0.5% change
+            // Perform comprehensive market analysis
+            const analysis = performMarketAnalysis(symbol, data, currentPrice);
             
-            if (Math.abs(changePercent) > breakoutThreshold) {
-                console.log(`${symbol}: Price change ${changePercent.toFixed(2)}% exceeds threshold ${breakoutThreshold}%`);
-                return true;
+            // Check if we have a strong signal
+            const hasStrongSignal = analysis.confidence >= 60 && analysis.recommendation !== 'NEUTRAL';
+            
+            if (hasStrongSignal) {
+                console.log(`${symbol}: Strong signal detected - ${analysis.recommendation} (Confidence: ${analysis.confidence.toFixed(0)}%)`);
+                return {
+                    shouldTrade: true,
+                    direction: analysis.recommendation,
+                    confidence: analysis.confidence,
+                    analysis: analysis
+                };
             }
             
-            return false;
+            console.log(`${symbol}: No strong signal detected (Confidence: ${analysis.confidence.toFixed(0)}%)`);
+            return { shouldTrade: false };
         }
         
         function executeAutoTrade(symbol, data) {
             console.log(`Executing auto trade for ${symbol}...`);
             
-            // Determine trade direction based on price movement
-            const currentPrice = parseFloat(data.price);
-            const prevPrice = parseFloat(data.prev_price);
-            const side = currentPrice > prevPrice ? 'Buy' : 'Sell';
+            // Get the analysis result from checkBreakoutConditions
+            const breakoutResult = checkBreakoutConditions(symbol, data);
             
-            // Calculate position size based on risk management
+            if (!breakoutResult.shouldTrade) {
+                console.log(`No trading signal for ${symbol}, skipping...`);
+                return;
+            }
+            
+            const currentPrice = parseFloat(data.price);
+            const side = breakoutResult.direction;
+            const confidence = breakoutResult.confidence;
+            const analysis = breakoutResult.analysis;
+            
+            console.log(`🎯 Auto trading ${symbol}: ${side} (Confidence: ${confidence.toFixed(0)}%)`);
+            
+            // Calculate position size based on risk management and confidence
             const riskPercent = parseFloat(document.getElementById('max-risk-per-trade').value);
             const accountBalance = parseFloat(document.getElementById('total-balance').textContent.replace('$', '').replace(',', ''));
-            const positionSize = (accountBalance * riskPercent / 100) / currentPrice;
+            
+            // Adjust position size based on confidence level
+            const confidenceMultiplier = confidence / 100;
+            const adjustedRiskPercent = riskPercent * confidenceMultiplier;
+            const positionSize = (accountBalance * adjustedRiskPercent / 100) / currentPrice;
             
             // Execute the trade via Bybit API
             fetch('/api/bybit/place-order', {
@@ -10090,8 +10312,15 @@
                     totalTrades++;
                     document.getElementById('total-trades').textContent = totalTrades;
                     
-                    // Show success notification
-                    showAutoTradingNotification(`✅ Auto Trade Executed!\n${symbol}: ${side} ${positionSize.toFixed(4)}\nPrice: $${currentPrice.toFixed(2)}`);
+                    // Show success notification with analysis details
+                    const notificationMsg = `✅ Auto Trade Executed!\n\n` +
+                        `${symbol}: ${side} ${positionSize.toFixed(4)}\n` +
+                        `Price: $${currentPrice.toFixed(2)}\n` +
+                        `Confidence: ${confidence.toFixed(0)}%\n` +
+                        `Trend: ${analysis.trend}\n` +
+                        `Volatility: ${analysis.volatility}`;
+                    
+                    showAutoTradingNotification(notificationMsg);
                 } else {
                     console.error(`Failed to execute auto trade for ${symbol}:`, result.error);
                     showAutoTradingNotification(`❌ Auto Trade Failed!\n${symbol}: ${result.error}`);
