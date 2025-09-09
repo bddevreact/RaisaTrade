@@ -2750,19 +2750,47 @@
                 throw new Error(`${symbol} minimum quantity requirement: ${minQuantity}. Your USDT amount (${usdtAmount}) is too small for current price (${currentPrice}).`);
             }
             
-            // Round to step size precision
-            const roundedQuantity = Math.floor(rawQuantity / stepSize) * stepSize;
+            // Calculate step-aligned quantity with proper precision
+            // Use Math.round instead of Math.floor to get the closest valid quantity
+            const steps = Math.round(rawQuantity / stepSize);
+            let roundedQuantity = steps * stepSize;
             
             // Ensure it's not less than minimum after rounding
             if (roundedQuantity < minQuantity) {
-                throw new Error(`${symbol} quantity (${roundedQuantity}) is below minimum requirement (${minQuantity}) after rounding.`);
+                // If below minimum, use the next step up
+                const minSteps = Math.ceil(minQuantity / stepSize);
+                roundedQuantity = minSteps * stepSize;
+            }
+            
+            // Format quantity to proper decimal places based on step size
+            let formattedQuantity;
+            if (stepSize >= 1) {
+                // For step sizes >= 1, use integer precision
+                formattedQuantity = Math.round(roundedQuantity);
+            } else if (stepSize >= 0.1) {
+                // For step sizes >= 0.1, use 1 decimal place
+                formattedQuantity = Math.round(roundedQuantity * 10) / 10;
+            } else if (stepSize >= 0.01) {
+                // For step sizes >= 0.01, use 2 decimal places
+                formattedQuantity = Math.round(roundedQuantity * 100) / 100;
+            } else if (stepSize >= 0.001) {
+                // For step sizes >= 0.001, use 3 decimal places
+                formattedQuantity = Math.round(roundedQuantity * 1000) / 1000;
+            } else {
+                // For smaller step sizes, use 4 decimal places
+                formattedQuantity = Math.round(roundedQuantity * 10000) / 10000;
+            }
+            
+            // Final validation
+            if (formattedQuantity < minQuantity) {
+                throw new Error(`${symbol} quantity (${formattedQuantity}) is below minimum requirement (${minQuantity}) after formatting.`);
             }
             
             return {
-                quantity: roundedQuantity,
+                quantity: formattedQuantity,
                 minQuantity: minQuantity,
                 stepSize: stepSize,
-                actualUSDT: roundedQuantity * currentPrice,
+                actualUSDT: formattedQuantity * currentPrice,
                 originalUSDT: usdtAmount
             };
         }
