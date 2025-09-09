@@ -5991,6 +5991,9 @@
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                                 <i class="fas fa-times me-1"></i>Cancel
                             </button>
+                            <button type="button" class="btn btn-warning me-2" onclick="forceRSIRefresh('${symbol}')">
+                                <i class="fas fa-sync-alt me-1"></i>Refresh RSI
+                            </button>
                             <button type="button" class="btn btn-bybit" onclick="executePosition('${symbol}')">
                                 <i class="fas fa-play me-1"></i>Open Position
                             </button>
@@ -6035,6 +6038,12 @@
             
             // Test the symbol and APIs for debugging
             testSymbolAndAPI(symbol);
+            
+            // Force refresh RSI data before analysis
+            console.log(`🔄 Refreshing RSI data for ${symbol} before analysis...`);
+            forceRSIRefresh(symbol).catch(error => {
+                console.warn(`RSI refresh failed, continuing with analysis:`, error);
+            });
             
             const side = document.querySelector('input[name="positionSide"]:checked').value;
             const usdtAmount = parseFloat(document.getElementById('positionSize').value);
@@ -6193,12 +6202,12 @@
                     if (longValid && !shortValid) {
                         analysis.recommendation = 'Buy';
                         analysis.strategyValid = true;
-                        analysis.strategyMessage = rsiData.longMessage || `LONG Strategy Valid: RSI 5m (${rsi5m.toFixed(2)}) < 30 AND RSI 1h (${rsi1h.toFixed(2)}) < 50`;
+                        analysis.strategyMessage = rsiData.longMessage || `LONG Strategy Valid: RSI 5m (${rsi5m !== null && rsi5m !== undefined ? rsi5m.toFixed(2) : 'N/A'}) < 30 AND RSI 1h (${rsi1h !== null && rsi1h !== undefined ? rsi1h.toFixed(2) : 'N/A'}) < 50`;
                         analysis.confidence = 85; // High confidence for valid strategy
                     } else if (shortValid && !longValid) {
                         analysis.recommendation = 'Sell';
                         analysis.strategyValid = true;
-                        analysis.strategyMessage = rsiData.shortMessage || `SHORT Strategy Valid: RSI 5m (${rsi5m.toFixed(2)}) > 70 AND RSI 1h (${rsi1h.toFixed(2)}) > 50`;
+                        analysis.strategyMessage = rsiData.shortMessage || `SHORT Strategy Valid: RSI 5m (${rsi5m !== null && rsi5m !== undefined ? rsi5m.toFixed(2) : 'N/A'}) > 70 AND RSI 1h (${rsi1h !== null && rsi1h !== undefined ? rsi1h.toFixed(2) : 'N/A'}) > 50`;
                         analysis.confidence = 85; // High confidence for valid strategy
                     } else if (longValid && shortValid) {
                         analysis.recommendation = 'CONFLICT';
@@ -6208,7 +6217,7 @@
                     } else {
                         analysis.recommendation = 'NEUTRAL';
                         analysis.strategyValid = false;
-                        analysis.strategyMessage = `No Strategy Conditions Met: RSI 5m (${rsi5m.toFixed(2)}), RSI 1h (${rsi1h.toFixed(2)})`;
+                        analysis.strategyMessage = `No Strategy Conditions Met: RSI 5m (${rsi5m !== null && rsi5m !== undefined ? rsi5m.toFixed(2) : 'N/A'}), RSI 1h (${rsi1h !== null && rsi1h !== undefined ? rsi1h.toFixed(2) : 'N/A'})`;
                         analysis.confidence = 0;
                     }
                     
@@ -6266,9 +6275,12 @@
         }
         
         function getRSIValues(symbol) {
-            // Fetch real RSI values from the backend API
+            // Fetch real RSI values from the backend API with cache busting
             return new Promise((resolve, reject) => {
-                console.log(`🔍 Fetching RSI data for symbol: ${symbol}`);
+                console.log(`🔍 Fetching FRESH RSI data for symbol: ${symbol}`);
+                
+                // Add timestamp to prevent caching
+                const timestamp = Date.now();
                 
                 // Check both LONG and SHORT conditions to get RSI values
                 Promise.all([
@@ -6276,10 +6288,13 @@
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
+                            'Cache-Control': 'no-cache',
+                            'Pragma': 'no-cache'
                         },
                         body: JSON.stringify({
                             symbol: symbol,
-                            direction: 'long'
+                            direction: 'long',
+                            timestamp: timestamp // Force fresh data
                         })
                     }).then(response => {
                         console.log(`RSI API response for ${symbol} LONG:`, response.status);
@@ -6289,10 +6304,13 @@
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
+                            'Cache-Control': 'no-cache',
+                            'Pragma': 'no-cache'
                         },
                         body: JSON.stringify({
                             symbol: symbol,
-                            direction: 'short'
+                            direction: 'short',
+                            timestamp: timestamp // Force fresh data
                         })
                     }).then(response => {
                         console.log(`RSI API response for ${symbol} SHORT:`, response.status);
@@ -6300,12 +6318,14 @@
                     })
                 ])
                 .then(([longResult, shortResult]) => {
-                    console.log(`RSI API results for ${symbol}:`, { longResult, shortResult });
+                    console.log(`🔄 FRESH RSI API results for ${symbol}:`, { longResult, shortResult });
                     
                     if (longResult.success && shortResult.success) {
                         // Extract RSI values from the results
                         const rsi5m = longResult.data.rsi_5m || shortResult.data.rsi_5m;
                         const rsi1h = longResult.data.rsi_1h || shortResult.data.rsi_1h;
+                        
+                        console.log(`📊 FRESH RSI Values: 5m=${rsi5m}, 1h=${rsi1h}`);
                         
                         resolve({
                             rsi_5m: rsi5m,
@@ -6313,7 +6333,8 @@
                             longValid: longResult.data.valid,
                             shortValid: shortResult.data.valid,
                             longMessage: longResult.data.message,
-                            shortMessage: shortResult.data.message
+                            shortMessage: shortResult.data.message,
+                            timestamp: timestamp
                         });
                     } else {
                         const errorMsg = `RSI API failed: LONG=${longResult.error || 'unknown'}, SHORT=${shortResult.error || 'unknown'}`;
@@ -6388,6 +6409,37 @@
             .catch(error => {
                 console.error(`RSI API error for ${symbol}:`, error);
             });
+        }
+        
+        // Force RSI refresh function
+        function forceRSIRefresh(symbol) {
+            console.log(`🔄 Force refreshing RSI data for ${symbol}...`);
+            
+            // Clear any cached data
+            const timestamp = Date.now();
+            
+            // Make fresh RSI API call
+            return getRSIValues(symbol)
+                .then(rsiData => {
+                    console.log(`✅ RSI data refreshed for ${symbol}:`, rsiData);
+                    
+                    // Show updated RSI values to user
+                    const refreshMsg = `🔄 RSI DATA REFRESHED\n\n` +
+                        `Symbol: ${symbol}\n` +
+                        `RSI 5m: ${rsiData.rsi_5m !== null && rsiData.rsi_5m !== undefined ? rsiData.rsi_5m.toFixed(2) : 'N/A'}\n` +
+                        `RSI 1h: ${rsiData.rsi_1h !== null && rsiData.rsi_1h !== undefined ? rsiData.rsi_1h.toFixed(2) : 'N/A'}\n` +
+                        `LONG Valid: ${rsiData.longValid ? 'YES' : 'NO'}\n` +
+                        `SHORT Valid: ${rsiData.shortValid ? 'YES' : 'NO'}\n` +
+                        `Timestamp: ${new Date(timestamp).toLocaleTimeString()}`;
+                    
+                    alert(refreshMsg);
+                    return rsiData;
+                })
+                .catch(error => {
+                    console.error(`Error refreshing RSI for ${symbol}:`, error);
+                    alert(`❌ Error refreshing RSI data: ${error.message}`);
+                    throw error;
+                });
         }
         
         function determineTradingDirection(analysis, requestedSide) {
