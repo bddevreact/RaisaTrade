@@ -6187,7 +6187,7 @@
                     console.log(`🎯 RSI Strategy Check (Real API):`);
                     console.log(`   LONG Valid: ${longValid} - ${rsiData.longMessage || 'No message'}`);
                     console.log(`   SHORT Valid: ${shortValid} - ${rsiData.shortMessage || 'No message'}`);
-                    console.log(`   RSI 5m: ${rsi5m.toFixed(2)}, RSI 1h: ${rsi1h.toFixed(2)}`);
+                    console.log(`   RSI 5m: ${rsi5m !== null && rsi5m !== undefined ? rsi5m.toFixed(2) : 'N/A'}, RSI 1h: ${rsi1h !== null && rsi1h !== undefined ? rsi1h.toFixed(2) : 'N/A'}`);
                     
                     // Determine strategy recommendation based on real API validation
                     if (longValid && !shortValid) {
@@ -6413,11 +6413,16 @@
         function showAnalysisResults(symbol, analysis, recommendedSide, requestedSide, onConfirm) {
             // Handle blocked trades
             if (recommendedSide === 'BLOCKED') {
+                const rsi5m = analysis.indicators.rsi_5m !== null && analysis.indicators.rsi_5m !== undefined ? 
+                    analysis.indicators.rsi_5m.toFixed(2) : 'N/A';
+                const rsi1h = analysis.indicators.rsi_1h !== null && analysis.indicators.rsi_1h !== undefined ? 
+                    analysis.indicators.rsi_1h.toFixed(2) : 'N/A';
+                
                 const blockedMsg = `🚫 TRADE BLOCKED - STRATEGY CONDITIONS NOT MET\n\n` +
                     `Symbol: ${symbol}\n` +
                     `Current Price: $${analysis.currentPrice.toFixed(2)}\n` +
-                    `RSI 5m: ${analysis.indicators.rsi_5m.toFixed(2)}\n` +
-                    `RSI 1h: ${analysis.indicators.rsi_1h.toFixed(2)}\n\n` +
+                    `RSI 5m: ${rsi5m}\n` +
+                    `RSI 1h: ${rsi1h}\n\n` +
                     `STRATEGY VALIDATION:\n` +
                     `${analysis.strategyMessage}\n\n` +
                     `REQUIRED CONDITIONS:\n` +
@@ -6431,6 +6436,12 @@
                 return;
             }
             
+            // Safe RSI display with null checks
+            const rsi5m = analysis.indicators.rsi_5m !== null && analysis.indicators.rsi_5m !== undefined ? 
+                analysis.indicators.rsi_5m.toFixed(2) : 'N/A';
+            const rsi1h = analysis.indicators.rsi_1h !== null && analysis.indicators.rsi_1h !== undefined ? 
+                analysis.indicators.rsi_1h.toFixed(2) : 'N/A';
+            
             const analysisText = `📊 MARKET ANALYSIS RESULTS\n\n` +
                 `Symbol: ${symbol}\n` +
                 `Current Price: $${analysis.currentPrice.toFixed(2)}\n` +
@@ -6440,8 +6451,8 @@
                 `Volatility: ${analysis.volatility}\n` +
                 `Confidence: ${analysis.confidence.toFixed(0)}%\n\n` +
                 `RSI INDICATORS:\n` +
-                `• RSI 5m: ${analysis.indicators.rsi_5m.toFixed(2)}\n` +
-                `• RSI 1h: ${analysis.indicators.rsi_1h.toFixed(2)}\n\n` +
+                `• RSI 5m: ${rsi5m}\n` +
+                `• RSI 1h: ${rsi1h}\n\n` +
                 `STRATEGY VALIDATION:\n` +
                 `✅ ${analysis.strategyMessage}\n\n` +
                 `RECOMMENDATION:\n` +
@@ -10514,13 +10525,18 @@
                             document.getElementById('total-trades').textContent = totalTrades;
                             
                             // Show success notification with analysis details
+                            const rsi5m = analysis.indicators.rsi_5m !== null && analysis.indicators.rsi_5m !== undefined ? 
+                                analysis.indicators.rsi_5m.toFixed(2) : 'N/A';
+                            const rsi1h = analysis.indicators.rsi_1h !== null && analysis.indicators.rsi_1h !== undefined ? 
+                                analysis.indicators.rsi_1h.toFixed(2) : 'N/A';
+                            
                             const notificationMsg = `✅ Auto Trade Executed!\n\n` +
                                 `${symbol}: ${side} ${positionSize.toFixed(4)}\n` +
                                 `Price: $${currentPrice.toFixed(2)}\n` +
                                 `Confidence: ${confidence.toFixed(0)}%\n` +
                                 `Strategy: ${analysis.strategyMessage}\n` +
-                                `RSI 5m: ${analysis.indicators.rsi_5m.toFixed(2)}\n` +
-                                `RSI 1h: ${analysis.indicators.rsi_1h.toFixed(2)}`;
+                                `RSI 5m: ${rsi5m}\n` +
+                                `RSI 1h: ${rsi1h}`;
                             
                             showAutoTradingNotification(notificationMsg);
                         } else {
