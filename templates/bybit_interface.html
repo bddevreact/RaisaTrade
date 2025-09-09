@@ -6139,99 +6139,176 @@
                 indicators: {},
                 signals: {},
                 recommendation: null,
-                confidence: 0
+                confidence: 0,
+                strategyValid: false,
+                strategyMessage: ''
             };
             
-            // Price analysis
-            const price24h = parseFloat(marketData.prev_price || 0);
-            const priceChange = price24h > 0 ? ((currentPrice - price24h) / price24h) * 100 : 0;
-            analysis.priceChange24h = priceChange;
-            
-            // Volume analysis
-            const volume24h = parseFloat(marketData.volume_24h || 0);
-            analysis.volume24h = volume24h;
-            
-            // Basic trend analysis
-            if (priceChange > 2) {
-                analysis.trend = 'STRONG_BULLISH';
-                analysis.signals.price = 'BUY';
-            } else if (priceChange > 0.5) {
-                analysis.trend = 'BULLISH';
-                analysis.signals.price = 'BUY';
-            } else if (priceChange < -2) {
-                analysis.trend = 'STRONG_BEARISH';
-                analysis.signals.price = 'SELL';
-            } else if (priceChange < -0.5) {
-                analysis.trend = 'BEARISH';
-                analysis.signals.price = 'SELL';
-            } else {
-                analysis.trend = 'SIDEWAYS';
-                analysis.signals.price = 'NEUTRAL';
-            }
-            
-            // Volume confirmation
-            if (volume24h > 1000000) { // High volume threshold
-                analysis.signals.volume = 'CONFIRMED';
-                analysis.confidence += 20;
-            } else {
-                analysis.signals.volume = 'WEAK';
-                analysis.confidence -= 10;
-            }
-            
-            // Price momentum
-            if (Math.abs(priceChange) > 1) {
-                analysis.signals.momentum = priceChange > 0 ? 'BULLISH' : 'BEARISH';
-                analysis.confidence += 15;
-            } else {
-                analysis.signals.momentum = 'NEUTRAL';
-            }
-            
-            // Market volatility
-            const volatility = Math.abs(priceChange);
-            if (volatility > 5) {
-                analysis.volatility = 'HIGH';
-                analysis.confidence -= 5; // High volatility reduces confidence
-            } else if (volatility > 2) {
-                analysis.volatility = 'MEDIUM';
-            } else {
-                analysis.volatility = 'LOW';
-                analysis.confidence += 5; // Low volatility increases confidence
-            }
-            
-            // Overall recommendation
-            const buySignals = Object.values(analysis.signals).filter(s => s === 'BUY' || s === 'BULLISH').length;
-            const sellSignals = Object.values(analysis.signals).filter(s => s === 'SELL' || s === 'BEARISH').length;
-            
-            if (buySignals > sellSignals) {
-                analysis.recommendation = 'Buy';
-                analysis.confidence += 25;
-            } else if (sellSignals > buySignals) {
-                analysis.recommendation = 'Sell';
-                analysis.confidence += 25;
-            } else {
-                analysis.recommendation = 'NEUTRAL';
-                analysis.confidence -= 10;
-            }
-            
-            // Ensure confidence is between 0 and 100
-            analysis.confidence = Math.max(0, Math.min(100, analysis.confidence));
-            
-            console.log(`📊 Analysis complete for ${symbol}:`, analysis);
-            return analysis;
+            // Get RSI values for strategy validation
+            return getRSIValues(symbol)
+                .then(rsiData => {
+                    console.log(`📊 RSI data for ${symbol}:`, rsiData);
+                    
+                    // Price analysis
+                    const price24h = parseFloat(marketData.prev_price || 0);
+                    const priceChange = price24h > 0 ? ((currentPrice - price24h) / price24h) * 100 : 0;
+                    analysis.priceChange24h = priceChange;
+                    
+                    // Volume analysis
+                    const volume24h = parseFloat(marketData.volume_24h || 0);
+                    analysis.volume24h = volume24h;
+                    
+                    // RSI Strategy Validation (CRITICAL) - Use real API results
+                    const rsi5m = rsiData.rsi_5m || 50;
+                    const rsi1h = rsiData.rsi_1h || 50;
+                    const longValid = rsiData.longValid || false;
+                    const shortValid = rsiData.shortValid || false;
+                    
+                    analysis.indicators.rsi_5m = rsi5m;
+                    analysis.indicators.rsi_1h = rsi1h;
+                    
+                    console.log(`🎯 RSI Strategy Check (Real API):`);
+                    console.log(`   LONG Valid: ${longValid} - ${rsiData.longMessage || 'No message'}`);
+                    console.log(`   SHORT Valid: ${shortValid} - ${rsiData.shortMessage || 'No message'}`);
+                    console.log(`   RSI 5m: ${rsi5m.toFixed(2)}, RSI 1h: ${rsi1h.toFixed(2)}`);
+                    
+                    // Determine strategy recommendation based on real API validation
+                    if (longValid && !shortValid) {
+                        analysis.recommendation = 'Buy';
+                        analysis.strategyValid = true;
+                        analysis.strategyMessage = rsiData.longMessage || `LONG Strategy Valid: RSI 5m (${rsi5m.toFixed(2)}) < 30 AND RSI 1h (${rsi1h.toFixed(2)}) < 50`;
+                        analysis.confidence = 85; // High confidence for valid strategy
+                    } else if (shortValid && !longValid) {
+                        analysis.recommendation = 'Sell';
+                        analysis.strategyValid = true;
+                        analysis.strategyMessage = rsiData.shortMessage || `SHORT Strategy Valid: RSI 5m (${rsi5m.toFixed(2)}) > 70 AND RSI 1h (${rsi1h.toFixed(2)}) > 50`;
+                        analysis.confidence = 85; // High confidence for valid strategy
+                    } else if (longValid && shortValid) {
+                        analysis.recommendation = 'CONFLICT';
+                        analysis.strategyValid = false;
+                        analysis.strategyMessage = `Strategy Conflict: Both LONG and SHORT conditions met`;
+                        analysis.confidence = 0;
+                    } else {
+                        analysis.recommendation = 'NEUTRAL';
+                        analysis.strategyValid = false;
+                        analysis.strategyMessage = `No Strategy Conditions Met: RSI 5m (${rsi5m.toFixed(2)}), RSI 1h (${rsi1h.toFixed(2)})`;
+                        analysis.confidence = 0;
+                    }
+                    
+                    // Additional market analysis for context
+                    if (priceChange > 2) {
+                        analysis.trend = 'STRONG_BULLISH';
+                    } else if (priceChange > 0.5) {
+                        analysis.trend = 'BULLISH';
+                    } else if (priceChange < -2) {
+                        analysis.trend = 'STRONG_BEARISH';
+                    } else if (priceChange < -0.5) {
+                        analysis.trend = 'BEARISH';
+                    } else {
+                        analysis.trend = 'SIDEWAYS';
+                    }
+                    
+                    // Volume confirmation
+                    if (volume24h > 1000000) {
+                        analysis.signals.volume = 'CONFIRMED';
+                        if (analysis.strategyValid) analysis.confidence += 10;
+                    } else {
+                        analysis.signals.volume = 'WEAK';
+                        if (analysis.strategyValid) analysis.confidence -= 5;
+                    }
+                    
+                    // Market volatility
+                    const volatility = Math.abs(priceChange);
+                    if (volatility > 5) {
+                        analysis.volatility = 'HIGH';
+                        if (analysis.strategyValid) analysis.confidence -= 5;
+                    } else if (volatility > 2) {
+                        analysis.volatility = 'MEDIUM';
+                    } else {
+                        analysis.volatility = 'LOW';
+                        if (analysis.strategyValid) analysis.confidence += 5;
+                    }
+                    
+                    // Ensure confidence is between 0 and 100
+                    analysis.confidence = Math.max(0, Math.min(100, analysis.confidence));
+                    
+                    console.log(`📊 Strategy analysis complete for ${symbol}:`, analysis);
+                    return analysis;
+                })
+                .catch(error => {
+                    console.error(`Error getting RSI data for ${symbol}:`, error);
+                    // Fallback analysis without RSI
+                    analysis.recommendation = 'NEUTRAL';
+                    analysis.strategyValid = false;
+                    analysis.strategyMessage = `Error getting RSI data: ${error.message}`;
+                    analysis.confidence = 0;
+                    return analysis;
+                });
+        }
+        
+        function getRSIValues(symbol) {
+            // Fetch real RSI values from the backend API
+            return new Promise((resolve, reject) => {
+                // Check both LONG and SHORT conditions to get RSI values
+                Promise.all([
+                    fetch('/api/rsi-filter/check', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            symbol: symbol,
+                            direction: 'long'
+                        })
+                    }).then(response => response.json()),
+                    fetch('/api/rsi-filter/check', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            symbol: symbol,
+                            direction: 'short'
+                        })
+                    }).then(response => response.json())
+                ])
+                .then(([longResult, shortResult]) => {
+                    if (longResult.success && shortResult.success) {
+                        // Extract RSI values from the results
+                        const rsi5m = longResult.data.rsi_5m || shortResult.data.rsi_5m;
+                        const rsi1h = longResult.data.rsi_1h || shortResult.data.rsi_1h;
+                        
+                        resolve({
+                            rsi_5m: rsi5m,
+                            rsi_1h: rsi1h,
+                            longValid: longResult.data.valid,
+                            shortValid: shortResult.data.valid,
+                            longMessage: longResult.data.message,
+                            shortMessage: shortResult.data.message
+                        });
+                    } else {
+                        reject(new Error('Failed to get RSI data from API'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching RSI data:', error);
+                    reject(error);
+                });
+            });
         }
         
         function determineTradingDirection(analysis, requestedSide) {
             console.log(`🎯 Determining trading direction based on analysis...`);
             
+            // CRITICAL: Only allow trading if strategy conditions are met
+            if (!analysis.strategyValid) {
+                console.log(`❌ Strategy conditions not met: ${analysis.strategyMessage}`);
+                return 'BLOCKED';
+            }
+            
             // If analysis recommends the same as requested, use it
             if (analysis.recommendation === requestedSide) {
                 console.log(`✅ Analysis confirms requested direction: ${requestedSide}`);
-                return requestedSide;
-            }
-            
-            // If analysis is neutral, use requested side with warning
-            if (analysis.recommendation === 'NEUTRAL') {
-                console.log(`⚠️ Analysis is neutral, using requested direction: ${requestedSide}`);
                 return requestedSide;
             }
             
@@ -6241,6 +6318,26 @@
         }
         
         function showAnalysisResults(symbol, analysis, recommendedSide, requestedSide, onConfirm) {
+            // Handle blocked trades
+            if (recommendedSide === 'BLOCKED') {
+                const blockedMsg = `🚫 TRADE BLOCKED - STRATEGY CONDITIONS NOT MET\n\n` +
+                    `Symbol: ${symbol}\n` +
+                    `Current Price: $${analysis.currentPrice.toFixed(2)}\n` +
+                    `RSI 5m: ${analysis.indicators.rsi_5m.toFixed(2)}\n` +
+                    `RSI 1h: ${analysis.indicators.rsi_1h.toFixed(2)}\n\n` +
+                    `STRATEGY VALIDATION:\n` +
+                    `${analysis.strategyMessage}\n\n` +
+                    `REQUIRED CONDITIONS:\n` +
+                    `• LONG: RSI 5m < 30 AND RSI 1h < 50\n` +
+                    `• SHORT: RSI 5m > 70 AND RSI 1h > 50\n\n` +
+                    `Current conditions do not meet the trading strategy requirements.\n` +
+                    `Please wait for proper entry conditions before trading.`;
+                
+                alert(blockedMsg);
+                console.log('Trade blocked due to strategy conditions not being met');
+                return;
+            }
+            
             const analysisText = `📊 MARKET ANALYSIS RESULTS\n\n` +
                 `Symbol: ${symbol}\n` +
                 `Current Price: $${analysis.currentPrice.toFixed(2)}\n` +
@@ -6249,10 +6346,11 @@
                 `Trend: ${analysis.trend}\n` +
                 `Volatility: ${analysis.volatility}\n` +
                 `Confidence: ${analysis.confidence.toFixed(0)}%\n\n` +
-                `SIGNALS:\n` +
-                `• Price: ${analysis.signals.price}\n` +
-                `• Volume: ${analysis.signals.volume}\n` +
-                `• Momentum: ${analysis.signals.momentum}\n\n` +
+                `RSI INDICATORS:\n` +
+                `• RSI 5m: ${analysis.indicators.rsi_5m.toFixed(2)}\n` +
+                `• RSI 1h: ${analysis.indicators.rsi_1h.toFixed(2)}\n\n` +
+                `STRATEGY VALIDATION:\n` +
+                `✅ ${analysis.strategyMessage}\n\n` +
                 `RECOMMENDATION:\n` +
                 `Analysis suggests: ${analysis.recommendation}\n` +
                 `You requested: ${requestedSide}\n` +
@@ -10226,12 +10324,17 @@
             Object.keys(marketData).forEach(symbol => {
                 const data = marketData[symbol];
                 
-                // Check breakout conditions with comprehensive analysis
-                const breakoutResult = checkBreakoutConditions(symbol, data);
-                if (breakoutResult.shouldTrade) {
-                    console.log(`Strong signal detected for ${symbol}, executing trade...`);
-                    executeAutoTrade(symbol, data);
-                }
+                // Check breakout conditions with comprehensive analysis (now returns a promise)
+                checkBreakoutConditions(symbol, data)
+                    .then(breakoutResult => {
+                        if (breakoutResult.shouldTrade) {
+                            console.log(`Strong signal detected for ${symbol}, executing trade...`);
+                            executeAutoTrade(symbol, data);
+                        }
+                    })
+                    .catch(error => {
+                        console.error(`Error analyzing ${symbol}:`, error);
+                    });
             });
         }
         
@@ -10242,94 +10345,104 @@
             const prevPrice = parseFloat(data.prev_price);
             const changePercent = ((currentPrice - prevPrice) / prevPrice) * 100;
             
-            // Perform comprehensive market analysis
-            const analysis = performMarketAnalysis(symbol, data, currentPrice);
-            
-            // Check if we have a strong signal
-            const hasStrongSignal = analysis.confidence >= 60 && analysis.recommendation !== 'NEUTRAL';
-            
-            if (hasStrongSignal) {
-                console.log(`${symbol}: Strong signal detected - ${analysis.recommendation} (Confidence: ${analysis.confidence.toFixed(0)}%)`);
-                return {
-                    shouldTrade: true,
-                    direction: analysis.recommendation,
-                    confidence: analysis.confidence,
-                    analysis: analysis
-                };
-            }
-            
-            console.log(`${symbol}: No strong signal detected (Confidence: ${analysis.confidence.toFixed(0)}%)`);
-            return { shouldTrade: false };
+            // Perform comprehensive market analysis with RSI validation
+            return performMarketAnalysis(symbol, data, currentPrice)
+                .then(analysis => {
+                    // Check if we have a valid strategy signal
+                    const hasValidStrategy = analysis.strategyValid && analysis.recommendation !== 'NEUTRAL' && analysis.recommendation !== 'CONFLICT';
+                    
+                    if (hasValidStrategy) {
+                        console.log(`${symbol}: Valid strategy signal detected - ${analysis.recommendation} (Confidence: ${analysis.confidence.toFixed(0)}%)`);
+                        return {
+                            shouldTrade: true,
+                            direction: analysis.recommendation,
+                            confidence: analysis.confidence,
+                            analysis: analysis
+                        };
+                    }
+                    
+                    console.log(`${symbol}: No valid strategy signal detected (Strategy Valid: ${analysis.strategyValid}, Confidence: ${analysis.confidence.toFixed(0)}%)`);
+                    return { shouldTrade: false };
+                })
+                .catch(error => {
+                    console.error(`Error in breakout conditions check for ${symbol}:`, error);
+                    return { shouldTrade: false };
+                });
         }
         
         function executeAutoTrade(symbol, data) {
             console.log(`Executing auto trade for ${symbol}...`);
             
-            // Get the analysis result from checkBreakoutConditions
-            const breakoutResult = checkBreakoutConditions(symbol, data);
-            
-            if (!breakoutResult.shouldTrade) {
-                console.log(`No trading signal for ${symbol}, skipping...`);
-                return;
-            }
-            
-            const currentPrice = parseFloat(data.price);
-            const side = breakoutResult.direction;
-            const confidence = breakoutResult.confidence;
-            const analysis = breakoutResult.analysis;
-            
-            console.log(`🎯 Auto trading ${symbol}: ${side} (Confidence: ${confidence.toFixed(0)}%)`);
-            
-            // Calculate position size based on risk management and confidence
-            const riskPercent = parseFloat(document.getElementById('max-risk-per-trade').value);
-            const accountBalance = parseFloat(document.getElementById('total-balance').textContent.replace('$', '').replace(',', ''));
-            
-            // Adjust position size based on confidence level
-            const confidenceMultiplier = confidence / 100;
-            const adjustedRiskPercent = riskPercent * confidenceMultiplier;
-            const positionSize = (accountBalance * adjustedRiskPercent / 100) / currentPrice;
-            
-            // Execute the trade via Bybit API
-            fetch('/api/bybit/place-order', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    symbol: symbol,
-                    side: side,
-                    orderType: 'Market',
-                    qty: positionSize.toFixed(4),
-                    leverage: 10
+            // Get the analysis result from checkBreakoutConditions (now returns a promise)
+            checkBreakoutConditions(symbol, data)
+                .then(breakoutResult => {
+                    if (!breakoutResult.shouldTrade) {
+                        console.log(`No trading signal for ${symbol}, skipping...`);
+                        return;
+                    }
+                    
+                    const currentPrice = parseFloat(data.price);
+                    const side = breakoutResult.direction;
+                    const confidence = breakoutResult.confidence;
+                    const analysis = breakoutResult.analysis;
+                    
+                    console.log(`🎯 Auto trading ${symbol}: ${side} (Confidence: ${confidence.toFixed(0)}%)`);
+                    
+                    // Calculate position size based on risk management and confidence
+                    const riskPercent = parseFloat(document.getElementById('max-risk-per-trade').value);
+                    const accountBalance = parseFloat(document.getElementById('total-balance').textContent.replace('$', '').replace(',', ''));
+                    
+                    // Adjust position size based on confidence level
+                    const confidenceMultiplier = confidence / 100;
+                    const adjustedRiskPercent = riskPercent * confidenceMultiplier;
+                    const positionSize = (accountBalance * adjustedRiskPercent / 100) / currentPrice;
+                    
+                    // Execute the trade via Bybit API
+                    fetch('/api/bybit/place-order', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            symbol: symbol,
+                            side: side,
+                            orderType: 'Market',
+                            qty: positionSize.toFixed(4),
+                            leverage: 10
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(result => {
+                        if (result.success) {
+                            console.log(`Auto trade executed successfully for ${symbol}: ${side} ${positionSize.toFixed(4)}`);
+                            
+                            // Update counters
+                            totalTrades++;
+                            document.getElementById('total-trades').textContent = totalTrades;
+                            
+                            // Show success notification with analysis details
+                            const notificationMsg = `✅ Auto Trade Executed!\n\n` +
+                                `${symbol}: ${side} ${positionSize.toFixed(4)}\n` +
+                                `Price: $${currentPrice.toFixed(2)}\n` +
+                                `Confidence: ${confidence.toFixed(0)}%\n` +
+                                `Strategy: ${analysis.strategyMessage}\n` +
+                                `RSI 5m: ${analysis.indicators.rsi_5m.toFixed(2)}\n` +
+                                `RSI 1h: ${analysis.indicators.rsi_1h.toFixed(2)}`;
+                            
+                            showAutoTradingNotification(notificationMsg);
+                        } else {
+                            console.error(`Failed to execute auto trade for ${symbol}:`, result.error);
+                            showAutoTradingNotification(`❌ Auto Trade Failed!\n${symbol}: ${result.error}`);
+                        }
+                    })
+                    .catch(error => {
+                        console.error(`Error executing auto trade for ${symbol}:`, error);
+                        showAutoTradingNotification(`❌ Auto Trade Error!\n${symbol}: ${error.message}`);
+                    });
                 })
-            })
-            .then(response => response.json())
-            .then(result => {
-                if (result.success) {
-                    console.log(`Auto trade executed successfully for ${symbol}: ${side} ${positionSize.toFixed(4)}`);
-                    
-                    // Update counters
-                    totalTrades++;
-                    document.getElementById('total-trades').textContent = totalTrades;
-                    
-                    // Show success notification with analysis details
-                    const notificationMsg = `✅ Auto Trade Executed!\n\n` +
-                        `${symbol}: ${side} ${positionSize.toFixed(4)}\n` +
-                        `Price: $${currentPrice.toFixed(2)}\n` +
-                        `Confidence: ${confidence.toFixed(0)}%\n` +
-                        `Trend: ${analysis.trend}\n` +
-                        `Volatility: ${analysis.volatility}`;
-                    
-                    showAutoTradingNotification(notificationMsg);
-                } else {
-                    console.error(`Failed to execute auto trade for ${symbol}:`, result.error);
-                    showAutoTradingNotification(`❌ Auto Trade Failed!\n${symbol}: ${result.error}`);
-                }
-            })
-            .catch(error => {
-                console.error(`Error executing auto trade for ${symbol}:`, error);
-                showAutoTradingNotification(`❌ Auto Trade Error!\n${symbol}: ${error.message}`);
-            });
+                .catch(error => {
+                    console.error(`Error in auto trade analysis for ${symbol}:`, error);
+                });
         }
         
         function showAutoTradingNotification(message) {
